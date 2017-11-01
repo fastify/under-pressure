@@ -48,6 +48,11 @@ If the value is `0` the check will not be performed.
 
 Thanks to the encapsulation model of Fastify, you can selectively use this plugin in some subset of routes or even with different thresholds in different plugins.
 
+#### `memoryUsage`
+This plugin also exposes a function that will tell you the current values of `heapUsed`, `rssBytes` and `eventLoopDelay`.
+```js
+console.log(fastify.memoryUsage())
+```
 <a name="acknowledgements"></a>
 ## Acknowledgements
 
