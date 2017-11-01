@@ -1,7 +1,5 @@
 # under-pressure
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/fastify/under-pressure.svg)](https://greenkeeper.io/)
-
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)
   [![Build Status](https://travis-ci.org/fastify/under-pressure.svg?branch=master)](https://travis-ci.org/fastify/under-pressure)
 
@@ -57,7 +55,7 @@ console.log(fastify.memoryUsage())
 ```
 
 #### Status route
-If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example. 
+If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example.
 
 <a name="acknowledgements"></a>
 ## Acknowledgements
