@@ -174,6 +174,36 @@ test('memoryUsage name space', t => {
   })
 })
 
+test('memoryUsage name space (without check)', t => {
+  t.plan(8)
+
+  const fastify = Fastify()
+  fastify.register(underPressure)
+
+  fastify.get('/', (req, reply) => {
+    t.true(fastify.memoryUsage().eventLoopDelay > 0)
+    t.true(fastify.memoryUsage().heapUsed > 0)
+    t.true(fastify.memoryUsage().rssBytes > 0)
+    reply.send({ hello: 'world' })
+  })
+
+  fastify.listen(0, err => {
+    t.error(err)
+    t.is(typeof fastify.memoryUsage, 'function')
+
+    process.nextTick(() => sleep(500))
+    sget({
+      method: 'GET',
+      url: 'http://localhost:' + fastify.server.address().port
+    }, (err, response, body) => {
+      t.error(err)
+      t.strictEqual(response.statusCode, 200)
+      t.deepEqual(JSON.parse(body), { hello: 'world' })
+      fastify.close()
+    })
+  })
+})
+
 function sleep (msec) {
   const start = Date.now()
   while (Date.now() - start < msec) {}
