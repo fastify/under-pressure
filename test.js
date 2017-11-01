@@ -204,6 +204,30 @@ test('memoryUsage name space (without check)', t => {
   })
 })
 
+test('Expose status route', t => {
+  t.plan(4)
+
+  const fastify = Fastify()
+  fastify.register(underPressure, {
+    exposeStatusRoute: true
+  })
+
+  fastify.listen(0, err => {
+    t.error(err)
+
+    process.nextTick(() => sleep(500))
+    sget({
+      method: 'GET',
+      url: 'http://localhost:' + fastify.server.address().port + '/status'
+    }, (err, response, body) => {
+      t.error(err)
+      t.strictEqual(response.statusCode, 200)
+      t.deepEqual(JSON.parse(body), { status: 'ok' })
+      fastify.close()
+    })
+  })
+})
+
 function sleep (msec) {
   const start = Date.now()
   while (Date.now() - start < msec) {}
