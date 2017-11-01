@@ -55,7 +55,7 @@ console.log(fastify.memoryUsage())
 ```
 
 #### Status route
-If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example. 
+If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example.
 
 <a name="acknowledgements"></a>
 ## Acknowledgements
