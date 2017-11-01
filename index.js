@@ -23,6 +23,22 @@ function underPressure (fastify, opts, next) {
   fastify.decorate('memoryUsage', memoryUsage)
   fastify.addHook('onClose', onClose)
 
+  if (opts.exposeStatusRoute === true) {
+    fastify.route({
+      url: '/status',
+      method: 'GET',
+      schema: {
+        response: { 200: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' }
+          }}
+        }
+      },
+      handler: onStatus
+    })
+  }
+
   if (checkMaxEventLoopDelay === false &&
       checkMaxHeapUsedBytes === false &&
       checkMaxRssBytes === false) {
@@ -74,6 +90,10 @@ function underPressure (fastify, opts, next) {
       rssBytes,
       heapUsed
     }
+  }
+
+  function onStatus (req, reply) {
+    reply.send({ status: 'ok' })
   }
 
   function onClose (fastify, done) {
