@@ -1,0 +1,27 @@
+{
+  "name": "under-pressure",
+  "version": "0.1.0",
+  "description": "Measure process load with automatic handling of 'Service Unavailable' plugin for Fastify.",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && tap test.js"
+  },
+  "keywords": [
+    "fastify",
+    "service unavailable",
+    "limit",
+    "delay",
+    "retry"
+  ],
+  "author": "Tomas Della Vedova - @delvedor (http://delved.org)",
+  "license": "MIT",
+  "dependencies": {
+    "fastify-plugin": "^0.1.1"
+  },
+  "devDependencies": {
+    "fastify": "^0.31.0",
+    "simple-get": "^2.7.0",
+    "standard": "^10.0.3",
+    "tap": "^10.7.2"
+  }
+}
