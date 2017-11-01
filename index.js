@@ -18,7 +18,10 @@ function underPressure (fastify, opts, next) {
   var rssBytes = 0
   var eventLoopDelay = 0
   var lastCheck = now()
+  const timer = setInterval(updateMemoryUsage, sampleInterval)
+
   fastify.decorate('memoryUsage', memoryUsage)
+  fastify.addHook('onClose', onClose)
 
   if (checkMaxEventLoopDelay === false &&
       checkMaxHeapUsedBytes === false &&
@@ -30,9 +33,7 @@ function underPressure (fastify, opts, next) {
   const retryAfter = opts.retryAfter || 10
 
   fastify.addHook('onRequest', onRequest)
-  fastify.addHook('onClose', onClose)
 
-  const timer = setInterval(updateMemoryUsage, sampleInterval)
   function updateMemoryUsage () {
     var mem = process.memoryUsage()
     heapUsed = mem.heapUsed
