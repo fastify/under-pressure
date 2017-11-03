@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "fastify": "^0.31.0",
+    "pre-commit": "^1.2.2",
     "simple-get": "^2.7.0",
     "standard": "^10.0.3",
     "tap": "^10.7.2"
