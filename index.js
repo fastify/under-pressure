@@ -109,4 +109,7 @@ function now () {
   return (ts[0] * 1e3) + (ts[1] / 1e6)
 }
 
-module.exports = fp(underPressure, { fastify: '>=0.27.0' })
+module.exports = fp(underPressure, {
+  fastify: '>=0.39.0',
+  name: 'under-pressure'
+})

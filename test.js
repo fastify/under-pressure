@@ -21,7 +21,8 @@ test('Should return 503 on maxEventLoopDelay', t => {
   fastify.listen(0, err => {
     t.error(err)
 
-    process.nextTick(() => sleep(500))
+    // Increased to prevent Travis to fail
+    process.nextTick(() => sleep(1000))
     sget({
       method: 'GET',
       url: 'http://localhost:' + fastify.server.address().port
