@@ -6,6 +6,13 @@
   "scripts": {
     "test": "standard && tap test.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fastify/under-pressure.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fastify/under-pressure/issues"
+  },
   "keywords": [
     "fastify",
     "service unavailable",
