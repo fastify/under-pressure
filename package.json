@@ -26,9 +26,9 @@
     "fastify-plugin": "^0.2.1"
   },
   "devDependencies": {
-    "fastify": "^0.39.0",
+    "fastify": "^0.43.0",
     "simple-get": "^2.7.0",
-    "standard": "^10.0.3",
+    "standard": "^11.0.0",
     "tap": "^11.0.1"
   }
 }
