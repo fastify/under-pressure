@@ -229,6 +229,32 @@ test('Expose status route', t => {
   })
 })
 
+test('Expose custom status route', t => {
+  t.plan(5)
+
+  const fastify = Fastify()
+  t.tearDown(() => fastify.close())
+
+  fastify.register(underPressure, {
+    exposeStatusRoute: '/alive'
+  })
+
+  fastify.inject({
+    url: '/status'
+  }, (err, response) => {
+    t.error(err)
+    t.strictEqual(response.statusCode, 404)
+  })
+
+  fastify.inject({
+    url: '/alive'
+  }, (err, response) => {
+    t.error(err)
+    t.strictEqual(response.statusCode, 200)
+    t.deepEqual(JSON.parse(response.payload), { status: 'ok' })
+  })
+})
+
 function sleep (msec) {
   const start = Date.now()
   while (Date.now() - start < msec) {}

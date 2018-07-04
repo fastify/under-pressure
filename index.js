@@ -23,9 +23,9 @@ function underPressure (fastify, opts, next) {
   fastify.decorate('memoryUsage', memoryUsage)
   fastify.addHook('onClose', onClose)
 
-  if (opts.exposeStatusRoute === true) {
+  if (opts.exposeStatusRoute) {
     fastify.route({
-      url: '/status',
+      url: opts.exposeStatusRoute === true ? '/status' : opts.exposeStatusRoute,
       method: 'GET',
       schema: {
         response: { 200: {
