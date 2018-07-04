@@ -1,7 +1,8 @@
 # under-pressure
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/fastify/under-pressure.svg)](https://greenkeeper.io/)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)
-  [![Build Status](https://travis-ci.org/fastify/under-pressure.svg?branch=master)](https://travis-ci.org/fastify/under-pressure)
+[![Build Status](https://travis-ci.org/fastify/under-pressure.svg?branch=master)](https://travis-ci.org/fastify/under-pressure)
 
 Measure process load with automatic handling of *"Service Unavailable"* plugin for Fastify.  
 It can check `maxEventLoopDelay`, `maxHeapUsedBytes` and `maxRssBytes` values.

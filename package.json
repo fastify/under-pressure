@@ -4,7 +4,10 @@
   "description": "Measure process load with automatic handling of 'Service Unavailable' plugin for Fastify.",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tap test.js"
+    "lint": "standard | snazzy",
+    "unit": "tap test.js",
+    "test": "npm run lint && npm run unit",
+    "coverage": "npm run unit -- --cov --coverage-report=html"
   },
   "repository": {
     "type": "git",
@@ -23,12 +26,14 @@
   "author": "Tomas Della Vedova - @delvedor (http://delved.org)",
   "license": "MIT",
   "dependencies": {
-    "fastify-plugin": "^0.2.1"
+    "fastify-plugin": "^1.2.0"
   },
   "devDependencies": {
-    "fastify": "^0.39.0",
-    "simple-get": "^2.7.0",
-    "standard": "^10.0.3",
-    "tap": "^11.0.1"
+    "fastify": "^1.7.0",
+    "pre-commit": "^1.2.2",
+    "simple-get": "^3.0.2",
+    "snazzy": "^7.1.1",
+    "standard": "^11.0.1",
+    "tap": "^12.0.1"
   }
 }
