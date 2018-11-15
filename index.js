@@ -32,8 +32,8 @@ function underPressure (fastify, opts, next) {
           type: 'object',
           properties: {
             status: { type: 'string' }
-          }}
-        }
+          }
+        } }
       },
       handler: onStatus
     })
