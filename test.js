@@ -26,7 +26,7 @@ test('Should return 503 on maxEventLoopDelay', t => {
     process.nextTick(() => sleep(1000))
     sget({
       method: 'GET',
-      url: `${address}`
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 503)
@@ -60,7 +60,7 @@ test('Should return 503 on maxHeapUsedBytes', t => {
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: `${address}`
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 503)
@@ -94,7 +94,7 @@ test('Should return 503 on maxRssBytes', t => {
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: `${address}`
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 503)
@@ -130,7 +130,7 @@ test('Custom message and retry after header', t => {
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: `${address}`
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 503)
@@ -170,7 +170,7 @@ test('memoryUsage name space', t => {
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: `${address}`
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 200)
@@ -201,7 +201,7 @@ test('memoryUsage name space (without check)', t => {
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: `${address}`
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 200)
