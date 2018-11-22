@@ -7,6 +7,11 @@
 Measure process load with automatic handling of *"Service Unavailable"* plugin for Fastify.  
 It can check `maxEventLoopDelay`, `maxHeapUsedBytes` and `maxRssBytes` values.
 
+<a name="requirements"></a>
+## Requirements
+
+Fastify ^1.1.0 .
+
 <a name="install"></a>
 ## Install
 ```

@@ -18,14 +18,15 @@ test('Should return 503 on maxEventLoopDelay', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, err => {
+  fastify.listen(0, (err, address) => {
     t.error(err)
+    fastify.server.unref()
 
     // Increased to prevent Travis to fail
     process.nextTick(() => sleep(1000))
     sget({
       method: 'GET',
-      url: 'http://localhost:' + fastify.server.address().port
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 503)
@@ -52,13 +53,14 @@ test('Should return 503 on maxHeapUsedBytes', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, err => {
+  fastify.listen(0, (err, address) => {
     t.error(err)
+    fastify.server.unref()
 
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: 'http://localhost:' + fastify.server.address().port
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 503)
@@ -85,13 +87,14 @@ test('Should return 503 on maxRssBytes', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, err => {
+  fastify.listen(0, (err, address) => {
     t.error(err)
+    fastify.server.unref()
 
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: 'http://localhost:' + fastify.server.address().port
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 503)
@@ -120,13 +123,14 @@ test('Custom message and retry after header', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, err => {
+  fastify.listen(0, (err, address) => {
     t.error(err)
+    fastify.server.unref()
 
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: 'http://localhost:' + fastify.server.address().port
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 503)
@@ -158,14 +162,15 @@ test('memoryUsage name space', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, err => {
+  fastify.listen(0, (err, address) => {
     t.error(err)
     t.is(typeof fastify.memoryUsage, 'function')
+    fastify.server.unref()
 
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: 'http://localhost:' + fastify.server.address().port
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 200)
@@ -188,14 +193,15 @@ test('memoryUsage name space (without check)', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, err => {
+  fastify.listen(0, (err, address) => {
     t.error(err)
     t.is(typeof fastify.memoryUsage, 'function')
+    fastify.server.unref()
 
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: 'http://localhost:' + fastify.server.address().port
+      url: address
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 200)
@@ -213,13 +219,14 @@ test('Expose status route', t => {
     exposeStatusRoute: true
   })
 
-  fastify.listen(0, err => {
+  fastify.listen(0, (err, address) => {
     t.error(err)
+    fastify.server.unref()
 
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
-      url: 'http://localhost:' + fastify.server.address().port + '/status'
+      url: `${address}/status`
     }, (err, response, body) => {
       t.error(err)
       t.strictEqual(response.statusCode, 200)

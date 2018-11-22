@@ -32,8 +32,8 @@ function underPressure (fastify, opts, next) {
           type: 'object',
           properties: {
             status: { type: 'string' }
-          }}
-        }
+          }
+        } }
       },
       handler: onStatus
     })
@@ -110,6 +110,6 @@ function now () {
 }
 
 module.exports = fp(underPressure, {
-  fastify: '>=0.39.0',
+  fastify: '^1.1.0',
   name: 'under-pressure'
 })
