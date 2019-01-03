@@ -17,7 +17,6 @@ function underPressure (fastify, opts, next) {
 
   var heapUsed = 0
   var rssBytes = 0
-  var eventLoopDelay = 0
   var loopSampler = loopDelay()
   const timer = setInterval(updateMemoryUsage, sampleInterval)
 
@@ -85,7 +84,7 @@ function underPressure (fastify, opts, next) {
 
   function memoryUsage () {
     return {
-      eventLoopDelay,
+      eventLoopDelay: loopSampler.delay,
       rssBytes,
       heapUsed
     }

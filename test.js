@@ -146,7 +146,7 @@ test('Custom message and retry after header', t => {
 })
 
 test('memoryUsage name space', t => {
-  t.plan(7)
+  t.plan(8)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
@@ -156,6 +156,7 @@ test('memoryUsage name space', t => {
   })
 
   fastify.get('/', (req, reply) => {
+    t.true(fastify.memoryUsage().eventLoopDelay > 0)
     t.true(fastify.memoryUsage().heapUsed > 0)
     t.true(fastify.memoryUsage().rssBytes > 0)
     reply.send({ hello: 'world' })
@@ -180,12 +181,13 @@ test('memoryUsage name space', t => {
 })
 
 test('memoryUsage name space (without check)', t => {
-  t.plan(7)
+  t.plan(8)
 
   const fastify = Fastify()
   fastify.register(underPressure)
 
   fastify.get('/', (req, reply) => {
+    t.true(fastify.memoryUsage().eventLoopDelay > 0)
     t.true(fastify.memoryUsage().heapUsed > 0)
     t.true(fastify.memoryUsage().rssBytes > 0)
     reply.send({ hello: 'world' })
