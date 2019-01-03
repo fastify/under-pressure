@@ -1,6 +1,7 @@
 'use strict'
 
 const fp = require('fastify-plugin')
+const loopDelay = require('event-loop-delay')
 
 function underPressure (fastify, opts, next) {
   opts = opts || {}
@@ -17,7 +18,7 @@ function underPressure (fastify, opts, next) {
   var heapUsed = 0
   var rssBytes = 0
   var eventLoopDelay = 0
-  var lastCheck = now()
+  var loopSampler = loopDelay()
   const timer = setInterval(updateMemoryUsage, sampleInterval)
 
   fastify.decorate('memoryUsage', memoryUsage)
@@ -54,13 +55,11 @@ function underPressure (fastify, opts, next) {
     var mem = process.memoryUsage()
     heapUsed = mem.heapUsed
     rssBytes = mem.rss
-    var toCheck = now()
-    eventLoopDelay = toCheck - lastCheck - sampleInterval
-    lastCheck = toCheck
   }
 
   function onRequest (req, res, next) {
-    if (checkMaxEventLoopDelay && eventLoopDelay > maxEventLoopDelay) {
+    if (checkMaxEventLoopDelay && loopSampler.delay > maxEventLoopDelay) {
+      loopSampler = loopDelay()
       sendError(res, next)
       return
     }
@@ -102,11 +101,6 @@ function underPressure (fastify, opts, next) {
   }
 
   next()
-}
-
-function now () {
-  var ts = process.hrtime()
-  return (ts[0] * 1e3) + (ts[1] / 1e6)
 }
 
 module.exports = fp(underPressure, {
