@@ -78,8 +78,8 @@ function underPressure (fastify, opts, next) {
     next()
   }
 
-  function sendError (res, next) {
-    res.status(503).header('Retry-After', retryAfter)
+  function sendError (reply, next) {
+    reply.status(503).header('Retry-After', retryAfter)
     next(serviceUnavailableError)
   }
 
