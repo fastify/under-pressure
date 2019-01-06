@@ -29,7 +29,7 @@
     "fastify-plugin": "^1.4.0"
   },
   "devDependencies": {
-    "fastify": "^1.13.3",
+    "fastify": "2.0.0-rc.3",
     "pre-commit": "^1.2.2",
     "simple-get": "^3.0.3",
     "snazzy": "^8.0.0",

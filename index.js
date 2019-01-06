@@ -79,8 +79,7 @@ function underPressure (fastify, opts, next) {
   }
 
   function sendError (res, next) {
-    res.statusCode = 503
-    res.setHeader('Retry-After', retryAfter)
+    res.status(503).header('Retry-After', retryAfter)
     next(serviceUnavailableError)
   }
 
@@ -110,6 +109,6 @@ function now () {
 }
 
 module.exports = fp(underPressure, {
-  fastify: '^1.1.0',
+  fastify: '>=2.0.0',
   name: 'under-pressure'
 })
