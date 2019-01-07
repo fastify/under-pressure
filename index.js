@@ -59,19 +59,19 @@ function underPressure (fastify, opts, next) {
     lastCheck = toCheck
   }
 
-  function onRequest (req, res, next) {
+  function onRequest (req, reply, next) {
     if (checkMaxEventLoopDelay && eventLoopDelay > maxEventLoopDelay) {
-      sendError(res, next)
+      sendError(reply, next)
       return
     }
 
     if (checkMaxHeapUsedBytes && heapUsed > maxHeapUsedBytes) {
-      sendError(res, next)
+      sendError(reply, next)
       return
     }
 
     if (checkMaxRssBytes && rssBytes > maxRssBytes) {
-      sendError(res, next)
+      sendError(reply, next)
       return
     }
 
