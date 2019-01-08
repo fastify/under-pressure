@@ -59,28 +59,27 @@ function underPressure (fastify, opts, next) {
     lastCheck = toCheck
   }
 
-  function onRequest (req, res, next) {
+  function onRequest (req, reply, next) {
     if (checkMaxEventLoopDelay && eventLoopDelay > maxEventLoopDelay) {
-      sendError(res, next)
+      sendError(reply, next)
       return
     }
 
     if (checkMaxHeapUsedBytes && heapUsed > maxHeapUsedBytes) {
-      sendError(res, next)
+      sendError(reply, next)
       return
     }
 
     if (checkMaxRssBytes && rssBytes > maxRssBytes) {
-      sendError(res, next)
+      sendError(reply, next)
       return
     }
 
     next()
   }
 
-  function sendError (res, next) {
-    res.statusCode = 503
-    res.setHeader('Retry-After', retryAfter)
+  function sendError (reply, next) {
+    reply.status(503).header('Retry-After', retryAfter)
     next(serviceUnavailableError)
   }
 
@@ -110,6 +109,6 @@ function now () {
 }
 
 module.exports = fp(underPressure, {
-  fastify: '^1.1.0',
+  fastify: '>=2.0.0',
   name: 'under-pressure'
 })
