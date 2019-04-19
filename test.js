@@ -3,8 +3,11 @@
 const t = require('tap')
 const test = t.test
 const sget = require('simple-get').concat
+const semver = require('semver')
 const Fastify = require('fastify')
 const underPressure = require('./index')
+
+const sleepTime = semver.gt(process.versions.node, '7.0.0') ? 800 : 3000
 
 test('Should return 503 on maxEventLoopDelay', t => {
   t.plan(5)
@@ -23,7 +26,7 @@ test('Should return 503 on maxEventLoopDelay', t => {
     fastify.server.unref()
 
     // Increased to prevent Travis to fail
-    process.nextTick(() => sleep(1000))
+    process.nextTick(() => sleep(sleepTime))
     sget({
       method: 'GET',
       url: address
@@ -57,7 +60,7 @@ test('Should return 503 on maxHeapUsedBytes', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => sleep(1000))
+    process.nextTick(() => sleep(sleepTime))
     sget({
       method: 'GET',
       url: address
@@ -91,7 +94,7 @@ test('Should return 503 on maxRssBytes', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => sleep(1000))
+    process.nextTick(() => sleep(sleepTime))
     sget({
       method: 'GET',
       url: address
@@ -127,7 +130,7 @@ test('Custom message and retry after header', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => sleep(1000))
+    process.nextTick(() => sleep(sleepTime))
     sget({
       method: 'GET',
       url: address
@@ -167,7 +170,7 @@ test('memoryUsage name space', t => {
     t.is(typeof fastify.memoryUsage, 'function')
     fastify.server.unref()
 
-    process.nextTick(() => sleep(1000))
+    process.nextTick(() => sleep(sleepTime))
     sget({
       method: 'GET',
       url: address
@@ -198,7 +201,7 @@ test('memoryUsage name space (without check)', t => {
     t.is(typeof fastify.memoryUsage, 'function')
     fastify.server.unref()
 
-    process.nextTick(() => sleep(1000))
+    process.nextTick(() => sleep(sleepTime))
     sget({
       method: 'GET',
       url: address
@@ -223,7 +226,7 @@ test('Expose status route', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => sleep(1000))
+    process.nextTick(() => sleep(sleepTime))
     sget({
       method: 'GET',
       url: `${address}/status`
