@@ -7,7 +7,7 @@ const semver = require('semver')
 const Fastify = require('fastify')
 const underPressure = require('./index')
 
-const sleepTime = semver.gt(process.versions.node, '7.0.0') ? 800 : 3000
+const sleepTime = semver.gt(process.versions.node, '7.0.0') ? 500 : 5000
 
 test('Should return 503 on maxEventLoopDelay', t => {
   t.plan(5)
