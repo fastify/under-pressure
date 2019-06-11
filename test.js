@@ -337,6 +337,7 @@ test('Custom health check', t => {
     const fastify = Fastify()
     fastify.register(underPressure, {
       healthCheck: async () => {
+        await new Promise(resolve => setTimeout(() => resolve(), 100))
         t.false(called)
         called = true
       }
