@@ -35,7 +35,8 @@ function underPressure (fastify, opts, next) {
         externalsHealthy = false
         fastify.log.error('external healthCheck function suupplied to `under-pressure` threw an error. setting the service status to unhealthy.', { error })
       })
-    doCheck()
+
+    doCheck().then(() => next())
 
     externalHealthCheckTimer = setInterval(doCheck, healthCheckInterval)
     externalHealthCheckTimer.unref()
@@ -130,7 +131,9 @@ function underPressure (fastify, opts, next) {
     done()
   }
 
-  next()
+  // if there is no healthcheck then proceed
+  // otherwise we need to wait for the initial healthcheck promise to resolve
+  if (!healthCheck) next()
 }
 
 function now () {

@@ -283,8 +283,6 @@ test('Custom health check', t => {
       t.error(err)
       fastify.server.unref()
 
-      // Increased to prevent Travis to fail
-      process.nextTick(() => sleep(1000))
       sget({
         method: 'GET',
         url: address
@@ -318,8 +316,6 @@ test('Custom health check', t => {
       t.error(err)
       fastify.server.unref()
 
-      // Increased to prevent Travis to fail
-      process.nextTick(() => sleep(1000))
       sget({
         method: 'GET',
         url: address
