@@ -271,7 +271,6 @@ test('Custom health check', t => {
     const fastify = Fastify()
     fastify.register(underPressure, {
       healthCheck: async () => {
-        console.log('health check')
         return false
       }
     })

@@ -10,10 +10,8 @@ function underPressure (fastify, opts, next) {
   const maxEventLoopDelay = opts.maxEventLoopDelay || 0
   const maxHeapUsedBytes = opts.maxHeapUsedBytes || 0
   const maxRssBytes = opts.maxRssBytes || 0
-  const healthCheck = opts.healthCheck || async function () { return true }
+  const healthCheck = opts.healthCheck || false
   const healthCheckInterval = opts.healthCheckInterval || 1000
-
-  assert(typeof healthCheck === 'function', 'opts.healthCheck should be a function that returns a promise that resolves to true or false')
 
   const checkMaxEventLoopDelay = maxEventLoopDelay > 0
   const checkMaxHeapUsedBytes = maxHeapUsedBytes > 0
@@ -27,15 +25,23 @@ function underPressure (fastify, opts, next) {
   timer.unref()
 
   var externalsHealthy = false
-  const doCheck = () => healthCheck()
-    .then(externalHealth => { externalsHealthy = externalHealth })
-    .catch((error) => {
-      externalsHealthy = false
-      fastify.log.error('external healthCheck function suupplied to `under-pressure` threw an error. setting the service status to unhealthy.', { error })
-    })
-  doCheck()
-  const externalHealthCheckTimer = setInterval(doCheck, healthCheckInterval)
-  externalHealthCheckTimer.unref()
+  var externalHealthCheckTimer
+  if (healthCheck) {
+    assert(typeof healthCheck === 'function', 'opts.healthCheck should be a function that returns a promise that resolves to true or false')
+
+    const doCheck = () => healthCheck()
+      .then(externalHealth => { externalsHealthy = externalHealth })
+      .catch((error) => {
+        externalsHealthy = false
+        fastify.log.error('external healthCheck function suupplied to `under-pressure` threw an error. setting the service status to unhealthy.', { error })
+      })
+    doCheck()
+
+    externalHealthCheckTimer = setInterval(doCheck, healthCheckInterval)
+    externalHealthCheckTimer.unref()
+  } else {
+    externalsHealthy = true
+  }
 
   fastify.decorate('memoryUsage', memoryUsage)
   fastify.addHook('onClose', onClose)
@@ -57,8 +63,9 @@ function underPressure (fastify, opts, next) {
   }
 
   if (checkMaxEventLoopDelay === false &&
-      checkMaxHeapUsedBytes === false &&
-      checkMaxRssBytes === false) {
+    checkMaxHeapUsedBytes === false &&
+    checkMaxRssBytes === false &&
+    healthCheck === false) {
     return next()
   }
 
