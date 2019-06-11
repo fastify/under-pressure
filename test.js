@@ -330,6 +330,7 @@ test('Custom health check', t => {
     })
   })
 })
+
 function sleep (msec) {
   const start = Date.now()
   while (Date.now() - start < msec) {}
