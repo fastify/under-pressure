@@ -262,6 +262,74 @@ test('Expose custom status route', t => {
   })
 })
 
+test('Custom health check', t => {
+  t.test('should return 503 when custom health check returns false for healthCheck', t => {
+    t.plan(5)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      healthCheck: async () => false
+    })
+
+    fastify.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      // Increased to prevent Travis to fail
+      process.nextTick(() => sleep(1000))
+      sget({
+        method: 'GET',
+        url: address
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 503)
+        t.strictEqual(response.headers['retry-after'], '10')
+        t.deepEqual(JSON.parse(body), {
+          error: 'Service Unavailable',
+          message: 'Service Unavailable',
+          statusCode: 503
+        })
+        fastify.close()
+      })
+    })
+  })
+
+  t.test('should return 503 when custom health check returns true for healthCheck', t => {
+    t.plan(5)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      healthCheck: async () => true
+    })
+
+    fastify.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      // Increased to prevent Travis to fail
+      process.nextTick(() => sleep(1000))
+      sget({
+        method: 'GET',
+        url: address
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 200)
+        t.deepEqual(JSON.parse(body), {
+          hello: 'world'
+        })
+        fastify.close()
+      })
+    })
+  })
+})
 function sleep (msec) {
   const start = Date.now()
   while (Date.now() - start < msec) {}

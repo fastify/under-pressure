@@ -1,6 +1,7 @@
 'use strict'
 
 const fp = require('fastify-plugin')
+const assert = require('assert')
 
 function underPressure (fastify, opts, next) {
   opts = opts || {}
@@ -9,6 +10,10 @@ function underPressure (fastify, opts, next) {
   const maxEventLoopDelay = opts.maxEventLoopDelay || 0
   const maxHeapUsedBytes = opts.maxHeapUsedBytes || 0
   const maxRssBytes = opts.maxRssBytes || 0
+  const healthCheck = opts.healthCheck || async function () { return true }
+  const healthCheckInterval = opts.healthCheckInterval || 1000
+
+  assert(typeof healthCheck === 'function', 'opts.healthCheck should be a function that returns a promise that resolves to true or false')
 
   const checkMaxEventLoopDelay = maxEventLoopDelay > 0
   const checkMaxHeapUsedBytes = maxHeapUsedBytes > 0
@@ -19,6 +24,11 @@ function underPressure (fastify, opts, next) {
   var eventLoopDelay = 0
   var lastCheck = now()
   const timer = setInterval(updateMemoryUsage, sampleInterval)
+
+  var externalsHealthy = false
+  const doCheck = () => healthCheck().then(externalHealth => { externalsHealthy = externalHealth })
+  doCheck()
+  const externalHealthCheckTimer = setInterval(doCheck, healthCheckInterval)
 
   fastify.decorate('memoryUsage', memoryUsage)
   fastify.addHook('onClose', onClose)
@@ -75,6 +85,11 @@ function underPressure (fastify, opts, next) {
       return
     }
 
+    if (!externalsHealthy) {
+      sendError(reply, next)
+      return
+    }
+
     next()
   }
 
@@ -97,6 +112,7 @@ function underPressure (fastify, opts, next) {
 
   function onClose (fastify, done) {
     clearInterval(timer)
+    clearInterval(externalHealthCheckTimer)
     done()
   }
 

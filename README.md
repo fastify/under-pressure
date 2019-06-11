@@ -21,6 +21,7 @@ npm i under-pressure --save
 <a name="usage"></a>
 ## Usage
 Require the plugin and register it into the Fastify instance.
+
 ```js
 const fastify = require('fastify')()
 
@@ -64,6 +65,26 @@ console.log(fastify.memoryUsage())
 If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example.
 
 If you need the change the exposed route path, you can pass `{ exposeStatusRoute: '/alive' }` options.
+
+
+#### Custom health checks
+If needed you can pass a custom `healthCheck` property which is an async function and `under-pressure` will allow you to check the status of other components of your service.
+
+This function should return a promise which resolves to a boolean value. It will be called every 1000 milliseconds by default. This interval amount can be configured by settting the `healthCheckInterval` property.
+
+By default when this function is supplied your service health is considered unhealthy, until it has started to return true. 
+
+```js
+const fastify = require('fastify')()
+
+fastify.register(require('under-pressure'), {
+  healthCheck: async function () {
+    // do some magic to check if your db connection is healthy, etc...
+    return true
+  },
+  healthCheckInterval: 500
+})
+```
 
 <a name="acknowledgements"></a>
 ## Acknowledgements
