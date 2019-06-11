@@ -24,11 +24,18 @@ function underPressure (fastify, opts, next) {
   var eventLoopDelay = 0
   var lastCheck = now()
   const timer = setInterval(updateMemoryUsage, sampleInterval)
+  timer.unref()
 
   var externalsHealthy = false
-  const doCheck = () => healthCheck().then(externalHealth => { externalsHealthy = externalHealth })
+  const doCheck = () => healthCheck()
+    .then(externalHealth => { externalsHealthy = externalHealth })
+    .catch((error) => {
+      externalsHealthy = false
+      fastify.log.error('external healthCheck function suupplied to `under-pressure` threw an error. setting the service status to unhealthy.', { error })
+    })
   doCheck()
   const externalHealthCheckTimer = setInterval(doCheck, healthCheckInterval)
+  externalHealthCheckTimer.unref()
 
   fastify.decorate('memoryUsage', memoryUsage)
   fastify.addHook('onClose', onClose)

@@ -263,12 +263,17 @@ test('Expose custom status route', t => {
 })
 
 test('Custom health check', t => {
+  t.plan(2)
+
   t.test('should return 503 when custom health check returns false for healthCheck', t => {
     t.plan(5)
 
     const fastify = Fastify()
     fastify.register(underPressure, {
-      healthCheck: async () => false
+      healthCheck: async () => {
+        console.log('health check')
+        return false
+      }
     })
 
     fastify.get('/', (req, reply) => {
@@ -298,8 +303,8 @@ test('Custom health check', t => {
     })
   })
 
-  t.test('should return 503 when custom health check returns true for healthCheck', t => {
-    t.plan(5)
+  t.test('should return 200 when custom health check returns true for healthCheck', t => {
+    t.plan(4)
 
     const fastify = Fastify()
     fastify.register(underPressure, {
