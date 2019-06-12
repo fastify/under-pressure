@@ -34,7 +34,7 @@ async function underPressure (fastify, opts) {
         externalsHealthy = await healthCheck()
       } catch (error) {
         externalsHealthy = false
-        fastify.log.error('external healthCheck function supplied to `under-pressure` threw an error. setting the service status to unhealthy.', { error })
+        fastify.log.error({ error }, 'external healthCheck function supplied to `under-pressure` threw an error. setting the service status to unhealthy.')
       }
     }
 
