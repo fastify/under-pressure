@@ -3,7 +3,7 @@
 const fp = require('fastify-plugin')
 const assert = require('assert')
 
-function underPressure (fastify, opts, next) {
+async function underPressure (fastify, opts) {
   opts = opts || {}
 
   const sampleInterval = opts.sampleInterval || 5
@@ -29,14 +29,16 @@ function underPressure (fastify, opts, next) {
   if (healthCheck) {
     assert(typeof healthCheck === 'function', 'opts.healthCheck should be a function that returns a promise that resolves to true or false')
 
-    const doCheck = () => healthCheck()
-      .then(externalHealth => { externalsHealthy = externalHealth })
-      .catch((error) => {
+    const doCheck = async () => {
+      try {
+        externalsHealthy = await healthCheck()
+      } catch (error) {
         externalsHealthy = false
-        fastify.log.error('external healthCheck function suupplied to `under-pressure` threw an error. setting the service status to unhealthy.', { error })
-      })
+        fastify.log.error('external healthCheck function supplied to `under-pressure` threw an error. setting the service status to unhealthy.', { error })
+      }
+    }
 
-    doCheck().then(() => next())
+    await doCheck()
 
     externalHealthCheckTimer = setInterval(doCheck, healthCheckInterval)
     externalHealthCheckTimer.unref()
@@ -67,7 +69,7 @@ function underPressure (fastify, opts, next) {
     checkMaxHeapUsedBytes === false &&
     checkMaxRssBytes === false &&
     healthCheck === false) {
-    return next()
+    return
   }
 
   const serviceUnavailableError = new Error(opts.message || 'Service Unavailable')
@@ -130,10 +132,6 @@ function underPressure (fastify, opts, next) {
     clearInterval(externalHealthCheckTimer)
     done()
   }
-
-  // if there is no healthcheck then proceed
-  // otherwise we need to wait for the initial healthcheck promise to resolve
-  if (!healthCheck) next()
 }
 
 function now () {
