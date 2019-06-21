@@ -123,8 +123,21 @@ async function underPressure (fastify, opts) {
     }
   }
 
-  function onStatus (req, reply) {
-    reply.send({ status: 'ok' })
+  async function onStatus (req, reply) {
+    if (healthCheck) {
+      try {
+        if (!await healthCheck()) {
+          req.log.error('external health check failed')
+          reply.status(503).header('Retry-After', retryAfter)
+          throw serviceUnavailableError
+        }
+      } catch (err) {
+        req.log.error({ err }, 'external health check failed with error')
+        reply.status(503).header('Retry-After', retryAfter)
+        throw serviceUnavailableError
+      }
+    }
+    return { status: 'ok' }
   }
 
   function onClose (fastify, done) {
