@@ -11,7 +11,7 @@ async function underPressure (fastify, opts) {
   const maxHeapUsedBytes = opts.maxHeapUsedBytes || 0
   const maxRssBytes = opts.maxRssBytes || 0
   const healthCheck = opts.healthCheck || false
-  const healthCheckInterval = opts.healthCheckInterval || 1000
+  const healthCheckInterval = opts.healthCheckInterval || -1
 
   const checkMaxEventLoopDelay = maxEventLoopDelay > 0
   const checkMaxHeapUsedBytes = maxHeapUsedBytes > 0
@@ -28,6 +28,7 @@ async function underPressure (fastify, opts) {
   var externalHealthCheckTimer
   if (healthCheck) {
     assert(typeof healthCheck === 'function', 'opts.healthCheck should be a function that returns a promise that resolves to true or false')
+    assert(healthCheckInterval > 0 || opts.exposeStatusRoute, 'opts.healthCheck requires opts.healthCheckInterval or opts.exposeStatusRoute')
 
     const doCheck = async () => {
       try {
@@ -40,8 +41,10 @@ async function underPressure (fastify, opts) {
 
     await doCheck()
 
-    externalHealthCheckTimer = setInterval(doCheck, healthCheckInterval)
-    externalHealthCheckTimer.unref()
+    if (healthCheckInterval > 0) {
+      externalHealthCheckTimer = setInterval(doCheck, healthCheckInterval)
+      externalHealthCheckTimer.unref()
+    }
   } else {
     externalsHealthy = true
   }

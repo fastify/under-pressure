@@ -272,7 +272,8 @@ test('Custom health check', t => {
     fastify.register(underPressure, {
       healthCheck: async () => {
         return false
-      }
+      },
+      healthCheckInterval: 1000
     })
 
     fastify.get('/', (req, reply) => {
@@ -305,7 +306,8 @@ test('Custom health check', t => {
 
     const fastify = Fastify()
     fastify.register(underPressure, {
-      healthCheck: async () => true
+      healthCheck: async () => true,
+      healthCheckInterval: 1000
     })
 
     fastify.get('/', (req, reply) => {
@@ -389,7 +391,8 @@ test('Custom health check', t => {
         await new Promise(resolve => setTimeout(() => resolve(), 100))
         t.false(called)
         called = true
-      }
+      },
+      healthCheckInterval: 1000
     })
 
     fastify.listen(0, (err) => {

@@ -72,9 +72,14 @@ If you need the change the exposed route path, you can pass `{ exposeStatusRoute
 #### Custom health checks
 If needed you can pass a custom `healthCheck` property which is an async function and `under-pressure` will allow you to check the status of other components of your service.
 
-This function should return a promise which resolves to a boolean value. It will be called every 1000 milliseconds by default. This interval amount can be configured by settting the `healthCheckInterval` property.
+This function should return a promise which resolves to a boolean value. The `healthCheck` function can be called either:
 
-By default when this function is supplied your service health is considered unhealthy, until it has started to return true. 
+* every X milliseconds, the time can be
+  configured with the `healthCheckInterval` option.
+* every time the status route is called, if `exposeStatusRoute` is set
+  to `true`.
+
+By default when this function is supplied your service health is considered unhealthy, until it has started to return true.
 
 ```js
 const fastify = require('fastify')()
