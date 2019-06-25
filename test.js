@@ -262,6 +262,220 @@ test('Expose custom status route', t => {
   })
 })
 
+test('Custom health check', t => {
+  t.plan(6)
+
+  t.test('should return 503 when custom health check returns false for healthCheck', t => {
+    t.plan(5)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      healthCheck: async () => {
+        return false
+      },
+      healthCheckInterval: 1000
+    })
+
+    fastify.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      sget({
+        method: 'GET',
+        url: address
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 503)
+        t.strictEqual(response.headers['retry-after'], '10')
+        t.deepEqual(JSON.parse(body), {
+          error: 'Service Unavailable',
+          message: 'Service Unavailable',
+          statusCode: 503
+        })
+        fastify.close()
+      })
+    })
+  })
+
+  t.test('should return 200 when custom health check returns true for healthCheck', t => {
+    t.plan(4)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      healthCheck: async () => true,
+      healthCheckInterval: 1000
+    })
+
+    fastify.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      sget({
+        method: 'GET',
+        url: address
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 200)
+        t.deepEqual(JSON.parse(body), {
+          hello: 'world'
+        })
+        fastify.close()
+      })
+    })
+  })
+
+  t.test('healthCheckInterval option', t => {
+    t.plan(8)
+
+    const fastify = Fastify()
+    let check = true
+
+    fastify.register(underPressure, {
+      healthCheck: async () => check,
+      healthCheckInterval: 100
+    })
+
+    fastify.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+      sget({
+        method: 'GET',
+        url: address
+      }, (err, response, body) => {
+        check = false
+        t.error(err)
+        t.strictEqual(response.statusCode, 200)
+        t.deepEqual(JSON.parse(body), {
+          hello: 'world'
+        })
+      })
+
+      setTimeout(function () {
+        sget({
+          method: 'GET',
+          url: address
+        }, (err, response, body) => {
+          t.error(err)
+          t.strictEqual(response.statusCode, 503)
+          t.strictEqual(response.headers['retry-after'], '10')
+          t.deepEqual(JSON.parse(body), {
+            error: 'Service Unavailable',
+            message: 'Service Unavailable',
+            statusCode: 503
+          })
+          fastify.close()
+        })
+      }, 100)
+    })
+  })
+
+  t.test('should wait for the initial healthCheck call before initialising the server', t => {
+    t.plan(3)
+
+    let called = false
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      healthCheck: async () => {
+        await new Promise(resolve => setTimeout(() => resolve(), 100))
+        t.false(called)
+        called = true
+      },
+      healthCheckInterval: 1000
+    })
+
+    fastify.listen(0, (err) => {
+      t.error(err)
+      t.true(called)
+      fastify.close()
+    })
+  })
+
+  t.test('should call the external health at every status route', t => {
+    t.plan(7)
+
+    const fastify = Fastify()
+    let check = true
+    fastify.register(underPressure, {
+      healthCheck: async () => {
+        t.pass('healthcheck called')
+        return check
+      },
+      exposeStatusRoute: true
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+      check = false
+
+      sget({
+        method: 'GET',
+        url: address + '/status'
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 503)
+        t.strictEqual(response.headers['retry-after'], '10')
+        t.deepEqual(JSON.parse(body), {
+          error: 'Service Unavailable',
+          message: 'Service Unavailable',
+          statusCode: 503
+        })
+        fastify.close()
+      })
+    })
+  })
+
+  t.test('should call the external health at every status route, healthCheck throws', t => {
+    t.plan(7)
+
+    const fastify = Fastify()
+    let check = true
+    fastify.register(underPressure, {
+      healthCheck: async () => {
+        t.pass('healthcheck called')
+        if (check === false) {
+          throw new Error('kaboom')
+        }
+        return true
+      },
+      exposeStatusRoute: true
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+      check = false
+
+      sget({
+        method: 'GET',
+        url: address + '/status'
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 503)
+        t.strictEqual(response.headers['retry-after'], '10')
+        t.deepEqual(JSON.parse(body), {
+          error: 'Service Unavailable',
+          message: 'Service Unavailable',
+          statusCode: 503
+        })
+        fastify.close()
+      })
+    })
+  })
+})
+
 function sleep (msec) {
   const start = Date.now()
   while (Date.now() - start < msec) {}
