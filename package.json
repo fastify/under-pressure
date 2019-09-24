@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "standard | snazzy",
     "unit": "tap test.js --no-coverage",
-    "test": "npm run lint && npm run unit"
+    "test": "npm run lint && npm run unit && npm run typescript",
+    "typescript": "tsc --project ./tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -28,12 +29,14 @@
     "fastify-plugin": "^1.5.0"
   },
   "devDependencies": {
+    "@types/node": "^12.7.3",
     "fastify": "^2.3.0",
     "pre-commit": "^1.2.2",
     "simple-get": "^3.0.3",
     "snazzy": "^8.0.0",
     "standard": "^14.0.0",
-    "tap": "^14.2.4"
+    "tap": "^14.2.4",
+    "typescript": "^3.6.2"
   },
   "engines": {
     "node": ">=8"
