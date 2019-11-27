@@ -68,6 +68,15 @@ If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will e
 
 If you need the change the exposed route path, you can pass `{ exposeStatusRoute: '/alive' }` options.
 
+The options object will be passed down to the route registration method to allow passing of route configuration options.
+```js
+fastify.register(require('under-pressure'), {
+  maxEventLoopDelay: 1000,
+  exposeStatusRoute: true,
+  logLevel: 'debug'
+})
+```
+The above example will set the `logLevel` value for the `/status` route be `debug`.
 
 #### Custom health checks
 If needed you can pass a custom `healthCheck` property which is an async function and `under-pressure` will allow you to check the status of other components of your service.

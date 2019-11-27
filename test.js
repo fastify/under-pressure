@@ -262,6 +262,31 @@ test('Expose custom status route', t => {
   })
 })
 
+test('Expose status route with additional route options', t => {
+  t.plan(3)
+
+  const customConfig = {
+    customVal: 'someVal'
+  }
+  const fastify = Fastify()
+  fastify.register(underPressure, {
+    exposeStatusRoute: true,
+    logLevel: 'silent',
+    config: customConfig
+  })
+
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => sleep(500))
+    t.strictEqual(routeOptions.path, '/status')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
+    t.deepEqual(routeOptions.config, customConfig, 'config not set')
+    fastify.close()
+  })
+
+  fastify.listen()
+})
+
 test('Custom health check', t => {
   t.plan(6)
 

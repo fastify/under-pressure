@@ -54,6 +54,7 @@ async function underPressure (fastify, opts) {
 
   if (opts.exposeStatusRoute) {
     fastify.route({
+      ...opts,
       url: opts.exposeStatusRoute === true ? '/status' : opts.exposeStatusRoute,
       method: 'GET',
       schema: {
