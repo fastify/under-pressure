@@ -90,7 +90,6 @@ test('Should return 503 on maxRssBytes', t => {
   fastify.listen(0, (err, address) => {
     t.error(err)
     fastify.server.unref()
-
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
@@ -285,6 +284,28 @@ test('Expose status route with additional route options', t => {
     t.strictEqual(routeOptions.path, '/alive')
     t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
     t.deepEqual(routeOptions.config, customConfig, 'config not set')
+    fastify.close()
+  })
+
+  fastify.listen()
+})
+
+test('Expose status route with additional route options and default route', t => {
+  t.plan(2)
+
+  const fastify = Fastify()
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      }
+    }
+  })
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => sleep(500))
+    t.strictEqual(routeOptions.path, '/status')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
     fastify.close()
   })
 

@@ -57,7 +57,7 @@ async function underPressure (fastify, opts) {
   if (opts.exposeStatusRoute) {
     fastify.route({
       ...opts.exposeStatusRoute.routeOpts,
-      url: opts.exposeStatusRoute.route || '/status',
+      url: opts.exposeStatusRoute.route,
       method: 'GET',
       schema: {
         response: {
@@ -89,10 +89,10 @@ async function underPressure (fastify, opts) {
     if (!opts) {
       return false
     }
-    const route = typeof opts === 'string' ? opts : '/status'
-    opts = typeof opts === 'object' ? opts : {}
-    opts.route = opts.route || route
-    return opts
+    if (typeof opts === 'string') {
+      return { route: opts }
+    }
+    return Object.assign({ route: '/status' }, opts)
   }
 
   function updateMemoryUsage () {
