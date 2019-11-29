@@ -1,6 +1,6 @@
 {
   "name": "under-pressure",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Measure process load with automatic handling of 'Service Unavailable' plugin for Fastify.",
   "main": "index.js",
   "scripts": {
