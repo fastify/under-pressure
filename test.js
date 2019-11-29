@@ -90,7 +90,6 @@ test('Should return 503 on maxRssBytes', t => {
   fastify.listen(0, (err, address) => {
     t.error(err)
     fastify.server.unref()
-
     process.nextTick(() => sleep(500))
     sget({
       method: 'GET',
@@ -260,6 +259,57 @@ test('Expose custom status route', t => {
     t.strictEqual(response.statusCode, 200)
     t.deepEqual(JSON.parse(response.payload), { status: 'ok' })
   })
+})
+
+test('Expose status route with additional route options', t => {
+  t.plan(3)
+
+  const customConfig = {
+    customVal: 'someVal'
+  }
+  const fastify = Fastify()
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent',
+        config: customConfig
+      },
+      url: '/alive'
+    }
+  })
+
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => sleep(500))
+    t.strictEqual(routeOptions.url, '/alive')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
+    t.deepEqual(routeOptions.config, customConfig, 'config not set')
+    fastify.close()
+  })
+
+  fastify.listen()
+})
+
+test('Expose status route with additional route options and default url', t => {
+  t.plan(2)
+
+  const fastify = Fastify()
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      }
+    }
+  })
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => sleep(500))
+    t.strictEqual(routeOptions.url, '/status')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
+    fastify.close()
+  })
+
+  fastify.listen()
 })
 
 test('Custom health check', t => {

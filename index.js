@@ -52,9 +52,12 @@ async function underPressure (fastify, opts) {
   fastify.decorate('memoryUsage', memoryUsage)
   fastify.addHook('onClose', onClose)
 
+  opts.exposeStatusRoute = mapExposeStatusRoute(opts.exposeStatusRoute)
+
   if (opts.exposeStatusRoute) {
     fastify.route({
-      url: opts.exposeStatusRoute === true ? '/status' : opts.exposeStatusRoute,
+      ...opts.exposeStatusRoute.routeOpts,
+      url: opts.exposeStatusRoute.url,
       method: 'GET',
       schema: {
         response: {
@@ -81,6 +84,16 @@ async function underPressure (fastify, opts) {
   const retryAfter = opts.retryAfter || 10
 
   fastify.addHook('onRequest', onRequest)
+
+  function mapExposeStatusRoute (opts) {
+    if (!opts) {
+      return false
+    }
+    if (typeof opts === 'string') {
+      return { url: opts }
+    }
+    return Object.assign({ url: '/status' }, opts)
+  }
 
   function updateMemoryUsage () {
     var mem = process.memoryUsage()
