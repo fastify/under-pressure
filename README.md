@@ -79,7 +79,7 @@ fastify.register(require('under-pressure'), {
         someAttr: 'value'
       }
     },
-    route: '/alive' // If you also want to set a custom route path and pass options
+    url: '/alive' // If you also want to set a custom route path and pass options
   }
 })
 ```

@@ -274,14 +274,14 @@ test('Expose status route with additional route options', t => {
         logLevel: 'silent',
         config: customConfig
       },
-      route: '/alive'
+      url: '/alive'
     }
   })
 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
     process.nextTick(() => sleep(500))
-    t.strictEqual(routeOptions.path, '/alive')
+    t.strictEqual(routeOptions.url, '/alive')
     t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
     t.deepEqual(routeOptions.config, customConfig, 'config not set')
     fastify.close()
@@ -290,7 +290,7 @@ test('Expose status route with additional route options', t => {
   fastify.listen()
 })
 
-test('Expose status route with additional route options and default route', t => {
+test('Expose status route with additional route options and default url', t => {
   t.plan(2)
 
   const fastify = Fastify()
@@ -304,7 +304,7 @@ test('Expose status route with additional route options and default route', t =>
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
     process.nextTick(() => sleep(500))
-    t.strictEqual(routeOptions.path, '/status')
+    t.strictEqual(routeOptions.url, '/status')
     t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
     fastify.close()
   })
