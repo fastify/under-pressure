@@ -46,3 +46,38 @@ const fastify = fastifyLib();
     healthCheckInterval: 500
   });
 };
+
+() => {
+  fastify.register(underPressure, {
+    sampleInterval: 10
+  });
+}
+
+() => {
+  fastify.register(underPressure, {
+    exposeStatusRoute: '/v2/status',
+  });
+
+  fastify.register(underPressure, {
+    exposeStatusRoute: true
+  });
+
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent',
+        config: {}
+      },
+      url: '/alive'
+    }
+  });
+
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      }
+    }
+  });
+};
+
