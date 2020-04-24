@@ -108,6 +108,22 @@ fastify.register(require('under-pressure'), {
   healthCheckInterval: 500
 })
 ```
+<a name="sample-interval"></a>
+#### Sample interval
+
+You can set a custom value for sampling the metrics returned by `memoryUsage` using the `sampleInterval` option, which accepts a number that represents the interval in milliseconds.
+
+The default value is different depending on which Node version is used. On version 8 and 10 it is `5`, while on version 11.10.0 and up it is `1000`. This difference is due to the fact that from version 11.10.0 the event loop delay can be sampled with [`monitorEventLoopDelay`](https://nodejs.org/docs/latest-v12.x/api/perf_hooks.html#perf_hooks_perf_hooks_monitoreventloopdelay_options) and this allows to increase the interval value.
+
+```js
+const fastify = require('fastify')()
+
+fastify.register(require('under-pressure'), {
+  sampleInterval: <your custom sample interval in ms>
+})
+
+
+```
 
 <a name="acknowledgements"></a>
 ## Acknowledgements

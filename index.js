@@ -2,11 +2,19 @@
 
 const fp = require('fastify-plugin')
 const assert = require('assert')
+const { monitorEventLoopDelay } = require('perf_hooks')
+
+function getSampleInterval (value, eventLoopResolution) {
+  const defaultValue = monitorEventLoopDelay ? 1000 : 5
+  const sampleInterval = value || defaultValue
+  return monitorEventLoopDelay ? Math.max(eventLoopResolution, sampleInterval) : sampleInterval
+}
 
 async function underPressure (fastify, opts) {
   opts = opts || {}
 
-  const sampleInterval = opts.sampleInterval || 5
+  const resolution = 10
+  const sampleInterval = getSampleInterval(opts.sampleInterval, resolution)
   const maxEventLoopDelay = opts.maxEventLoopDelay || 0
   const maxHeapUsedBytes = opts.maxHeapUsedBytes || 0
   const maxRssBytes = opts.maxRssBytes || 0
@@ -20,7 +28,16 @@ async function underPressure (fastify, opts) {
   var heapUsed = 0
   var rssBytes = 0
   var eventLoopDelay = 0
-  var lastCheck = now()
+  var lastCheck
+  var histogram
+
+  if (monitorEventLoopDelay) {
+    histogram = monitorEventLoopDelay({ resolution })
+    histogram.enable()
+  } else {
+    lastCheck = now()
+  }
+
   const timer = setInterval(updateMemoryUsage, sampleInterval)
   timer.unref()
 
@@ -95,13 +112,22 @@ async function underPressure (fastify, opts) {
     return Object.assign({ url: '/status' }, opts)
   }
 
+  function updateEventLoopDelay () {
+    if (histogram) {
+      eventLoopDelay = Math.max(0, histogram.mean / 1e6 - resolution)
+      histogram.reset()
+    } else {
+      const toCheck = now()
+      eventLoopDelay = Math.max(0, toCheck - lastCheck - sampleInterval)
+      lastCheck = toCheck
+    }
+  }
+
   function updateMemoryUsage () {
     var mem = process.memoryUsage()
     heapUsed = mem.heapUsed
     rssBytes = mem.rss
-    var toCheck = now()
-    eventLoopDelay = toCheck - lastCheck - sampleInterval
-    lastCheck = toCheck
+    updateEventLoopDelay()
   }
 
   function onRequest (req, reply, next) {

@@ -2,28 +2,39 @@
 
 const t = require('tap')
 const test = t.test
+const { promisify } = require('util')
 const sget = require('simple-get').concat
 const Fastify = require('fastify')
+const { monitorEventLoopDelay } = require('perf_hooks')
 const underPressure = require('./index')
+
+const wait = promisify(setTimeout)
 
 test('Should return 503 on maxEventLoopDelay', t => {
   t.plan(5)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
-    maxEventLoopDelay: 50
+    maxEventLoopDelay: 15
   })
 
   fastify.get('/', (req, reply) => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen(0, async (err, address) => {
     t.error(err)
     fastify.server.unref()
 
+    // If using monitorEventLoopDelay give it time to collect
+    // some samples
+    if (monitorEventLoopDelay) {
+      await wait(500)
+    }
+
     // Increased to prevent Travis to fail
-    process.nextTick(() => sleep(1000))
+    process.nextTick(() => block(1000))
+
     sget({
       method: 'GET',
       url: address
@@ -57,7 +68,8 @@ test('Should return 503 on maxHeapUsedBytes', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => sleep(500))
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+
     sget({
       method: 'GET',
       url: address
@@ -90,7 +102,9 @@ test('Should return 503 on maxRssBytes', t => {
   fastify.listen(0, (err, address) => {
     t.error(err)
     fastify.server.unref()
-    process.nextTick(() => sleep(500))
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+
     sget({
       method: 'GET',
       url: address
@@ -113,7 +127,7 @@ test('Custom message and retry after header', t => {
 
   const fastify = Fastify()
   fastify.register(underPressure, {
-    maxEventLoopDelay: 50,
+    maxRssBytes: 1,
     message: 'Under pressure!',
     retryAfter: 50
   })
@@ -126,7 +140,8 @@ test('Custom message and retry after header', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => sleep(500))
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+
     sget({
       method: 'GET',
       url: address
@@ -161,12 +176,19 @@ test('memoryUsage name space', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen(0, async (err, address) => {
     t.error(err)
     t.is(typeof fastify.memoryUsage, 'function')
     fastify.server.unref()
 
-    process.nextTick(() => sleep(500))
+    // If using monitorEventLoopDelay give it time to collect
+    // some samples
+    if (monitorEventLoopDelay) {
+      await wait(500)
+    }
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+
     sget({
       method: 'GET',
       url: address
@@ -192,12 +214,19 @@ test('memoryUsage name space (without check)', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen(0, async (err, address) => {
     t.error(err)
     t.is(typeof fastify.memoryUsage, 'function')
     fastify.server.unref()
 
-    process.nextTick(() => sleep(500))
+    // If using monitorEventLoopDelay give it time to collect
+    // some samples
+    if (monitorEventLoopDelay) {
+      await wait(500)
+    }
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+
     sget({
       method: 'GET',
       url: address
@@ -222,7 +251,8 @@ test('Expose status route', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => sleep(500))
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+
     sget({
       method: 'GET',
       url: `${address}/status`
@@ -280,7 +310,7 @@ test('Expose status route with additional route options', t => {
 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
-    process.nextTick(() => sleep(500))
+    process.nextTick(() => block(500))
     t.strictEqual(routeOptions.url, '/alive')
     t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
     t.deepEqual(routeOptions.config, customConfig, 'config not set')
@@ -303,7 +333,7 @@ test('Expose status route with additional route options and default url', t => {
   })
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
-    process.nextTick(() => sleep(500))
+    process.nextTick(() => block(500))
     t.strictEqual(routeOptions.url, '/status')
     t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
     fastify.close()
@@ -438,7 +468,7 @@ test('Custom health check', t => {
     const fastify = Fastify()
     fastify.register(underPressure, {
       healthCheck: async () => {
-        await new Promise(resolve => setTimeout(() => resolve(), 100))
+        await wait(100)
         t.false(called)
         called = true
       },
@@ -526,7 +556,7 @@ test('Custom health check', t => {
   })
 })
 
-function sleep (msec) {
+function block (msec) {
   const start = Date.now()
   while (Date.now() - start < msec) {}
 }
