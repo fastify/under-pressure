@@ -1,7 +1,6 @@
 'use strict'
 
 const t = require('tap')
-const test = t.test
 const { promisify } = require('util')
 const sget = require('simple-get').concat
 const Fastify = require('fastify')
@@ -10,7 +9,7 @@ const underPressure = require('./index')
 
 const wait = promisify(setTimeout)
 
-test('Should return 503 on maxEventLoopDelay', t => {
+t.test('Should return 503 on maxEventLoopDelay', t => {
   t.plan(5)
 
   const fastify = Fastify()
@@ -52,7 +51,7 @@ test('Should return 503 on maxEventLoopDelay', t => {
   })
 })
 
-test('Should return 503 on maxHeapUsedBytes', t => {
+t.test('Should return 503 on maxHeapUsedBytes', t => {
   t.plan(5)
 
   const fastify = Fastify()
@@ -87,7 +86,7 @@ test('Should return 503 on maxHeapUsedBytes', t => {
   })
 })
 
-test('Should return 503 on maxRssBytes', t => {
+t.test('Should return 503 on maxRssBytes', t => {
   t.plan(5)
 
   const fastify = Fastify()
@@ -122,7 +121,7 @@ test('Should return 503 on maxRssBytes', t => {
   })
 })
 
-test('Custom message and retry after header', t => {
+t.test('Custom message and retry after header', t => {
   t.plan(5)
 
   const fastify = Fastify()
@@ -159,7 +158,7 @@ test('Custom message and retry after header', t => {
   })
 })
 
-test('memoryUsage name space', t => {
+t.test('memoryUsage name space', t => {
   t.plan(8)
 
   const fastify = Fastify()
@@ -201,7 +200,7 @@ test('memoryUsage name space', t => {
   })
 })
 
-test('memoryUsage name space (without check)', t => {
+t.test('memoryUsage name space (without check)', t => {
   t.plan(8)
 
   const fastify = Fastify()
@@ -239,7 +238,7 @@ test('memoryUsage name space (without check)', t => {
   })
 })
 
-test('Expose status route', t => {
+t.test('Expose status route', t => {
   t.plan(4)
 
   const fastify = Fastify()
@@ -265,7 +264,7 @@ test('Expose status route', t => {
   })
 })
 
-test('Expose custom status route', t => {
+t.test('Expose custom status route', t => {
   t.plan(5)
 
   const fastify = Fastify()
@@ -291,22 +290,13 @@ test('Expose custom status route', t => {
   })
 })
 
-test('Expose status route with additional route options', t => {
+t.test('Expose status route with additional route options', t => {
   t.plan(3)
 
   const customConfig = {
     customVal: 'someVal'
   }
   const fastify = Fastify()
-  fastify.register(underPressure, {
-    exposeStatusRoute: {
-      routeOpts: {
-        logLevel: 'silent',
-        config: customConfig
-      },
-      url: '/alive'
-    }
-  })
 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
@@ -317,20 +307,24 @@ test('Expose status route with additional route options', t => {
     fastify.close()
   })
 
-  fastify.listen()
-})
-
-test('Expose status route with additional route options and default url', t => {
-  t.plan(2)
-
-  const fastify = Fastify()
   fastify.register(underPressure, {
     exposeStatusRoute: {
       routeOpts: {
-        logLevel: 'silent'
-      }
+        logLevel: 'silent',
+        config: customConfig
+      },
+      url: '/alive'
     }
   })
+
+  fastify.ready()
+})
+
+t.test('Expose status route with additional route options and default url', t => {
+  t.plan(2)
+
+  const fastify = Fastify()
+
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
     process.nextTick(() => block(500))
@@ -339,10 +333,18 @@ test('Expose status route with additional route options and default url', t => {
     fastify.close()
   })
 
-  fastify.listen()
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      }
+    }
+  })
+
+  fastify.ready()
 })
 
-test('Custom health check', t => {
+t.test('Custom health check', t => {
   t.plan(6)
 
   t.test('should return 503 when custom health check returns false for healthCheck', t => {
@@ -558,5 +560,5 @@ test('Custom health check', t => {
 
 function block (msec) {
   const start = Date.now()
-  while (Date.now() - start < msec) {}
+  while (Date.now() - start < msec) { }
 }

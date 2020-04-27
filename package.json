@@ -7,7 +7,7 @@
     "lint": "standard | snazzy",
     "unit": "tap test.js",
     "test": "npm run lint && npm run unit && npm run typescript",
-    "typescript": "tsc --project ./tsconfig.json"
+    "typescript": "tsd"
   },
   "repository": {
     "type": "git",
@@ -26,16 +26,17 @@
   "author": "Tomas Della Vedova - @delvedor (http://delved.org)",
   "license": "MIT",
   "dependencies": {
-    "fastify-plugin": "^1.6.1"
+    "fastify-plugin": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^13.13.2",
-    "fastify": "^2.13.1",
+    "fastify": "^3.0.0-alpha.1",
     "pre-commit": "^1.2.2",
     "simple-get": "^3.1.0",
     "snazzy": "^8.0.0",
     "standard": "^14.0.0",
     "tap": "^14.2.4",
+    "tsd": "^0.11.0",
     "typescript": "^3.6.2"
   },
   "engines": {
