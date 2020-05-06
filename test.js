@@ -1,7 +1,6 @@
 'use strict'
 
-const t = require('tap')
-const test = t.test
+const { test } = require('tap')
 const { promisify } = require('util')
 const sget = require('simple-get').concat
 const Fastify = require('fastify')
@@ -298,15 +297,6 @@ test('Expose status route with additional route options', t => {
     customVal: 'someVal'
   }
   const fastify = Fastify()
-  fastify.register(underPressure, {
-    exposeStatusRoute: {
-      routeOpts: {
-        logLevel: 'silent',
-        config: customConfig
-      },
-      url: '/alive'
-    }
-  })
 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
@@ -317,20 +307,24 @@ test('Expose status route with additional route options', t => {
     fastify.close()
   })
 
-  fastify.listen()
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent',
+        config: customConfig
+      },
+      url: '/alive'
+    }
+  })
+
+  fastify.ready()
 })
 
 test('Expose status route with additional route options and default url', t => {
   t.plan(2)
 
   const fastify = Fastify()
-  fastify.register(underPressure, {
-    exposeStatusRoute: {
-      routeOpts: {
-        logLevel: 'silent'
-      }
-    }
-  })
+
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
     process.nextTick(() => block(500))
@@ -339,7 +333,15 @@ test('Expose status route with additional route options and default url', t => {
     fastify.close()
   })
 
-  fastify.listen()
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      }
+    }
+  })
+
+  fastify.ready()
 })
 
 test('Custom health check', t => {
@@ -558,5 +560,5 @@ test('Custom health check', t => {
 
 function block (msec) {
   const start = Date.now()
-  while (Date.now() - start < msec) {}
+  while (Date.now() - start < msec) { }
 }

@@ -1,5 +1,6 @@
-import * as http from "http";
-import * as fastify from "fastify";
+import {
+  FastifyPlugin
+} from "fastify";
 
 declare namespace underPressure {
   interface UnderPressureOptions {
@@ -11,21 +12,18 @@ declare namespace underPressure {
     healthCheck?: () => Promise<boolean>;
     healthCheckInterval?: number;
     sampleInterval?: number;
-    exposeStatusRoute?: boolean | string | {routeOpts: object; url?: string};
+    exposeStatusRoute?: boolean | string | { routeOpts: object; url?: string };
   }
 }
 
 declare module "fastify" {
-  interface FastifyInstance<HttpServer, HttpRequest, HttpResponse> {
-    memoryUsage: () => string;
+  interface FastifyInstance {
+    memoryUsage(): string;
   }
 }
 
-declare let underPressure: fastify.Plugin<
-  http.Server,
-  http.IncomingMessage,
-  http.ServerResponse,
+declare let underPressure: FastifyPlugin<
   underPressure.UnderPressureOptions
 >;
 
-export = underPressure;
+export default underPressure;
