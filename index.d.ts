@@ -1,10 +1,5 @@
 import {
-  FastifyPlugin,
-  RawServerBase,
-  RawServerDefault,
-  RawRequestDefaultExpression,
-  RawReplyDefaultExpression,
-  FastifyLoggerOptions
+  FastifyPlugin
 } from "fastify";
 
 declare namespace underPressure {
@@ -22,12 +17,7 @@ declare namespace underPressure {
 }
 
 declare module "fastify" {
-  interface FastifyInstance<
-    RawServer extends RawServerBase = RawServerDefault,
-    RawRequest extends RawRequestDefaultExpression<RawServer> = RawRequestDefaultExpression<RawServer>,
-    RawReply extends RawReplyDefaultExpression<RawServer> = RawReplyDefaultExpression<RawServer>,
-    Logger = FastifyLoggerOptions<RawServer>
-    > {
+  interface FastifyInstance {
     memoryUsage(): string;
   }
 }
