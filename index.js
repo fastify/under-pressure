@@ -197,6 +197,6 @@ function now () {
 }
 
 module.exports = fp(underPressure, {
-  fastify: '>=3',
+  fastify: '3.x',
   name: 'under-pressure'
 })
