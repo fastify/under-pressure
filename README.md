@@ -51,6 +51,21 @@ fastify.register(require('under-pressure'), {
 })
 ```
 
+You can also configure custom Error instance `under-pressure` will throw.
+```js
+  class CustomError extends Error {
+    constructor () {
+      super('Custom error message')
+      Error.captureStackTrace(this, CustomError)
+    }
+  }
+  
+  fastify.register(require('under-pressure'), {
+  maxEventLoopDelay: 1000,
+  customError: CustomError
+})
+```
+
 The default value for `maxEventLoopDelay`, `maxHeapUsedBytes` and `maxRssBytes` is `0`.  
 If the value is `0` the check will not be performed.
 
