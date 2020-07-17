@@ -1,8 +1,12 @@
 'use strict'
 
+const fe = require('fastify-error')
 const fp = require('fastify-plugin')
 const assert = require('assert')
 const { monitorEventLoopDelay } = require('perf_hooks')
+
+const SERVICE_UNAVAILABLE = 503
+const createError = (msg = 'Service Unavailable') => fe('FST_UNDER_PRESSURE', msg, SERVICE_UNAVAILABLE)
 
 function getSampleInterval (value, eventLoopResolution) {
   const defaultValue = monitorEventLoopDelay ? 1000 : 5
@@ -20,6 +24,7 @@ async function underPressure (fastify, opts) {
   const maxRssBytes = opts.maxRssBytes || 0
   const healthCheck = opts.healthCheck || false
   const healthCheckInterval = opts.healthCheckInterval || -1
+  const UnderPressureError = opts.customError || createError(opts.message)
 
   const checkMaxEventLoopDelay = maxEventLoopDelay > 0
   const checkMaxHeapUsedBytes = maxHeapUsedBytes > 0
@@ -97,7 +102,7 @@ async function underPressure (fastify, opts) {
     return
   }
 
-  const serviceUnavailableError = new Error(opts.message || 'Service Unavailable')
+  const underPressureError = new UnderPressureError()
   const retryAfter = opts.retryAfter || 10
 
   fastify.addHook('onRequest', onRequest)
@@ -155,8 +160,8 @@ async function underPressure (fastify, opts) {
   }
 
   function sendError (reply, next) {
-    reply.status(503).header('Retry-After', retryAfter)
-    next(serviceUnavailableError)
+    reply.status(SERVICE_UNAVAILABLE).header('Retry-After', retryAfter)
+    next(underPressureError)
   }
 
   function memoryUsage () {
@@ -172,13 +177,13 @@ async function underPressure (fastify, opts) {
       try {
         if (!await healthCheck()) {
           req.log.error('external health check failed')
-          reply.status(503).header('Retry-After', retryAfter)
-          throw serviceUnavailableError
+          reply.status(SERVICE_UNAVAILABLE).header('Retry-After', retryAfter)
+          throw underPressureError
         }
       } catch (err) {
         req.log.error({ err }, 'external health check failed with error')
-        reply.status(503).header('Retry-After', retryAfter)
-        throw serviceUnavailableError
+        reply.status(SERVICE_UNAVAILABLE).header('Retry-After', retryAfter)
+        throw underPressureError
       }
     }
     return { status: 'ok' }

@@ -42,6 +42,7 @@ test('Should return 503 on maxEventLoopDelay', t => {
       t.strictEqual(response.statusCode, 503)
       t.strictEqual(response.headers['retry-after'], '10')
       t.deepEqual(JSON.parse(body), {
+        code: 'FST_UNDER_PRESSURE',
         error: 'Service Unavailable',
         message: 'Service Unavailable',
         statusCode: 503
@@ -77,6 +78,7 @@ test('Should return 503 on maxHeapUsedBytes', t => {
       t.strictEqual(response.statusCode, 503)
       t.strictEqual(response.headers['retry-after'], '10')
       t.deepEqual(JSON.parse(body), {
+        code: 'FST_UNDER_PRESSURE',
         error: 'Service Unavailable',
         message: 'Service Unavailable',
         statusCode: 503
@@ -112,6 +114,7 @@ test('Should return 503 on maxRssBytes', t => {
       t.strictEqual(response.statusCode, 503)
       t.strictEqual(response.headers['retry-after'], '10')
       t.deepEqual(JSON.parse(body), {
+        code: 'FST_UNDER_PRESSURE',
         error: 'Service Unavailable',
         message: 'Service Unavailable',
         statusCode: 503
@@ -149,9 +152,60 @@ test('Custom message and retry after header', t => {
       t.strictEqual(response.statusCode, 503)
       t.strictEqual(response.headers['retry-after'], '50')
       t.deepEqual(JSON.parse(body), {
+        code: 'FST_UNDER_PRESSURE',
         error: 'Service Unavailable',
         message: 'Under pressure!',
         statusCode: 503
+      })
+      fastify.close()
+    })
+  })
+})
+
+test('Custom error instance', t => {
+  t.plan(5)
+
+  class CustomError extends Error {
+    constructor () {
+      super('Custom error message')
+      this.statusCode = 418
+      this.code = 'FST_CUSTOM_ERROR'
+      Error.captureStackTrace(this, CustomError)
+    }
+  }
+
+  const fastify = Fastify()
+  fastify.register(underPressure, {
+    maxRssBytes: 1,
+    customError: CustomError
+  })
+
+  fastify.get('/', (req, reply) => {
+    reply.send({ hello: 'world' })
+  })
+
+  fastify.setErrorHandler((err, req, reply) => {
+    t.ok(err instanceof Error)
+    return reply.code(err.statusCode).send(err)
+  })
+
+  fastify.listen(0, (err, address) => {
+    t.error(err)
+    fastify.server.unref()
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+
+    sget({
+      method: 'GET',
+      url: address
+    }, (err, response, body) => {
+      t.error(err)
+      t.strictEqual(response.statusCode, 418)
+      t.deepEqual(JSON.parse(body), {
+        code: 'FST_CUSTOM_ERROR',
+        error: 'I\'m a Teapot',
+        message: 'Custom error message',
+        statusCode: 418
       })
       fastify.close()
     })
@@ -374,6 +428,7 @@ test('Custom health check', t => {
         t.strictEqual(response.statusCode, 503)
         t.strictEqual(response.headers['retry-after'], '10')
         t.deepEqual(JSON.parse(body), {
+          code: 'FST_UNDER_PRESSURE',
           error: 'Service Unavailable',
           message: 'Service Unavailable',
           statusCode: 503
@@ -453,6 +508,7 @@ test('Custom health check', t => {
           t.strictEqual(response.statusCode, 503)
           t.strictEqual(response.headers['retry-after'], '10')
           t.deepEqual(JSON.parse(body), {
+            code: 'FST_UNDER_PRESSURE',
             error: 'Service Unavailable',
             message: 'Service Unavailable',
             statusCode: 503
@@ -510,6 +566,7 @@ test('Custom health check', t => {
         t.strictEqual(response.statusCode, 503)
         t.strictEqual(response.headers['retry-after'], '10')
         t.deepEqual(JSON.parse(body), {
+          code: 'FST_UNDER_PRESSURE',
           error: 'Service Unavailable',
           message: 'Service Unavailable',
           statusCode: 503
@@ -548,6 +605,7 @@ test('Custom health check', t => {
         t.strictEqual(response.statusCode, 503)
         t.strictEqual(response.headers['retry-after'], '10')
         t.deepEqual(JSON.parse(body), {
+          code: 'FST_UNDER_PRESSURE',
           error: 'Service Unavailable',
           message: 'Service Unavailable',
           statusCode: 503
