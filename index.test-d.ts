@@ -75,5 +75,9 @@ const server = fastify();
       }
     }
   });
+
+  server.register(underPressure, {
+    customError: new Error('custom error message')
+  });
 };
 
