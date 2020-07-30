@@ -30,7 +30,10 @@ const server = fastify();
 };
 
 () => {
-  console.log(server.memoryUsage());
+  const memoryUsage = server.memoryUsage();
+  console.log(memoryUsage.heapUsed);
+  console.log(memoryUsage.rssBytes);
+  console.log(memoryUsage.eventLoopDelay);
 };
 
 () => {
@@ -80,4 +83,3 @@ const server = fastify();
     customError: new Error('custom error message')
   });
 };
-
