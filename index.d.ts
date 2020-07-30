@@ -19,7 +19,7 @@ declare namespace underPressure {
 
 declare module "fastify" {
   interface FastifyInstance {
-    memoryUsage(): string;
+    memoryUsage(): { heapUsed: number; rssBytes: number; eventLoopDelay: number };
   }
 }
 
