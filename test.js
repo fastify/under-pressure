@@ -398,6 +398,79 @@ test('Expose status route with additional route options and default url', t => {
   fastify.ready()
 })
 
+test('Expose status route with additional route options, route schema options', t => {
+  const routeSchemaOpts = { hide: true }
+
+  const fastify = Fastify()
+
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => block(500))
+    t.strictEqual(routeOptions.url, '/alive')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
+    t.deepEqual(routeOptions.schema, Object.assign({}, routeSchemaOpts, {
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' }
+          }
+        }
+      }
+    }), 'config not set')
+    fastify.close()
+    t.end()
+  })
+
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      },
+      routeSchemaOpts,
+      url: '/alive'
+    }
+  })
+
+  fastify.ready()
+})
+
+test('Expose status route with additional route options, route schema options and default url', t => {
+  const routeSchemaOpts = { hide: true }
+
+  const fastify = Fastify()
+
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => block(500))
+    t.strictEqual(routeOptions.url, '/status')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
+    t.deepEqual(routeOptions.schema, Object.assign({}, routeSchemaOpts, {
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' }
+          }
+        }
+      }
+    }), 'config not set')
+    fastify.close()
+    t.end()
+  })
+
+  fastify.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      },
+      routeSchemaOpts
+    }
+  })
+
+  fastify.ready()
+})
+
 test('Custom health check', t => {
   t.plan(6)
 

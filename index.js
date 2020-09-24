@@ -81,7 +81,7 @@ async function underPressure (fastify, opts) {
       ...opts.exposeStatusRoute.routeOpts,
       url: opts.exposeStatusRoute.url,
       method: 'GET',
-      schema: {
+      schema: Object.assign({}, opts.exposeStatusRoute.routeSchemaOpts, {
         response: {
           200: {
             type: 'object',
@@ -90,7 +90,7 @@ async function underPressure (fastify, opts) {
             }
           }
         }
-      },
+      }),
       handler: onStatus
     })
   }
