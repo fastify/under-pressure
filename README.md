@@ -93,6 +93,9 @@ fastify.register(require('under-pressure'), {
         someAttr: 'value'
       }
     },
+    routeSchemaOpts: { // If you also want to set a custom route schema
+      hide: true
+    },
     url: '/alive' // If you also want to set a custom route path and pass options
   }
 })

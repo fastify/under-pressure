@@ -80,6 +80,17 @@ const server = fastify();
   });
 
   server.register(underPressure, {
+    exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      },
+      routeSchemaOpts: {
+        hide: true
+      }
+    }
+  })
+
+  server.register(underPressure, {
     customError: new Error('custom error message')
   });
 };
