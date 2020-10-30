@@ -6,6 +6,7 @@ const sget = require('simple-get').concat
 const Fastify = require('fastify')
 const { monitorEventLoopDelay } = require('perf_hooks')
 const underPressure = require('./index')
+const { valid, satisfies, coerce } = require('semver')
 
 const wait = promisify(setTimeout)
 
@@ -50,6 +51,49 @@ test('Should return 503 on maxEventLoopDelay', t => {
       fastify.close()
     })
   })
+})
+
+test('Should return 503 on maxEventloopUtilization', t => {
+  const isSupportedVersion = satisfies(valid(coerce(process.version)), '12.19.0 || >=14.0.0')
+
+  if (!isSupportedVersion) {
+    t.end()
+  } else {
+    t.plan(5)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      maxEventLoopUtilization: 0.60
+    })
+
+    fastify.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    })
+
+    fastify.listen(0, async (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      // Increased to prevent Travis to fail
+      process.nextTick(() => block(1000))
+
+      sget({
+        method: 'GET',
+        url: address
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 503)
+        t.strictEqual(response.headers['retry-after'], '10')
+        t.deepEqual(JSON.parse(body), {
+          code: 'FST_UNDER_PRESSURE',
+          error: 'Service Unavailable',
+          message: 'Service Unavailable',
+          statusCode: 503
+        })
+        fastify.close()
+      })
+    })
+  }
 })
 
 test('Should return 503 on maxHeapUsedBytes', t => {
