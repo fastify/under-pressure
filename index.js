@@ -33,13 +33,13 @@ async function underPressure (fastify, opts) {
   const checkMaxRssBytes = maxRssBytes > 0
   const checkMaxEventLoopUtilization = eventLoopUtilization ? maxEventLoopUtilization > 0 : false
 
-  var heapUsed = 0
-  var rssBytes = 0
-  var eventLoopDelay = 0
-  var lastCheck
-  var histogram
-  var elu
-  var eventLoopUtilizationVal = 0
+  let heapUsed = 0
+  let rssBytes = 0
+  let eventLoopDelay = 0
+  let lastCheck
+  let histogram
+  let elu
+  let eventLoopUtilizationVal = 0
 
   if (monitorEventLoopDelay) {
     histogram = monitorEventLoopDelay({ resolution })
@@ -55,8 +55,8 @@ async function underPressure (fastify, opts) {
   const timer = setInterval(updateMemoryUsage, sampleInterval)
   timer.unref()
 
-  var externalsHealthy = false
-  var externalHealthCheckTimer
+  let externalsHealthy = false
+  let externalHealthCheckTimer
   if (healthCheck) {
     assert(typeof healthCheck === 'function', 'opts.healthCheck should be a function that returns a promise that resolves to true or false')
     assert(healthCheckInterval > 0 || opts.exposeStatusRoute, 'opts.healthCheck requires opts.healthCheckInterval or opts.exposeStatusRoute')
@@ -146,7 +146,7 @@ async function underPressure (fastify, opts) {
   }
 
   function updateMemoryUsage () {
-    var mem = process.memoryUsage()
+    const mem = process.memoryUsage()
     heapUsed = mem.heapUsed
     rssBytes = mem.rss
     updateEventLoopDelay()
@@ -220,7 +220,7 @@ async function underPressure (fastify, opts) {
 }
 
 function now () {
-  var ts = process.hrtime()
+  const ts = process.hrtime()
   return (ts[0] * 1e3) + (ts[1] / 1e6)
 }
 

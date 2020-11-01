@@ -729,5 +729,6 @@ test('Custom health check', t => {
 
 function block (msec) {
   const start = Date.now()
+  /* eslint-disable no-empty */
   while (Date.now() - start < msec) { }
 }
