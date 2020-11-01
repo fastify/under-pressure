@@ -5,6 +5,7 @@ import {
 declare namespace underPressure {
   interface UnderPressureOptions {
     maxEventLoopDelay?: number;
+    maxEventLoopUtilization?: number;
     maxHeapUsedBytes?: number;
     maxRssBytes?: number;
     message?: string;

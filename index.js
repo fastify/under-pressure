@@ -4,6 +4,7 @@ const fe = require('fastify-error')
 const fp = require('fastify-plugin')
 const assert = require('assert')
 const { monitorEventLoopDelay } = require('perf_hooks')
+const { eventLoopUtilization } = require('perf_hooks').performance
 
 const SERVICE_UNAVAILABLE = 503
 const createError = (msg = 'Service Unavailable') => fe('FST_UNDER_PRESSURE', msg, SERVICE_UNAVAILABLE)
@@ -25,22 +26,30 @@ async function underPressure (fastify, opts) {
   const healthCheck = opts.healthCheck || false
   const healthCheckInterval = opts.healthCheckInterval || -1
   const UnderPressureError = opts.customError || createError(opts.message)
+  const maxEventLoopUtilization = opts.maxEventLoopUtilization || 0
 
   const checkMaxEventLoopDelay = maxEventLoopDelay > 0
   const checkMaxHeapUsedBytes = maxHeapUsedBytes > 0
   const checkMaxRssBytes = maxRssBytes > 0
+  const checkMaxEventLoopUtilization = eventLoopUtilization ? maxEventLoopUtilization > 0 : false
 
   var heapUsed = 0
   var rssBytes = 0
   var eventLoopDelay = 0
   var lastCheck
   var histogram
+  var elu
+  var eventLoopUtilizationVal = 0
 
   if (monitorEventLoopDelay) {
     histogram = monitorEventLoopDelay({ resolution })
     histogram.enable()
   } else {
     lastCheck = now()
+  }
+
+  if (eventLoopUtilization) {
+    elu = eventLoopUtilization()
   }
 
   const timer = setInterval(updateMemoryUsage, sampleInterval)
@@ -95,7 +104,7 @@ async function underPressure (fastify, opts) {
     })
   }
 
-  if (checkMaxEventLoopDelay === false &&
+  if (checkMaxEventLoopUtilization === false && checkMaxEventLoopDelay === false &&
     checkMaxHeapUsedBytes === false &&
     checkMaxRssBytes === false &&
     healthCheck === false) {
@@ -128,11 +137,20 @@ async function underPressure (fastify, opts) {
     }
   }
 
+  function updateEventLoopUtilization () {
+    if (elu) {
+      eventLoopUtilizationVal = eventLoopUtilization(elu).utilization
+    } else {
+      eventLoopUtilizationVal = 0
+    }
+  }
+
   function updateMemoryUsage () {
     var mem = process.memoryUsage()
     heapUsed = mem.heapUsed
     rssBytes = mem.rss
     updateEventLoopDelay()
+    updateEventLoopUtilization()
   }
 
   function onRequest (req, reply, next) {
@@ -152,6 +170,11 @@ async function underPressure (fastify, opts) {
     }
 
     if (!externalsHealthy) {
+      sendError(reply, next)
+      return
+    }
+
+    if (checkMaxEventLoopUtilization && eventLoopUtilizationVal > maxEventLoopUtilization) {
       sendError(reply, next)
       return
     }
