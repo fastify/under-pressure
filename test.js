@@ -53,47 +53,41 @@ test('Should return 503 on maxEventLoopDelay', t => {
   })
 })
 
-test('Should return 503 on maxEventloopUtilization', t => {
-  const isSupportedVersion = satisfies(valid(coerce(process.version)), '12.19.0 || >=14.0.0')
+const isSupportedVersion = satisfies(valid(coerce(process.version)), '12.19.0 || >=14.0.0')
+test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion }, t => {
+  t.plan(5)
+  const fastify = Fastify()
+  fastify.register(underPressure, {
+    maxEventLoopUtilization: 0.60
+  })
 
-  if (!isSupportedVersion) {
-    t.end()
-  } else {
-    t.plan(5)
+  fastify.get('/', (req, reply) => {
+    reply.send({ hello: 'world' })
+  })
 
-    const fastify = Fastify()
-    fastify.register(underPressure, {
-      maxEventLoopUtilization: 0.60
-    })
+  fastify.listen(0, async (err, address) => {
+    t.error(err)
+    fastify.server.unref()
 
-    fastify.get('/', (req, reply) => {
-      reply.send({ hello: 'world' })
-    })
+    // Increased to prevent Travis to fail
+    process.nextTick(() => block(1000))
 
-    fastify.listen(0, async (err, address) => {
+    sget({
+      method: 'GET',
+      url: address
+    }, (err, response, body) => {
       t.error(err)
-      fastify.server.unref()
-
-      // Increased to prevent Travis to fail
-      process.nextTick(() => block(1000))
-
-      sget({
-        method: 'GET',
-        url: address
-      }, (err, response, body) => {
-        t.error(err)
-        t.strictEqual(response.statusCode, 503)
-        t.strictEqual(response.headers['retry-after'], '10')
-        t.deepEqual(JSON.parse(body), {
-          code: 'FST_UNDER_PRESSURE',
-          error: 'Service Unavailable',
-          message: 'Service Unavailable',
-          statusCode: 503
-        })
-        fastify.close()
+      t.strictEqual(response.statusCode, 503)
+      t.strictEqual(response.headers['retry-after'], '10')
+      t.deepEqual(JSON.parse(body), {
+        code: 'FST_UNDER_PRESSURE',
+        error: 'Service Unavailable',
+        message: 'Service Unavailable',
+        statusCode: 503
       })
+      fastify.close()
     })
-  }
+  })
 })
 
 test('Should return 503 on maxHeapUsedBytes', t => {
