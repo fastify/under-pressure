@@ -191,7 +191,8 @@ async function underPressure (fastify, opts) {
     return {
       eventLoopDelay,
       rssBytes,
-      heapUsed
+      heapUsed,
+      eventLoopUtilizationVal
     }
   }
 

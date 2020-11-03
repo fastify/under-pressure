@@ -29,7 +29,8 @@ const fastify = require('fastify')()
 fastify.register(require('under-pressure'), {
   maxEventLoopDelay: 1000,
   maxHeapUsedBytes: 100000000,
-  maxRssBytes: 100000000
+  maxRssBytes: 100000000,
+  maxEventLoopUtilization:1
 })
 
 fastify.get('/', (req, reply) => {
@@ -66,13 +67,15 @@ You can also configure custom Error instance `under-pressure` will throw.
 })
 ```
 
-The default value for `maxEventLoopDelay`, `maxHeapUsedBytes` and `maxRssBytes` is `0`.  
+The default value for `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` is `0`.  
 If the value is `0` the check will not be performed.
+
+Since [`eventLoopUtilization`](https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_eventlooputilization_utilization1_utilization2) is only available in Node version 14.0.0 and 12.19.0 the check will be disbaled in other versions.
 
 Thanks to the encapsulation model of Fastify, you can selectively use this plugin in some subset of routes or even with different thresholds in different plugins.
 
 #### `memoryUsage`
-This plugin also exposes a function that will tell you the current values of `heapUsed`, `rssBytes` and `eventLoopDelay`.
+This plugin also exposes a function that will tell you the current values of `heapUsed`, `rssBytes`, `eventLoopDelay` and `eventLoopUtilizationVal`.
 ```js
 console.log(fastify.memoryUsage())
 ```
