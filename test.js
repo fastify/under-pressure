@@ -251,19 +251,21 @@ test('Custom error instance', t => {
 })
 
 test('memoryUsage name space', t => {
-  t.plan(8)
+  t.plan(9)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
     maxEventLoopDelay: 1000,
     maxHeapUsedBytes: 100000000,
-    maxRssBytes: 100000000
+    maxRssBytes: 100000000,
+    maxEventLoopUtilization: 0.85
   })
 
   fastify.get('/', (req, reply) => {
     t.true(fastify.memoryUsage().eventLoopDelay > 0)
     t.true(fastify.memoryUsage().heapUsed > 0)
     t.true(fastify.memoryUsage().rssBytes > 0)
+    t.true(fastify.memoryUsage().eventLoopUtilizationVal >= 0)
     reply.send({ hello: 'world' })
   })
 
@@ -293,7 +295,7 @@ test('memoryUsage name space', t => {
 })
 
 test('memoryUsage name space (without check)', t => {
-  t.plan(8)
+  t.plan(9)
 
   const fastify = Fastify()
   fastify.register(underPressure)
@@ -302,6 +304,7 @@ test('memoryUsage name space (without check)', t => {
     t.true(fastify.memoryUsage().eventLoopDelay > 0)
     t.true(fastify.memoryUsage().heapUsed > 0)
     t.true(fastify.memoryUsage().rssBytes > 0)
+    t.true(fastify.memoryUsage().eventLoopUtilizationVal >= 0)
     reply.send({ hello: 'world' })
   })
 
