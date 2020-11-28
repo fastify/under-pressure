@@ -39,7 +39,7 @@ async function underPressure (fastify, opts) {
   let lastCheck
   let histogram
   let elu
-  let eventLoopUtilizationVal = 0
+  let eventLoopUtilized = 0
 
   if (monitorEventLoopDelay) {
     histogram = monitorEventLoopDelay({ resolution })
@@ -139,9 +139,9 @@ async function underPressure (fastify, opts) {
 
   function updateEventLoopUtilization () {
     if (elu) {
-      eventLoopUtilizationVal = eventLoopUtilization(elu).utilization
+      eventLoopUtilized = eventLoopUtilization(elu).utilization
     } else {
-      eventLoopUtilizationVal = 0
+      eventLoopUtilized = 0
     }
   }
 
@@ -174,7 +174,7 @@ async function underPressure (fastify, opts) {
       return
     }
 
-    if (checkMaxEventLoopUtilization && eventLoopUtilizationVal > maxEventLoopUtilization) {
+    if (checkMaxEventLoopUtilization && eventLoopUtilized > maxEventLoopUtilization) {
       sendError(reply, next)
       return
     }
@@ -191,7 +191,8 @@ async function underPressure (fastify, opts) {
     return {
       eventLoopDelay,
       rssBytes,
-      heapUsed
+      heapUsed,
+      eventLoopUtilized
     }
   }
 
