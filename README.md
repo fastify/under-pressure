@@ -4,7 +4,7 @@
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)
 
 Measure process load with automatic handling of *"Service Unavailable"* plugin for Fastify.
-It can check `maxEventLoopDelay`, `maxHeapUsedBytes` and `maxRssBytes` values.
+It can check `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` values.
 You can also specify custom health check, to verify the status of
 external resources.
 
@@ -30,7 +30,7 @@ fastify.register(require('under-pressure'), {
   maxEventLoopDelay: 1000,
   maxHeapUsedBytes: 100000000,
   maxRssBytes: 100000000,
-  maxEventLoopUtilization:1
+  maxEventLoopUtilization:0.98
 })
 
 fastify.get('/', (req, reply) => {
@@ -75,7 +75,7 @@ Since [`eventLoopUtilization`](https://nodejs.org/api/perf_hooks.html#perf_hooks
 Thanks to the encapsulation model of Fastify, you can selectively use this plugin in some subset of routes or even with different thresholds in different plugins.
 
 #### `memoryUsage`
-This plugin also exposes a function that will tell you the current values of `heapUsed`, `rssBytes`, `eventLoopDelay` and `eventLoopUtilizationVal`.
+This plugin also exposes a function that will tell you the current values of `heapUsed`, `rssBytes`, `eventLoopDelay` and `eventLoopUtilized`.
 ```js
 console.log(fastify.memoryUsage())
 ```

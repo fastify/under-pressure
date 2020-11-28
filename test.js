@@ -265,7 +265,7 @@ test('memoryUsage name space', t => {
     t.true(fastify.memoryUsage().eventLoopDelay > 0)
     t.true(fastify.memoryUsage().heapUsed > 0)
     t.true(fastify.memoryUsage().rssBytes > 0)
-    t.true(fastify.memoryUsage().eventLoopUtilizationVal >= 0)
+    t.true(fastify.memoryUsage().eventLoopUtilized >= 0)
     reply.send({ hello: 'world' })
   })
 
@@ -304,7 +304,7 @@ test('memoryUsage name space (without check)', t => {
     t.true(fastify.memoryUsage().eventLoopDelay > 0)
     t.true(fastify.memoryUsage().heapUsed > 0)
     t.true(fastify.memoryUsage().rssBytes > 0)
-    t.true(fastify.memoryUsage().eventLoopUtilizationVal >= 0)
+    t.true(fastify.memoryUsage().eventLoopUtilized >= 0)
     reply.send({ hello: 'world' })
   })
 
