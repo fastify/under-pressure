@@ -42,7 +42,7 @@ fastify.listen(3000, err => {
   console.log(`server listening on ${fastify.server.address().port}`)
 })
 ```
-`under-pressure` will automatically handle for you the `Service Unavailable` error once one of the thresholds has been reached.  
+`under-pressure` will automatically handle for you the `Service Unavailable` error once one of the thresholds has been reached.
 You can configure the error message and the `Retry-After` header.
 ```js
 fastify.register(require('under-pressure'), {
@@ -60,14 +60,14 @@ You can also configure custom Error instance `under-pressure` will throw.
       Error.captureStackTrace(this, CustomError)
     }
   }
-  
+
   fastify.register(require('under-pressure'), {
   maxEventLoopDelay: 1000,
   customError: CustomError
 })
 ```
 
-The default value for `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` is `0`.  
+The default value for `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` is `0`.
 If the value is `0` the check will not be performed.
 
 Since [`eventLoopUtilization`](https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_eventlooputilization_utilization1_utilization2) is only available in Node version 14.0.0 and 12.19.0 the check will be disbaled in other versions.
@@ -81,7 +81,7 @@ console.log(fastify.memoryUsage())
 ```
 
 #### Status route
-If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example.
+If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. When the server is under pressure, it will return `{ status: 'not-ok' }`. This can be useful if you need to attach the server to an ELB on AWS for example.
 
 If you need the change the exposed route path, you can pass `{ exposeStatusRoute: '/alive' }` options.
 
@@ -104,6 +104,38 @@ fastify.register(require('under-pressure'), {
 })
 ```
 The above example will set the `logLevel` value for the `/status` route be `debug`.
+
+#### Status details route
+If needed you can pass `{ exposeStatusDetailsRoute: true }` and `under-pressure` will expose a `/status/details` route for you that sends back a JSON payload with the return of the `memoryUsage` function described above.
+
+If you need the change the exposed route path, you can pass `{ exposeStatusDetailsRoute: '/status-details' }` options.
+
+If you need to pass options to the status details route, such as logLevel or custom configuration you can pass an object,
+```js
+fastify.register(require('under-pressure'), {
+  maxEventLoopDelay: 1000,
+  exposeStatusDetailsRoute: {
+    routeOpts: {
+      logLevel: 'debug',
+      config: {
+        someAttr: 'value'
+      }
+    },
+    routeSchemaOpts: { // If you also want to set a custom route schema
+      hide: true
+    },
+    url: '/status-details' // If you also want to set a custom route path and pass options
+  }
+})
+```
+
+You can disable it under certain conditions, for instance:
+```js
+fastify.register(require('under-pressure'), {
+  maxEventLoopDelay: 1000,
+  exposeStatusDetailsRoute: !process.env.NODE_ENV === production
+})
+```
 
 #### Custom health checks
 If needed you can pass a custom `healthCheck` property which is an async function and `under-pressure` will allow you to check the status of other components of your service.
@@ -148,7 +180,7 @@ fastify.register(require('under-pressure'), {
 <a name="acknowledgements"></a>
 ## Acknowledgements
 
-This project is kindly sponsored by [LetzDoIt](http://www.letzdoitapp.com/).  
+This project is kindly sponsored by [LetzDoIt](http://www.letzdoitapp.com/).
 
 <a name="license"></a>
 ## License
