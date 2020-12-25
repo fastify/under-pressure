@@ -263,9 +263,9 @@ test('memoryUsage name space', t => {
 
   fastify.get('/', (req, reply) => {
     t.true(fastify.memoryUsage().eventLoopDelay > 0)
+    t.true(fastify.memoryUsage().eventLoopUtilized >= 0)
     t.true(fastify.memoryUsage().heapUsed > 0)
     t.true(fastify.memoryUsage().rssBytes > 0)
-    t.true(fastify.memoryUsage().eventLoopUtilized >= 0)
     reply.send({ hello: 'world' })
   })
 
@@ -302,9 +302,9 @@ test('memoryUsage name space (without check)', t => {
 
   fastify.get('/', (req, reply) => {
     t.true(fastify.memoryUsage().eventLoopDelay > 0)
+    t.true(fastify.memoryUsage().eventLoopUtilized >= 0)
     t.true(fastify.memoryUsage().heapUsed > 0)
     t.true(fastify.memoryUsage().rssBytes > 0)
-    t.true(fastify.memoryUsage().eventLoopUtilized >= 0)
     reply.send({ hello: 'world' })
   })
 
@@ -502,6 +502,170 @@ test('Expose status route with additional route options, route schema options an
 
   fastify.register(underPressure, {
     exposeStatusRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      },
+      routeSchemaOpts
+    }
+  })
+
+  fastify.ready()
+})
+
+test('Expose custom status details route', t => {
+  t.plan(5)
+
+  const fastify = Fastify()
+  t.tearDown(() => fastify.close())
+
+  fastify.register(underPressure, {
+    exposeStatusDetailsRoute: '/status-details'
+  })
+
+  fastify.inject({
+    url: '/status/details'
+  }, (err, response) => {
+    t.error(err)
+    t.strictEqual(response.statusCode, 404)
+  })
+
+  fastify.inject({
+    url: '/status-details'
+  }, (err, response) => {
+    t.error(err)
+    t.strictEqual(response.statusCode, 200)
+    t.match(JSON.parse(response.payload), {
+      eventLoopDelay: /[0-9]+/,
+      eventLoopUtilized: /[0-9]+/,
+      heapUsed: /[0-9]+/,
+      rssBytes: /[0-9]+/
+    })
+  })
+})
+
+test('Expose status details route with additional route options', t => {
+  t.plan(3)
+
+  const customConfig = {
+    customVal: 'someVal'
+  }
+  const fastify = Fastify()
+
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => block(500))
+    t.strictEqual(routeOptions.url, '/status-details')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
+    t.deepEqual(routeOptions.config, customConfig, 'config not set')
+    fastify.close()
+  })
+
+  fastify.register(underPressure, {
+    exposeStatusDetailsRoute: {
+      routeOpts: {
+        logLevel: 'silent',
+        config: customConfig
+      },
+      url: '/status-details'
+    }
+  })
+
+  fastify.ready()
+})
+
+test('Expose status details route with additional route options and default url', t => {
+  t.plan(2)
+
+  const fastify = Fastify()
+
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => block(500))
+    t.strictEqual(routeOptions.url, '/status/details')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
+    fastify.close()
+  })
+
+  fastify.register(underPressure, {
+    exposeStatusDetailsRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      }
+    }
+  })
+
+  fastify.ready()
+})
+
+test('Expose status details route with additional route options, route schema options', t => {
+  const routeSchemaOpts = { hide: true }
+
+  const fastify = Fastify()
+
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => block(500))
+    t.strictEqual(routeOptions.url, '/status/details')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
+    t.deepEqual(routeOptions.schema, Object.assign({}, routeSchemaOpts, {
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            eventLoopDelay: { type: 'number' },
+            eventLoopUtilized: { type: 'number' },
+            heapUsed: { type: 'number' },
+            rssBytes: { type: 'number' }
+          }
+        }
+      }
+    }), 'config not set')
+    fastify.close()
+    t.end()
+  })
+
+  fastify.register(underPressure, {
+    exposeStatusDetailsRoute: {
+      routeOpts: {
+        logLevel: 'silent'
+      },
+      routeSchemaOpts,
+      url: '/status/details'
+    }
+  })
+
+  fastify.ready()
+})
+
+test('Expose status details route with additional route options, route schema options and default url', t => {
+  const routeSchemaOpts = { hide: true }
+
+  const fastify = Fastify()
+
+  fastify.addHook('onRoute', (routeOptions) => {
+    fastify.server.unref()
+    process.nextTick(() => block(500))
+    t.strictEqual(routeOptions.url, '/status/details')
+    t.strictEqual(routeOptions.logLevel, 'silent', 'log level not set')
+    t.deepEqual(routeOptions.schema, Object.assign({}, routeSchemaOpts, {
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            eventLoopDelay: { type: 'number' },
+            eventLoopUtilized: { type: 'number' },
+            heapUsed: { type: 'number' },
+            rssBytes: { type: 'number' }
+          }
+        }
+      }
+    }), 'config not set')
+    fastify.close()
+    t.end()
+  })
+
+  fastify.register(underPressure, {
+    exposeStatusDetailsRoute: {
       routeOpts: {
         logLevel: 'silent'
       },
