@@ -81,7 +81,7 @@ async function underPressure (fastify, opts) {
   }
 
   fastify.decorate('memoryUsage', memoryUsage)
-  fastify.decorate('isUnderPressureError', false);
+  fastify.decorate('isUnderPressureError', false)
   fastify.addHook('onClose', onClose)
 
   opts.exposeStatusRoute = mapExposeStatusRoute(opts.exposeStatusRoute, '/status')
