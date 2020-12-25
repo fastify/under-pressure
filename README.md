@@ -43,6 +43,7 @@ fastify.listen(3000, err => {
 })
 ```
 `under-pressure` will automatically handle for you the `Service Unavailable` error once one of the thresholds has been reached.
+The status and status details routes will always return their corresponding payloads without regards of the thresholds.
 You can configure the error message and the `Retry-After` header.
 ```js
 fastify.register(require('under-pressure'), {
