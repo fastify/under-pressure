@@ -124,7 +124,7 @@ async function underPressure (fastify, opts) {
           }
         }
       }),
-      handler: onStatusMemoryUsage
+      handler: onStatusDetails
     })
   }
 
@@ -248,7 +248,7 @@ async function underPressure (fastify, opts) {
     return { status: 'ok' }
   }
 
-  async function onStatusMemoryUsage (req, reply) {
+  async function onStatusDetails () {
     return memoryUsage()
   }
 
