@@ -85,7 +85,7 @@ async function underPressure (fastify, opts) {
   fastify.addHook('onClose', onClose)
 
   opts.exposeStatusRoute = mapExposeStatusRoute(opts.exposeStatusRoute, '/status')
-  opts.exposeStatusMemoryUsageRoute = mapExposeStatusRoute(opts.exposeStatusMemoryUsageRoute, '/status/memory-usage')
+  opts.exposeStatusDetailsRoute = mapExposeStatusRoute(opts.exposeStatusDetailsRoute, '/status/details')
 
   if (opts.exposeStatusRoute) {
     fastify.route({
@@ -106,10 +106,10 @@ async function underPressure (fastify, opts) {
     })
   }
 
-  if (opts.exposeStatusMemoryUsageRoute) {
+  if (opts.exposeStatusDetailsRoute) {
     fastify.route({
-      ...opts.exposeStatusMemoryUsageRoute.routeOpts || {},
-      url: opts.exposeStatusMemoryUsageRoute.url,
+      ...opts.exposeStatusDetailsRoute.routeOpts || {},
+      url: opts.exposeStatusDetailsRoute.url,
       method: 'GET',
       schema: Object.assign({}, opts.exposeStatusRoute.routeSchemaOpts, {
         response: {
@@ -201,7 +201,7 @@ async function underPressure (fastify, opts) {
     if (
       [
         opts.exposeStatusRoute.url,
-        opts.exposeStatusMemoryUsageRoute.url
+        opts.exposeStatusDetailsRoute.url
       ].filter(Boolean).includes(req.url)
     ) {
       return next()
