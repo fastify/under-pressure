@@ -248,7 +248,7 @@ async function underPressure (fastify, opts) {
     return { status: 'ok' }
   }
 
-  async function onStatusDetails () {
+  function onStatusDetails () {
     return memoryUsage()
   }
 
