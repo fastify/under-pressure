@@ -15,6 +15,8 @@ function getSampleInterval (value, eventLoopResolution) {
   return monitorEventLoopDelay ? Math.max(eventLoopResolution, sampleInterval) : sampleInterval
 }
 
+const isUnderPressureError = Symbol('isUnderPressureError')
+
 async function underPressure (fastify, opts) {
   opts = opts || {}
 
@@ -81,13 +83,15 @@ async function underPressure (fastify, opts) {
   }
 
   fastify.decorate('memoryUsage', memoryUsage)
+  fastify.decorate(isUnderPressureError, false)
   fastify.addHook('onClose', onClose)
 
-  opts.exposeStatusRoute = mapExposeStatusRoute(opts.exposeStatusRoute)
+  opts.exposeStatusRoute = mapExposeStatusRoute(opts.exposeStatusRoute, '/status')
+  opts.exposeStatusDetailsRoute = mapExposeStatusRoute(opts.exposeStatusDetailsRoute, '/status/details')
 
   if (opts.exposeStatusRoute) {
     fastify.route({
-      ...opts.exposeStatusRoute.routeOpts,
+      ...opts.exposeStatusRoute.routeOpts || {},
       url: opts.exposeStatusRoute.url,
       method: 'GET',
       schema: Object.assign({}, opts.exposeStatusRoute.routeSchemaOpts, {
@@ -104,6 +108,28 @@ async function underPressure (fastify, opts) {
     })
   }
 
+  if (opts.exposeStatusDetailsRoute) {
+    fastify.route({
+      ...opts.exposeStatusDetailsRoute.routeOpts || {},
+      url: opts.exposeStatusDetailsRoute.url,
+      method: 'GET',
+      schema: Object.assign({}, opts.exposeStatusDetailsRoute.routeSchemaOpts, {
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              eventLoopDelay: { type: 'number' },
+              eventLoopUtilized: { type: 'number' },
+              heapUsed: { type: 'number' },
+              rssBytes: { type: 'number' }
+            }
+          }
+        }
+      }),
+      handler: onStatusDetails
+    })
+  }
+
   if (checkMaxEventLoopUtilization === false && checkMaxEventLoopDelay === false &&
     checkMaxHeapUsedBytes === false &&
     checkMaxRssBytes === false &&
@@ -116,14 +142,14 @@ async function underPressure (fastify, opts) {
 
   fastify.addHook('onRequest', onRequest)
 
-  function mapExposeStatusRoute (opts) {
+  function mapExposeStatusRoute (opts, defaultUrl) {
     if (!opts) {
       return false
     }
     if (typeof opts === 'string') {
       return { url: opts }
     }
-    return Object.assign({ url: '/status' }, opts)
+    return Object.assign({ url: defaultUrl }, opts)
   }
 
   function updateEventLoopDelay () {
@@ -155,31 +181,39 @@ async function underPressure (fastify, opts) {
 
   function onRequest (req, reply, next) {
     if (checkMaxEventLoopDelay && eventLoopDelay > maxEventLoopDelay) {
-      sendError(reply, next)
-      return
+      req[isUnderPressureError] = true
     }
 
     if (checkMaxHeapUsedBytes && heapUsed > maxHeapUsedBytes) {
-      sendError(reply, next)
-      return
+      req[isUnderPressureError] = true
     }
 
     if (checkMaxRssBytes && rssBytes > maxRssBytes) {
-      sendError(reply, next)
-      return
+      req[isUnderPressureError] = true
     }
 
     if (!externalsHealthy) {
-      sendError(reply, next)
-      return
+      req[isUnderPressureError] = true
     }
 
     if (checkMaxEventLoopUtilization && eventLoopUtilized > maxEventLoopUtilization) {
-      sendError(reply, next)
-      return
+      req[isUnderPressureError] = true
     }
 
-    next()
+    if (
+      [
+        opts.exposeStatusRoute.url,
+        opts.exposeStatusDetailsRoute.url
+      ].includes(req.url)
+    ) {
+      return next()
+    }
+
+    if (req[isUnderPressureError]) {
+      sendError(reply, next)
+    } else {
+      next()
+    }
   }
 
   function sendError (reply, next) {
@@ -190,9 +224,9 @@ async function underPressure (fastify, opts) {
   function memoryUsage () {
     return {
       eventLoopDelay,
-      rssBytes,
+      eventLoopUtilized,
       heapUsed,
-      eventLoopUtilized
+      rssBytes
     }
   }
 
@@ -210,7 +244,14 @@ async function underPressure (fastify, opts) {
         throw underPressureError
       }
     }
+    if (req[isUnderPressureError]) {
+      return { status: 'not-ok' }
+    }
     return { status: 'ok' }
+  }
+
+  function onStatusDetails () {
+    return memoryUsage()
   }
 
   function onClose (fastify, done) {
