@@ -15,6 +15,8 @@ function getSampleInterval (value, eventLoopResolution) {
   return monitorEventLoopDelay ? Math.max(eventLoopResolution, sampleInterval) : sampleInterval
 }
 
+const isUnderPressureError = Symbol('isUnderPressureError')
+
 async function underPressure (fastify, opts) {
   opts = opts || {}
 
@@ -81,7 +83,7 @@ async function underPressure (fastify, opts) {
   }
 
   fastify.decorate('memoryUsage', memoryUsage)
-  fastify.decorate('isUnderPressureError', false)
+  fastify.decorate(isUnderPressureError, false)
   fastify.addHook('onClose', onClose)
 
   opts.exposeStatusRoute = mapExposeStatusRoute(opts.exposeStatusRoute, '/status')
@@ -179,35 +181,35 @@ async function underPressure (fastify, opts) {
 
   function onRequest (req, reply, next) {
     if (checkMaxEventLoopDelay && eventLoopDelay > maxEventLoopDelay) {
-      req.isUnderPressureError = true
+      req[isUnderPressureError] = true
     }
 
     if (checkMaxHeapUsedBytes && heapUsed > maxHeapUsedBytes) {
-      req.isUnderPressureError = true
+      req[isUnderPressureError] = true
     }
 
     if (checkMaxRssBytes && rssBytes > maxRssBytes) {
-      req.isUnderPressureError = true
+      req[isUnderPressureError] = true
     }
 
     if (!externalsHealthy) {
-      req.isUnderPressureError = true
+      req[isUnderPressureError] = true
     }
 
     if (checkMaxEventLoopUtilization && eventLoopUtilized > maxEventLoopUtilization) {
-      req.isUnderPressureError = true
+      req[isUnderPressureError] = true
     }
 
     if (
       [
         opts.exposeStatusRoute.url,
         opts.exposeStatusDetailsRoute.url
-      ].filter(Boolean).includes(req.url)
+      ].includes(req.url)
     ) {
       return next()
     }
 
-    if (req.isUnderPressureError) {
+    if (req[isUnderPressureError]) {
       sendError(reply, next)
     } else {
       next()
@@ -242,7 +244,7 @@ async function underPressure (fastify, opts) {
         throw underPressureError
       }
     }
-    if (req.isUnderPressureError) {
+    if (req[isUnderPressureError]) {
       return { status: 'not-ok' }
     }
     return { status: 'ok' }
