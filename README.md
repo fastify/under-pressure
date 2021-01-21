@@ -80,6 +80,40 @@ This plugin also exposes a function that will tell you the current values of `he
 console.log(fastify.memoryUsage())
 ```
 
+#### Pressure Handler
+
+You can provide a pressure handler in the options to handle the pressure errors. The advantage is that you know for which reason the error occured. And the request can be handled as if nothing happened.
+
+```js
+const fastify = require('fastify')()
+const underPressure = require('under-pressure')()
+
+fastify.register(underPressure, {
+  maxHeapUsedBytes: 100000000,
+  maxRssBytes: 100000000,
+  pressureHandler: (req, rep, type, value) => {
+    if (type === underPressure.TYPE_HEAP_USED_BYTES) {
+      fastify.log.warn(`too many heap bytes used: ${value}`)
+    } else if (type === underPressure.TYPE_RSS_BYTES) {
+      fastify.log.warn(`too many rss bytes used: ${value}`)
+    }
+
+    rep.send('out of memory') // if you omit this line, the request will be handled normally
+  }
+})
+```
+
+It is possible as well to return a Promise which will call `reply.send` (or something else).
+
+```js
+fastify.register(underPressure, {
+  maxHeapUsedBytes: 100000000,
+  pressureHandler: (req, rep, type, value) => {
+    return getPromise().then(() => reply.send({hello: 'world'}))
+  }
+})
+```
+
 #### Status route
 If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example.
 

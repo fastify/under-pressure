@@ -730,6 +730,215 @@ test('Custom health check', t => {
   })
 })
 
+test('Pressure handler', t => {
+  t.plan(8)
+
+  t.test('health check', t => {
+    t.plan(3)
+    const fastify = Fastify()
+
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: (req, rep, type, value) => {
+        t.equal(type, underPressure.TYPE_HEALTH_CHECK)
+        t.equal(value, undefined)
+        rep.send('B')
+      }
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    fastify.inject().get('/').end().then(res => t.equal(res.body, 'B'))
+  })
+
+  t.test('health check - delayed handling with promise success', t => {
+    t.plan(1)
+    const fastify = Fastify()
+
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: (req, rep, type, value) => new Promise((resolve, reject) => {
+        setTimeout(() => {
+          rep.send('B')
+          resolve()
+        }, 250)
+      })
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    fastify.inject().get('/').end().then(res => t.equal(res.body, 'B'))
+  })
+
+  t.test('health check - delayed handling with promise error', t => {
+    t.plan(2)
+    const fastify = Fastify()
+
+    const errorMessage = 'promiseError'
+
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: (req, rep, type, value) => new Promise((resolve, reject) => {
+        setTimeout(() => {
+          reject(new Error(errorMessage))
+        }, 250)
+      })
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    fastify.inject().get('/').end().then(res => t.equal(res.statusCode, 500) && t.equal(JSON.parse(res.body).message, errorMessage))
+  })
+
+  t.test('health check - no handling', t => {
+    t.plan(1)
+    const fastify = Fastify()
+
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: (req, rep, type, value) => {}
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    fastify.inject().get('/').end().then(res => t.equal(res.body, 'A'))
+  })
+
+  t.test('event loop delay', t => {
+    t.plan(5)
+    const fastify = Fastify()
+
+    fastify.register(underPressure, {
+      maxEventLoopDelay: 1,
+      pressureHandler: (req, rep, type, value) => {
+        t.equal(type, underPressure.TYPE_EVENT_LOOP_DELAY)
+        t.ok(value > 1)
+        rep.send('B')
+      }
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    fastify.listen(0, async (err, address) => {
+      t.error(err)
+      if (monitorEventLoopDelay) {
+        await wait(500)
+      }
+      process.nextTick(() => block(1000))
+      fastify.server.unref()
+
+      sget({
+        method: 'GET',
+        url: address + '/'
+      }, (err, response, body) => {
+        t.error(err)
+        t.equal(body.toString(), 'B')
+        fastify.close()
+      })
+    })
+  })
+
+  t.test('heap bytes', t => {
+    t.plan(5)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      maxHeapUsedBytes: 1,
+      pressureHandler: (req, rep, type, value) => {
+        t.equal(type, underPressure.TYPE_HEAP_USED_BYTES)
+        t.ok(value > 1)
+        rep.send('B')
+      }
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+
+      sget({
+        method: 'GET',
+        url: address
+      }, (err, response, body) => {
+        t.error(err)
+        t.equal(body.toString(), 'B')
+        fastify.close()
+      })
+    })
+  })
+
+  t.test('rss bytes', t => {
+    t.plan(5)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      maxRssBytes: 1,
+      pressureHandler: (req, rep, type, value) => {
+        t.equal(type, underPressure.TYPE_RSS_BYTES)
+        t.ok(value > 1)
+        rep.send('B')
+      }
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+
+      sget({
+        method: 'GET',
+        url: address
+      }, (err, response, body) => {
+        t.error(err)
+        t.equal(body.toString(), 'B')
+        fastify.close()
+      })
+    })
+  })
+
+  t.test('event loop utilization', t => {
+    t.plan(5)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      maxEventLoopUtilization: 0.01,
+      pressureHandler: (req, rep, type, value) => {
+        t.equal(type, underPressure.TYPE_EVENT_LOOP_UTILIZATION)
+        t.ok(value > 0.01 && value <= 1)
+        rep.send('B')
+      }
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      process.nextTick(() => block(1000))
+
+      sget({
+        method: 'GET',
+        url: address
+      }, (err, response, body) => {
+        t.error(err)
+        t.equal(body.toString(), 'B')
+        fastify.close()
+      })
+    })
+  })
+})
+
 function block (msec) {
   const start = Date.now()
   /* eslint-disable no-empty */
