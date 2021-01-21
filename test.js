@@ -906,7 +906,7 @@ test('Pressure handler', t => {
     })
   })
 
-  t.test('event loop utilization', t => {
+  t.test('event loop utilization', { skip: !isSupportedVersion }, t => {
     t.plan(5)
 
     const fastify = Fastify()
