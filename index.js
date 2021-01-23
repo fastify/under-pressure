@@ -193,7 +193,7 @@ async function underPressure (fastify, opts) {
     if (typeof pressureHandler === 'function') {
       const result = pressureHandler(req, reply, type, value)
       if (result instanceof Promise) {
-        result.then(() => next()).catch(next)
+        result.then(() => next()), next)
       } else {
         next()
       }
