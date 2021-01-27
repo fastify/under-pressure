@@ -733,7 +733,7 @@ test('Custom health check', t => {
 test('Pressure handler', t => {
   t.plan(8)
 
-  t.test('health check', t => {
+  t.test('health check', async t => {
     t.plan(3)
     const fastify = Fastify()
 
@@ -749,30 +749,28 @@ test('Pressure handler', t => {
 
     fastify.get('/', (req, rep) => rep.send('A'))
 
-    fastify.inject().get('/').end().then(res => t.equal(res.body, 'B'))
+    t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
 
-  t.test('health check - delayed handling with promise success', t => {
+  t.test('health check - delayed handling with promise success', async t => {
     t.plan(1)
     const fastify = Fastify()
 
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
-      pressureHandler: (req, rep, type, value) => new Promise((resolve, reject) => {
-        setTimeout(() => {
-          rep.send('B')
-          resolve()
-        }, 250)
-      })
+      pressureHandler: async (req, rep, type, value) => {
+        await wait(250)
+        rep.send('B')
+      }
     })
 
     fastify.get('/', (req, rep) => rep.send('A'))
 
-    fastify.inject().get('/').end().then(res => t.equal(res.body, 'B'))
+    t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
 
-  t.test('health check - delayed handling with promise error', t => {
+  t.test('health check - delayed handling with promise error', async t => {
     t.plan(2)
     const fastify = Fastify()
 
@@ -781,19 +779,20 @@ test('Pressure handler', t => {
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
-      pressureHandler: (req, rep, type, value) => new Promise((resolve, reject) => {
-        setTimeout(() => {
-          reject(new Error(errorMessage))
-        }, 250)
-      })
+      pressureHandler: async (req, rep, type, value) => {
+        await wait(250)
+        throw new Error(errorMessage)
+      }
     })
 
     fastify.get('/', (req, rep) => rep.send('A'))
 
-    fastify.inject().get('/').end().then(res => t.equal(res.statusCode, 500) && t.equal(JSON.parse(res.body).message, errorMessage))
+    const response = await fastify.inject().get('/').end()
+    t.equal(response.statusCode, 500)
+    t.equal(JSON.parse(response.body).message, errorMessage)
   })
 
-  t.test('health check - no handling', t => {
+  t.test('health check - no handling', async t => {
     t.plan(1)
     const fastify = Fastify()
 
@@ -805,7 +804,7 @@ test('Pressure handler', t => {
 
     fastify.get('/', (req, rep) => rep.send('A'))
 
-    fastify.inject().get('/').end().then(res => t.equal(res.body, 'A'))
+    t.equal((await fastify.inject().get('/').end()).body, 'A')
   })
 
   t.test('event loop delay', t => {
@@ -919,7 +918,7 @@ test('Pressure handler', t => {
       }
     })
 
-    fastify.get('/', (req, rep) => rep.send('A'))
+    fastify.get('/', async (req, rep) => rep.send('A'))
 
     fastify.listen(0, (err, address) => {
       t.error(err)

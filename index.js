@@ -193,7 +193,7 @@ async function underPressure (fastify, opts) {
     if (typeof pressureHandler === 'function') {
       const result = pressureHandler(req, reply, type, value)
       if (result instanceof Promise) {
-        result.then(() => next()), next)
+        result.then(() => next(), next)
       } else {
         next()
       }
@@ -246,4 +246,8 @@ module.exports = fp(underPressure, {
   name: 'under-pressure'
 })
 
-Object.assign(module.exports, { TYPE_EVENT_LOOP_DELAY, TYPE_EVENT_LOOP_UTILIZATION, TYPE_HEALTH_CHECK, TYPE_HEAP_USED_BYTES, TYPE_RSS_BYTES })
+module.exports.TYPE_EVENT_LOOP_DELAY = TYPE_EVENT_LOOP_DELAY
+module.exports.TYPE_EVENT_LOOP_UTILIZATION = TYPE_EVENT_LOOP_UTILIZATION
+module.exports.TYPE_HEALTH_CHECK = TYPE_HEALTH_CHECK
+module.exports.TYPE_HEAP_USED_BYTES = TYPE_HEAP_USED_BYTES
+module.exports.TYPE_RSS_BYTES = TYPE_RSS_BYTES
