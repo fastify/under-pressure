@@ -844,7 +844,7 @@ test('Pressure handler', t => {
       if (monitorEventLoopDelay) {
         await wait(500)
       }
-      process.nextTick(() => block(1000))
+      process.nextTick(() => block(1500))
 
       sget({
         method: 'GET',
