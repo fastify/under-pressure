@@ -822,7 +822,7 @@ test('Pressure handler', t => {
     t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
 
-  t.test('event loop delay', t => {
+  t.test('event loop delay', { skip: !monitorEventLoopDelay }, t => {
     t.plan(5)
     const fastify = Fastify()
 
@@ -841,9 +841,7 @@ test('Pressure handler', t => {
       t.error(err)
       fastify.server.unref()
 
-      if (monitorEventLoopDelay) {
-        await wait(500)
-      }
+      await wait(500)
       process.nextTick(() => block(1500))
 
       sget({
