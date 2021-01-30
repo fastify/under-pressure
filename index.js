@@ -194,8 +194,10 @@ async function underPressure (fastify, opts) {
       const result = pressureHandler(req, reply, type, value)
       if (result instanceof Promise) {
         result.then(() => next(), next)
-      } else {
+      } else if (result == null) {
         next()
+      } else {
+        reply.send(result)
       }
     } else {
       reply.status(SERVICE_UNAVAILABLE).header('Retry-After', retryAfter)

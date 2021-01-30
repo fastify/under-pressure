@@ -114,6 +114,8 @@ fastify.register(underPressure, {
 })
 ```
 
+Any other return value than a promise or nullish will be sent to client with `reply.send`.
+
 #### Status route
 If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example.
 

@@ -731,7 +731,7 @@ test('Custom health check', t => {
 })
 
 test('Pressure handler', t => {
-  t.plan(8)
+  t.plan(9)
 
   t.test('health check', async t => {
     t.plan(3)
@@ -807,6 +807,21 @@ test('Pressure handler', t => {
     t.equal((await fastify.inject().get('/').end()).body, 'A')
   })
 
+  t.test('health check - return response', async t => {
+    t.plan(1)
+    const fastify = Fastify()
+
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: (req, rep, type, value) => 'B'
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    t.equal((await fastify.inject().get('/').end()).body, 'B')
+  })
+
   t.test('event loop delay', t => {
     t.plan(5)
     const fastify = Fastify()
@@ -824,11 +839,12 @@ test('Pressure handler', t => {
 
     fastify.listen(0, async (err, address) => {
       t.error(err)
+      fastify.server.unref()
+
       if (monitorEventLoopDelay) {
         await wait(500)
       }
       process.nextTick(() => block(1000))
-      fastify.server.unref()
 
       sget({
         method: 'GET',
