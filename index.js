@@ -95,9 +95,8 @@ async function underPressure (fastify, opts) {
           200: {
             type: 'object',
             properties: Object.assign(
-              {},
-              opts.exposeStatusRoute.routeResponseSchemaOpts,
-              { status: { type: 'string' } }
+              { status: { type: 'string' } },
+              opts.exposeStatusRoute.routeResponseSchemaOpts
             )
           }
         }
