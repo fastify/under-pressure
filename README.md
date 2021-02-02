@@ -42,7 +42,7 @@ fastify.listen(3000, err => {
   console.log(`server listening on ${fastify.server.address().port}`)
 })
 ```
-`under-pressure` will automatically handle for you the `Service Unavailable` error once one of the thresholds has been reached.  
+`under-pressure` will automatically handle for you the `Service Unavailable` error once one of the thresholds has been reached.
 You can configure the error message and the `Retry-After` header.
 ```js
 fastify.register(require('under-pressure'), {
@@ -60,14 +60,14 @@ You can also configure custom Error instance `under-pressure` will throw.
       Error.captureStackTrace(this, CustomError)
     }
   }
-  
+
   fastify.register(require('under-pressure'), {
   maxEventLoopDelay: 1000,
   customError: CustomError
 })
 ```
 
-The default value for `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` is `0`.  
+The default value for `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` is `0`.
 If the value is `0` the check will not be performed.
 
 Since [`eventLoopUtilization`](https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_eventlooputilization_utilization1_utilization2) is only available in Node version 14.0.0 and 12.19.0 the check will be disbaled in other versions.
@@ -105,10 +105,30 @@ fastify.register(require('under-pressure'), {
 ```
 The above example will set the `logLevel` value for the `/status` route be `debug`.
 
+If you need to return other informations in the response, you can return an object from `healthCheck` function (see next paragraph) and use the `routeResponseSchemaOpts` property to describe your custom response schema (**note**: `status` will always be present in the response)
+
+```js
+fastify.register(underPressure, {
+  ...
+  exposeStatusRoute: {
+    routeResponseSchemaOpts: {
+      extraValue: { type: 'string' },
+      // ...
+    }
+  },
+  healthCheck: async () => {
+    return {
+      extraValue: await getExtraValue(),
+      // ...
+    }
+  },
+}
+```
+
 #### Custom health checks
 If needed you can pass a custom `healthCheck` property which is an async function and `under-pressure` will allow you to check the status of other components of your service.
 
-This function should return a promise which resolves to a boolean value. The `healthCheck` function can be called either:
+This function should return a promise which resolves to a boolean value or to an object. The `healthCheck` function can be called either:
 
 * every X milliseconds, the time can be
   configured with the `healthCheckInterval` option.
@@ -148,7 +168,7 @@ fastify.register(require('under-pressure'), {
 <a name="acknowledgements"></a>
 ## Acknowledgements
 
-This project is kindly sponsored by [LetzDoIt](http://www.letzdoitapp.com/).  
+This project is kindly sponsored by [LetzDoIt](http://www.letzdoitapp.com/).
 
 <a name="license"></a>
 ## License

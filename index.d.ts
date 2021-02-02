@@ -13,7 +13,7 @@ declare namespace underPressure {
     healthCheck?: () => Promise<boolean>;
     healthCheckInterval?: number;
     sampleInterval?: number;
-    exposeStatusRoute?: boolean | string | { routeOpts: object; routeSchemaOpts?: object; url?: string };
+    exposeStatusRoute?: boolean | string | { routeOpts: object; routeSchemaOpts?: object; routeResponseSchemaOpts?: object; url?: string };
     customError?: Error;
   }
 }
