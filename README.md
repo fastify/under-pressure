@@ -105,7 +105,7 @@ fastify.register(require('under-pressure'), {
 ```
 The above example will set the `logLevel` value for the `/status` route be `debug`.
 
-If you need to return other informations in the response, you can return an object from `healthCheck` function (see next paragraph) and use the `routeResponseSchemaOpts` property to describe your custom response schema (**note**: `status` will always be present in the response)
+If you need to return other information in the response, you can return an object from the `healthCheck` function (see next paragraph) and use the `routeResponseSchemaOpts` property to describe your custom response schema (**note**: `status` will always be present in the response)
 
 ```js
 fastify.register(underPressure, {
