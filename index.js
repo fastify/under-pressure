@@ -198,7 +198,7 @@ async function underPressure (fastify, opts) {
   }
 
   async function onStatus (req, reply) {
-    let response = { status: 'ok' }
+    const response = { status: 'ok' }
     if (healthCheck) {
       try {
         const checkResult = await healthCheck()
@@ -208,11 +208,9 @@ async function underPressure (fastify, opts) {
           throw underPressureError
         }
 
-        if (typeof checkResult === 'object' && checkResult !== null && !Array.isArray(checkResult)) {
-          response = {
-            ...response,
-            ...checkResult
-          }
+        return {
+          ...response,
+          ...checkResult
         }
       } catch (err) {
         req.log.error({ err }, 'external health check failed with error')
