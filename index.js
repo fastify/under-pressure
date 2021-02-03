@@ -198,7 +198,7 @@ async function underPressure (fastify, opts) {
   }
 
   async function onStatus (req, reply) {
-    const response = { status: 'ok' }
+    const okResponse = { status: 'ok' }
     if (healthCheck) {
       try {
         const checkResult = await healthCheck()
@@ -208,10 +208,7 @@ async function underPressure (fastify, opts) {
           throw underPressureError
         }
 
-        return {
-          ...response,
-          ...checkResult
-        }
+        return Object.assign(okResponse, checkResult)
       } catch (err) {
         req.log.error({ err }, 'external health check failed with error')
         reply.status(SERVICE_UNAVAILABLE).header('Retry-After', retryAfter)
@@ -219,7 +216,7 @@ async function underPressure (fastify, opts) {
       }
     }
 
-    return response
+    return okResponse
   }
 
   function onClose (fastify, done) {
