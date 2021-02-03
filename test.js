@@ -513,7 +513,7 @@ test('Expose status route with additional route options, route schema options an
 })
 
 test('Custom health check', t => {
-  t.plan(6)
+  t.plan(7)
 
   t.test('should return 503 when custom health check returns false for healthCheck', t => {
     t.plan(5)
@@ -723,6 +723,47 @@ test('Custom health check', t => {
           error: 'Service Unavailable',
           message: 'Service Unavailable',
           statusCode: 503
+        })
+        fastify.close()
+      })
+    })
+  })
+
+  t.test('should return custom response if returned from the healthCheck function', t => {
+    t.plan(6)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      healthCheck: async () => {
+        t.pass('healthcheck called')
+        return {
+          some: 'value',
+          anotherValue: 'another',
+          status: 'overrride status'
+        }
+      },
+      exposeStatusRoute: {
+        routeResponseSchemaOpts: {
+          some: { type: 'string' },
+          anotherValue: { type: 'string' }
+        }
+      }
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      sget({
+        method: 'GET',
+        url: address + '/status'
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 200)
+        t.deepEqual(JSON.parse(body), {
+          some: 'value',
+          anotherValue: 'another',
+          status: 'overrride status'
         })
         fastify.close()
       })
