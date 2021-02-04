@@ -22,7 +22,7 @@ declare namespace underPressure {
     healthCheckInterval?: number;
     pressureHandler?: (request: FastifyRequest, reply: FastifyReply, type: string, value: number | undefined) => Promise<void> | void;
     sampleInterval?: number;
-    exposeStatusRoute?: boolean | string | { routeOpts: object; routeSchemaOpts?: object; url?: string };
+    exposeStatusRoute?: boolean | string | { routeOpts: object; routeSchemaOpts?: object; routeResponseSchemaOpts?: object; url?: string };
     customError?: Error;
   }
 }
