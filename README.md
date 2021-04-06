@@ -1,7 +1,9 @@
 # under-pressure
 
-[![Build Status](https://img.shields.io/github/workflow/status/fastify/under-pressure/CI)](https://github.com/fastify/under-pressure/actions)
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)
+![CI](https://github.com/fastify/under-pressure/workflows/CI/badge.svg)
+[![NPM version](https://img.shields.io/npm/v/under-pressure.svg?style=flat)](https://www.npmjs.com/package/under-pressure)
+[![Known Vulnerabilities](https://snyk.io/test/github/fastify/under-pressure/badge.svg)](https://snyk.io/test/github/fastify/under-pressure)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
 
 Measure process load with automatic handling of *"Service Unavailable"* plugin for Fastify.
 It can check `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` values.
@@ -70,7 +72,7 @@ You can also configure custom Error instance `under-pressure` will throw.
 The default value for `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` is `0`.
 If the value is `0` the check will not be performed.
 
-Since [`eventLoopUtilization`](https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_eventlooputilization_utilization1_utilization2) is only available in Node version 14.0.0 and 12.19.0 the check will be disbaled in other versions.
+Since [`eventLoopUtilization`](https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_eventlooputilization_utilization1_utilization2) is only available in Node version 14.0.0 and 12.19.0 the check will be disabled in other versions.
 
 Thanks to the encapsulation model of Fastify, you can selectively use this plugin in some subset of routes or even with different thresholds in different plugins.
 
@@ -82,7 +84,7 @@ console.log(fastify.memoryUsage())
 
 #### Pressure Handler
 
-You can provide a pressure handler in the options to handle the pressure errors. The advantage is that you know for which reason the error occured. And the request can be handled as if nothing happened.
+You can provide a pressure handler in the options to handle the pressure errors. The advantage is that you know why the error occurred. Moreover, the request can be handled as if nothing happened.
 
 ```js
 const fastify = require('fastify')()
@@ -103,7 +105,7 @@ fastify.register(underPressure, {
 })
 ```
 
-It is possible as well to return a Promise which will call `reply.send` (or something else).
+It is possible as well to return a Promise that will call `reply.send` (or something else).
 
 ```js
 fastify.register(underPressure, {
@@ -162,9 +164,9 @@ fastify.register(underPressure, {
 ```
 
 #### Custom health checks
-If needed you can pass a custom `healthCheck` property which is an async function and `under-pressure` will allow you to check the status of other components of your service.
+If needed you can pass a custom `healthCheck` property, which is an async function, and `under-pressure` will allow you to check the status of other components of your service.
 
-This function should return a promise which resolves to a boolean value or to an object. The `healthCheck` function can be called either:
+This function should return a promise that resolves to a boolean value or to an object. The `healthCheck` function can be called either:
 
 * every X milliseconds, the time can be
   configured with the `healthCheckInterval` option.
@@ -189,7 +191,7 @@ fastify.register(require('under-pressure'), {
 
 You can set a custom value for sampling the metrics returned by `memoryUsage` using the `sampleInterval` option, which accepts a number that represents the interval in milliseconds.
 
-The default value is different depending on which Node version is used. On version 8 and 10 it is `5`, while on version 11.10.0 and up it is `1000`. This difference is due to the fact that from version 11.10.0 the event loop delay can be sampled with [`monitorEventLoopDelay`](https://nodejs.org/docs/latest-v12.x/api/perf_hooks.html#perf_hooks_perf_hooks_monitoreventloopdelay_options) and this allows to increase the interval value.
+The default value is different depending on which Node version is used. In version 8 and 10 it is `5`, while on version 11.10.0 and up it is `1000`. This difference is because from version 11.10.0 the event loop delay can be sampled with [`monitorEventLoopDelay`](https://nodejs.org/docs/latest-v12.x/api/perf_hooks.html#perf_hooks_perf_hooks_monitoreventloopdelay_options) and this allows to increase the interval value.
 
 ```js
 const fastify = require('fastify')()
@@ -204,7 +206,7 @@ fastify.register(require('under-pressure'), {
 <a name="acknowledgements"></a>
 ## Acknowledgements
 
-This project is kindly sponsored by [LetzDoIt](http://www.letzdoitapp.com/).
+This project is kindly sponsored by [LetzDoIt](https://www.letzdoitapp.com/).
 
 <a name="license"></a>
 ## License
