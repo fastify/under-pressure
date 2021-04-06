@@ -206,7 +206,7 @@ fastify.register(require('under-pressure'), {
 <a name="acknowledgements"></a>
 ## Acknowledgements
 
-This project is kindly sponsored by [LetzDoIt](http://www.letzdoitapp.com/).
+This project is kindly sponsored by [LetzDoIt](https://www.letzdoitapp.com/).
 
 <a name="license"></a>
 ## License
