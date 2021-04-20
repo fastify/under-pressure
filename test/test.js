@@ -40,9 +40,9 @@ test('Should return 503 on maxEventLoopDelay', t => {
       url: address
     }, (err, response, body) => {
       t.error(err)
-      t.strictEqual(response.statusCode, 503)
-      t.strictEqual(response.headers['retry-after'], '10')
-      t.deepEqual(JSON.parse(body), {
+      t.equal(response.statusCode, 503)
+      t.equal(response.headers['retry-after'], '10')
+      t.same(JSON.parse(body), {
         code: 'FST_UNDER_PRESSURE',
         error: 'Service Unavailable',
         message: 'Service Unavailable',
@@ -77,9 +77,9 @@ test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion
       url: address
     }, (err, response, body) => {
       t.error(err)
-      t.strictEqual(response.statusCode, 503)
-      t.strictEqual(response.headers['retry-after'], '10')
-      t.deepEqual(JSON.parse(body), {
+      t.equal(response.statusCode, 503)
+      t.equal(response.headers['retry-after'], '10')
+      t.same(JSON.parse(body), {
         code: 'FST_UNDER_PRESSURE',
         error: 'Service Unavailable',
         message: 'Service Unavailable',
@@ -113,9 +113,9 @@ test('Should return 503 on maxHeapUsedBytes', t => {
       url: address
     }, (err, response, body) => {
       t.error(err)
-      t.strictEqual(response.statusCode, 503)
-      t.strictEqual(response.headers['retry-after'], '10')
-      t.deepEqual(JSON.parse(body), {
+      t.equal(response.statusCode, 503)
+      t.equal(response.headers['retry-after'], '10')
+      t.same(JSON.parse(body), {
         code: 'FST_UNDER_PRESSURE',
         error: 'Service Unavailable',
         message: 'Service Unavailable',
@@ -149,9 +149,9 @@ test('Should return 503 on maxRssBytes', t => {
       url: address
     }, (err, response, body) => {
       t.error(err)
-      t.strictEqual(response.statusCode, 503)
-      t.strictEqual(response.headers['retry-after'], '10')
-      t.deepEqual(JSON.parse(body), {
+      t.equal(response.statusCode, 503)
+      t.equal(response.headers['retry-after'], '10')
+      t.same(JSON.parse(body), {
         code: 'FST_UNDER_PRESSURE',
         error: 'Service Unavailable',
         message: 'Service Unavailable',
@@ -187,9 +187,9 @@ test('Custom message and retry after header', t => {
       url: address
     }, (err, response, body) => {
       t.error(err)
-      t.strictEqual(response.statusCode, 503)
-      t.strictEqual(response.headers['retry-after'], '50')
-      t.deepEqual(JSON.parse(body), {
+      t.equal(response.statusCode, 503)
+      t.equal(response.headers['retry-after'], '50')
+      t.same(JSON.parse(body), {
         code: 'FST_UNDER_PRESSURE',
         error: 'Service Unavailable',
         message: 'Under pressure!',
@@ -238,8 +238,8 @@ test('Custom error instance', t => {
       url: address
     }, (err, response, body) => {
       t.error(err)
-      t.strictEqual(response.statusCode, 418)
-      t.deepEqual(JSON.parse(body), {
+      t.equal(response.statusCode, 418)
+      t.same(JSON.parse(body), {
         code: 'FST_CUSTOM_ERROR',
         error: 'I\'m a Teapot',
         message: 'Custom error message',
@@ -262,16 +262,16 @@ test('memoryUsage name space', t => {
   })
 
   fastify.get('/', (req, reply) => {
-    t.true(fastify.memoryUsage().eventLoopDelay > 0)
-    t.true(fastify.memoryUsage().heapUsed > 0)
-    t.true(fastify.memoryUsage().rssBytes > 0)
-    t.true(fastify.memoryUsage().eventLoopUtilized >= 0)
+    t.ok(fastify.memoryUsage().eventLoopDelay > 0)
+    t.ok(fastify.memoryUsage().heapUsed > 0)
+    t.ok(fastify.memoryUsage().rssBytes > 0)
+    t.ok(fastify.memoryUsage().eventLoopUtilized >= 0)
     reply.send({ hello: 'world' })
   })
 
   fastify.listen(0, async (err, address) => {
     t.error(err)
-    t.is(typeof fastify.memoryUsage, 'function')
+    t.equal(typeof fastify.memoryUsage, 'function')
     fastify.server.unref()
 
     // If using monitorEventLoopDelay give it time to collect
@@ -287,8 +287,8 @@ test('memoryUsage name space', t => {
       url: address
     }, (err, response, body) => {
       t.error(err)
-      t.strictEqual(response.statusCode, 200)
-      t.deepEqual(JSON.parse(body), { hello: 'world' })
+      t.equal(response.statusCode, 200)
+      t.same(JSON.parse(body), { hello: 'world' })
       fastify.close()
     })
   })
@@ -301,16 +301,16 @@ test('memoryUsage name space (without check)', t => {
   fastify.register(underPressure)
 
   fastify.get('/', (req, reply) => {
-    t.true(fastify.memoryUsage().eventLoopDelay > 0)
-    t.true(fastify.memoryUsage().heapUsed > 0)
-    t.true(fastify.memoryUsage().rssBytes > 0)
-    t.true(fastify.memoryUsage().eventLoopUtilized >= 0)
+    t.ok(fastify.memoryUsage().eventLoopDelay > 0)
+    t.ok(fastify.memoryUsage().heapUsed > 0)
+    t.ok(fastify.memoryUsage().rssBytes > 0)
+    t.ok(fastify.memoryUsage().eventLoopUtilized >= 0)
     reply.send({ hello: 'world' })
   })
 
   fastify.listen(0, async (err, address) => {
     t.error(err)
-    t.is(typeof fastify.memoryUsage, 'function')
+    t.equal(typeof fastify.memoryUsage, 'function')
     fastify.server.unref()
 
     // If using monitorEventLoopDelay give it time to collect
@@ -326,8 +326,8 @@ test('memoryUsage name space (without check)', t => {
       url: address
     }, (err, response, body) => {
       t.error(err)
-      t.strictEqual(response.statusCode, 200)
-      t.deepEqual(JSON.parse(body), { hello: 'world' })
+      t.equal(response.statusCode, 200)
+      t.same(JSON.parse(body), { hello: 'world' })
       fastify.close()
     })
   })
@@ -360,9 +360,9 @@ test('Custom health check', t => {
         url: address
       }, (err, response, body) => {
         t.error(err)
-        t.strictEqual(response.statusCode, 503)
-        t.strictEqual(response.headers['retry-after'], '10')
-        t.deepEqual(JSON.parse(body), {
+        t.equal(response.statusCode, 503)
+        t.equal(response.headers['retry-after'], '10')
+        t.same(JSON.parse(body), {
           code: 'FST_UNDER_PRESSURE',
           error: 'Service Unavailable',
           message: 'Service Unavailable',
@@ -395,8 +395,8 @@ test('Custom health check', t => {
         url: address
       }, (err, response, body) => {
         t.error(err)
-        t.strictEqual(response.statusCode, 200)
-        t.deepEqual(JSON.parse(body), {
+        t.equal(response.statusCode, 200)
+        t.same(JSON.parse(body), {
           hello: 'world'
         })
         fastify.close()
@@ -428,8 +428,8 @@ test('Custom health check', t => {
       }, (err, response, body) => {
         check = false
         t.error(err)
-        t.strictEqual(response.statusCode, 200)
-        t.deepEqual(JSON.parse(body), {
+        t.equal(response.statusCode, 200)
+        t.same(JSON.parse(body), {
           hello: 'world'
         })
       })
@@ -440,9 +440,9 @@ test('Custom health check', t => {
           url: address
         }, (err, response, body) => {
           t.error(err)
-          t.strictEqual(response.statusCode, 503)
-          t.strictEqual(response.headers['retry-after'], '10')
-          t.deepEqual(JSON.parse(body), {
+          t.equal(response.statusCode, 503)
+          t.equal(response.headers['retry-after'], '10')
+          t.same(JSON.parse(body), {
             code: 'FST_UNDER_PRESSURE',
             error: 'Service Unavailable',
             message: 'Service Unavailable',
@@ -462,7 +462,7 @@ test('Custom health check', t => {
     fastify.register(underPressure, {
       healthCheck: async () => {
         await wait(100)
-        t.false(called)
+        t.notOk(called)
         called = true
       },
       healthCheckInterval: 1000
@@ -470,7 +470,7 @@ test('Custom health check', t => {
 
     fastify.listen(0, (err) => {
       t.error(err)
-      t.true(called)
+      t.ok(called)
       fastify.close()
     })
   })
@@ -498,9 +498,9 @@ test('Custom health check', t => {
         url: address + '/status'
       }, (err, response, body) => {
         t.error(err)
-        t.strictEqual(response.statusCode, 503)
-        t.strictEqual(response.headers['retry-after'], '10')
-        t.deepEqual(JSON.parse(body), {
+        t.equal(response.statusCode, 503)
+        t.equal(response.headers['retry-after'], '10')
+        t.same(JSON.parse(body), {
           code: 'FST_UNDER_PRESSURE',
           error: 'Service Unavailable',
           message: 'Service Unavailable',
@@ -537,9 +537,9 @@ test('Custom health check', t => {
         url: address + '/status'
       }, (err, response, body) => {
         t.error(err)
-        t.strictEqual(response.statusCode, 503)
-        t.strictEqual(response.headers['retry-after'], '10')
-        t.deepEqual(JSON.parse(body), {
+        t.equal(response.statusCode, 503)
+        t.equal(response.headers['retry-after'], '10')
+        t.same(JSON.parse(body), {
           code: 'FST_UNDER_PRESSURE',
           error: 'Service Unavailable',
           message: 'Service Unavailable',
@@ -580,8 +580,8 @@ test('Custom health check', t => {
         url: address + '/status'
       }, (err, response, body) => {
         t.error(err)
-        t.strictEqual(response.statusCode, 200)
-        t.deepEqual(JSON.parse(body), {
+        t.equal(response.statusCode, 200)
+        t.same(JSON.parse(body), {
           some: 'value',
           anotherValue: 'another',
           status: 'overrride status'
