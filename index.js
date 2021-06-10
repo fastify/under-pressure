@@ -219,7 +219,7 @@ async function underPressure (fastify, opts) {
     const okResponse = { status: 'ok' }
     if (healthCheck) {
       try {
-        const checkResult = await healthCheck()
+        const checkResult = await healthCheck(req, reply)
         if (!checkResult) {
           req.log.error('external health check failed')
           reply.status(SERVICE_UNAVAILABLE).header('Retry-After', retryAfter)

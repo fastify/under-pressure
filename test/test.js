@@ -590,6 +590,47 @@ test('Custom health check', t => {
       })
     })
   })
+
+  t.test('should be request and reply as arguments in the healthCheck function', t => {
+    t.plan(6)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      healthCheck: async (req, reply) => {
+        t.pass('healthcheck called')
+        return {
+          reqUrl: req.url,
+          replyOk: reply.request === req,
+          status: 'overrride status'
+        }
+      },
+      exposeStatusRoute: {
+        routeResponseSchemaOpts: {
+          reqUrl: { type: 'string' },
+          replyOk: { type: 'boolean' }
+        }
+      }
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      sget({
+        method: 'GET',
+        url: address + '/status'
+      }, (err, response, body) => {
+        t.error(err)
+        t.equal(response.statusCode, 200)
+        t.same(JSON.parse(body), {
+          url: '/status',
+          replyOk: true,
+          status: 'overrride status'
+        })
+        fastify.close()
+      })
+    })
+  })
 })
 
 function block (msec) {
