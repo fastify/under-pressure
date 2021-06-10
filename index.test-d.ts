@@ -38,9 +38,9 @@ const server = fastify();
 
 () => {
   server.register(underPressure, {
-    healthCheck: async function () {
+    healthCheck: async function (fastifyInstance) {
       // do some magic to check if your db connection is healthy, etc...
-      return true;
+      return fastifyInstance.register === server.register;
     },
     healthCheckInterval: 500
   });

@@ -334,7 +334,7 @@ test('memoryUsage name space (without check)', t => {
 })
 
 test('Custom health check', t => {
-  t.plan(7)
+  t.plan(8)
 
   t.test('should return 503 when custom health check returns false for healthCheck', t => {
     t.plan(5)
@@ -584,6 +584,44 @@ test('Custom health check', t => {
         t.same(JSON.parse(body), {
           some: 'value',
           anotherValue: 'another',
+          status: 'overrride status'
+        })
+        fastify.close()
+      })
+    })
+  })
+
+  t.test('should be fastify instance as argument in the healthCheck function', t => {
+    t.plan(6)
+
+    const fastify = Fastify()
+    fastify.register(underPressure, {
+      healthCheck: async (fastifyInstance) => {
+        t.pass('healthcheck called')
+        return {
+          fastifyInstanceOk: fastifyInstance === fastify,
+          status: 'overrride status'
+        }
+      },
+      exposeStatusRoute: {
+        routeResponseSchemaOpts: {
+          fastifyInstanceOk: { type: 'boolean' }
+        }
+      }
+    })
+
+    fastify.listen(0, (err, address) => {
+      t.error(err)
+      fastify.server.unref()
+
+      sget({
+        method: 'GET',
+        url: address + '/status'
+      }, (err, response, body) => {
+        t.error(err)
+        t.equal(response.statusCode, 200)
+        t.same(JSON.parse(body), {
+          fastifyInstanceOk: true,
           status: 'overrride status'
         })
         fastify.close()
