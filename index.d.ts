@@ -1,4 +1,5 @@
 import {
+  FastifyInstance,
   FastifyPlugin,
   FastifyReply,
   FastifyRequest
@@ -18,7 +19,7 @@ declare namespace underPressure {
     maxRssBytes?: number;
     message?: string;
     retryAfter?: number;
-    healthCheck?: () => Promise<boolean>;
+    healthCheck?: (fastify: FastifyInstance) => Promise<Record<string, unknown> | boolean>;
     healthCheckInterval?: number;
     pressureHandler?: (request: FastifyRequest, reply: FastifyReply, type: string, value: number | undefined) => Promise<void> | void;
     sampleInterval?: number;

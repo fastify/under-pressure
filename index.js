@@ -59,6 +59,8 @@ async function underPressure (fastify, opts) {
     elu = eventLoopUtilization()
   }
 
+  fastify.decorate('memoryUsage', memoryUsage)
+
   const timer = setInterval(updateMemoryUsage, sampleInterval)
   timer.unref()
 
@@ -70,7 +72,7 @@ async function underPressure (fastify, opts) {
 
     const doCheck = async () => {
       try {
-        externalsHealthy = await healthCheck()
+        externalsHealthy = await healthCheck(fastify)
       } catch (error) {
         externalsHealthy = false
         fastify.log.error({ error }, 'external healthCheck function supplied to `under-pressure` threw an error. setting the service status to unhealthy.')
@@ -87,7 +89,6 @@ async function underPressure (fastify, opts) {
     externalsHealthy = true
   }
 
-  fastify.decorate('memoryUsage', memoryUsage)
   fastify.addHook('onClose', onClose)
 
   opts.exposeStatusRoute = mapExposeStatusRoute(opts.exposeStatusRoute)
@@ -219,7 +220,7 @@ async function underPressure (fastify, opts) {
     const okResponse = { status: 'ok' }
     if (healthCheck) {
       try {
-        const checkResult = await healthCheck()
+        const checkResult = await healthCheck(fastify)
         if (!checkResult) {
           req.log.error('external health check failed')
           reply.status(SERVICE_UNAVAILABLE).header('Retry-After', retryAfter)

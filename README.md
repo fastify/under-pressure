@@ -151,12 +151,22 @@ fastify.register(underPressure, {
   exposeStatusRoute: {
     routeResponseSchemaOpts: {
       extraValue: { type: 'string' },
+      metrics: {
+        type: 'object',
+        properties: {
+          eventLoopDelay: { type: 'number' },
+          rssBytes: { type: 'number' },
+          heapUsed: { type: 'number' },
+          eventLoopUtilized: { type: 'number' },
+        },
+      },
       // ...
     }
   },
-  healthCheck: async () => {
+  healthCheck: async (fastifyInstance) => {
     return {
       extraValue: await getExtraValue(),
+      metrics: fastifyInstance.memoryUsage(),
       // ...
     }
   },
@@ -179,7 +189,7 @@ By default when this function is supplied your service health is considered unhe
 const fastify = require('fastify')()
 
 fastify.register(require('under-pressure'), {
-  healthCheck: async function () {
+  healthCheck: async function (fastifyInstance) {
     // do some magic to check if your db connection is healthy, etc...
     return true
   },
