@@ -138,6 +138,7 @@ async function underPressure (fastify, opts) {
   function updateEventLoopDelay () {
     if (histogram) {
       eventLoopDelay = Math.max(0, histogram.mean / 1e6 - resolution)
+      if (Number.isNaN(eventLoopDelay)) eventLoopDelay = Infinity
       histogram.reset()
     } else {
       const toCheck = now()

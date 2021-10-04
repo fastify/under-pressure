@@ -234,3 +234,48 @@ test('event loop utilization', { skip: !isSupportedVersion }, t => {
     })
   })
 })
+
+test('event loop delay (NaN)', { skip: !isSupportedVersion }, t => {
+  t.plan(5)
+
+  const mockedUnderPressure = t.mock('../index', {
+    perf_hooks: {
+      monitorEventLoopDelay: () => ({
+        enable: () => { },
+        reset: () => { },
+        mean: NaN
+      }),
+      performance: {
+        eventLoopUtilization: () => { }
+      }
+    }
+  })
+
+  const fastify = Fastify()
+  fastify.register(mockedUnderPressure, {
+    maxEventLoopDelay: 1000,
+    pressureHandler: (req, rep, type, value) => {
+      t.equal(type, underPressure.TYPE_EVENT_LOOP_DELAY)
+      t.equal(value, Infinity)
+      rep.send('B')
+    }
+  })
+
+  fastify.get('/', async (req, rep) => rep.send('A'))
+
+  fastify.listen(0, (err, address) => {
+    t.error(err)
+    fastify.server.unref()
+
+    process.nextTick(() => block(1000))
+
+    sget({
+      method: 'GET',
+      url: address
+    }, (err, response, body) => {
+      t.error(err)
+      t.equal(body.toString(), 'B')
+      fastify.close()
+    })
+  })
+})
