@@ -123,7 +123,13 @@ If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will e
 
 If you need the change the exposed route path, you can pass `{ exposeStatusRoute: '/alive' }` options.
 
-If you need to pass options to the status route, such as logLevel or custom configuration you can pass an object,
+To configure the endpoint more specifically you can pass an object. This consists of
+
+- *routeOpts* - Any Fastify [route options](https://www.fastify.io/docs/latest/Reference/Routes/#routes-options) except `schema`
+- *routeSchemaOpts* - As per the Fastify route options, an object containing the schema for request
+- *routeResponseSchemaOpts* - An object containing the schema for additional response items to be merged with the default response schema, see below
+- *url* - The URL to expose the status route on
+
 ```js
 fastify.register(require('under-pressure'), {
   maxEventLoopDelay: 1000,
@@ -141,7 +147,7 @@ fastify.register(require('under-pressure'), {
   }
 })
 ```
-The above example will set the `logLevel` value for the `/status` route be `debug`.
+The above example will set the `logLevel` value for the `/alive` route to be `debug`.
 
 If you need to return other information in the response, you can return an object from the `healthCheck` function (see next paragraph) and use the `routeResponseSchemaOpts` property to describe your custom response schema (**note**: `status` will always be present in the response)
 
