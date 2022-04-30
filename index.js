@@ -1,6 +1,6 @@
 'use strict'
 
-const fe = require('fastify-error')
+const fe = require('@fastify/error')
 const fp = require('fastify-plugin')
 const assert = require('assert')
 const { monitorEventLoopDelay } = require('perf_hooks')
