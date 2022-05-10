@@ -20,7 +20,7 @@ test('Expose status route', t => {
     exposeStatusRoute: true
   })
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -70,7 +70,7 @@ test('Expose status route with additional route options', t => {
   const customConfig = {
     customVal: 'someVal'
   }
-  const fastify = Fastify()
+  const fastify = Fastify({ exposeHeadRoutes: false })
 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
@@ -97,7 +97,7 @@ test('Expose status route with additional route options', t => {
 test('Expose status route with additional route options and default url', t => {
   t.plan(2)
 
-  const fastify = Fastify()
+  const fastify = Fastify({ exposeHeadRoutes: false })
 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
@@ -121,7 +121,7 @@ test('Expose status route with additional route options and default url', t => {
 test('Expose status route with additional route options, route schema options', t => {
   const routeSchemaOpts = { hide: true }
 
-  const fastify = Fastify()
+  const fastify = Fastify({ exposeHeadRoutes: false })
 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
@@ -158,7 +158,7 @@ test('Expose status route with additional route options, route schema options', 
 test('Expose status route with additional route options, route schema options and default url', t => {
   const routeSchemaOpts = { hide: true }
 
-  const fastify = Fastify()
+  const fastify = Fastify({ exposeHeadRoutes: false })
 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
