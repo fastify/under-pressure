@@ -121,7 +121,7 @@ test('event loop delay', { skip: !monitorEventLoopDelay }, t => {
 
   fastify.get('/', (req, rep) => rep.send('A'))
 
-  fastify.listen(0, async (err, address) => {
+  fastify.listen({ port: 0 }, async (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -154,7 +154,7 @@ test('heap bytes', t => {
 
   fastify.get('/', (req, rep) => rep.send('A'))
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -186,7 +186,7 @@ test('rss bytes', t => {
 
   fastify.get('/', (req, rep) => rep.send('A'))
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -218,7 +218,7 @@ test('event loop utilization', { skip: !isSupportedVersion }, t => {
 
   fastify.get('/', async (req, rep) => rep.send('A'))
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -263,7 +263,7 @@ test('event loop delay (NaN)', { skip: !isSupportedVersion }, t => {
 
   fastify.get('/', async (req, rep) => rep.send('A'))
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
