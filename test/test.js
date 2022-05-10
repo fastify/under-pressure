@@ -22,7 +22,7 @@ test('Should return 503 on maxEventLoopDelay', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, async (err, address) => {
+  fastify.listen({ port: 0 }, async (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -65,7 +65,7 @@ test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, async (err, address) => {
+  fastify.listen({ port: 0 }, async (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -102,7 +102,7 @@ test('Should return 503 on maxHeapUsedBytes', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -138,7 +138,7 @@ test('Should return 503 on maxRssBytes', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -176,7 +176,7 @@ test('Custom message and retry after header', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -227,7 +227,7 @@ test('Custom error instance', t => {
     return reply.code(err.statusCode).send(err)
   })
 
-  fastify.listen(0, (err, address) => {
+  fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
@@ -269,7 +269,7 @@ test('memoryUsage name space', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, async (err, address) => {
+  fastify.listen({ port: 0 }, async (err, address) => {
     t.error(err)
     t.equal(typeof fastify.memoryUsage, 'function')
     fastify.server.unref()
@@ -308,7 +308,7 @@ test('memoryUsage name space (without check)', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.listen(0, async (err, address) => {
+  fastify.listen({ port: 0 }, async (err, address) => {
     t.error(err)
     t.equal(typeof fastify.memoryUsage, 'function')
     fastify.server.unref()
@@ -351,7 +351,7 @@ test('Custom health check', t => {
       reply.send({ hello: 'world' })
     })
 
-    fastify.listen(0, (err, address) => {
+    fastify.listen({ port: 0 }, (err, address) => {
       t.error(err)
       fastify.server.unref()
 
@@ -386,7 +386,7 @@ test('Custom health check', t => {
       reply.send({ hello: 'world' })
     })
 
-    fastify.listen(0, (err, address) => {
+    fastify.listen({ port: 0 }, (err, address) => {
       t.error(err)
       fastify.server.unref()
 
@@ -419,7 +419,7 @@ test('Custom health check', t => {
       reply.send({ hello: 'world' })
     })
 
-    fastify.listen(0, (err, address) => {
+    fastify.listen({ port: 0 }, (err, address) => {
       t.error(err)
       fastify.server.unref()
       sget({
@@ -468,7 +468,7 @@ test('Custom health check', t => {
       healthCheckInterval: 1000
     })
 
-    fastify.listen(0, (err) => {
+    fastify.listen({ port: 0 }, (err) => {
       t.error(err)
       t.ok(called)
       fastify.close()
@@ -488,7 +488,7 @@ test('Custom health check', t => {
       exposeStatusRoute: true
     })
 
-    fastify.listen(0, (err, address) => {
+    fastify.listen({ port: 0 }, (err, address) => {
       t.error(err)
       fastify.server.unref()
       check = false
@@ -527,7 +527,7 @@ test('Custom health check', t => {
       exposeStatusRoute: true
     })
 
-    fastify.listen(0, (err, address) => {
+    fastify.listen({ port: 0 }, (err, address) => {
       t.error(err)
       fastify.server.unref()
       check = false
@@ -571,7 +571,7 @@ test('Custom health check', t => {
       }
     })
 
-    fastify.listen(0, (err, address) => {
+    fastify.listen({ port: 0 }, (err, address) => {
       t.error(err)
       fastify.server.unref()
 
@@ -610,7 +610,7 @@ test('Custom health check', t => {
       }
     })
 
-    fastify.listen(0, (err, address) => {
+    fastify.listen({ port: 0 }, (err, address) => {
       t.error(err)
       fastify.server.unref()
 
