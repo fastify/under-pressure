@@ -2,7 +2,6 @@
 
 ![CI](https://github.com/fastify/under-pressure/workflows/CI/badge.svg)
 [![NPM version](https://img.shields.io/npm/v/under-pressure.svg?style=flat)](https://www.npmjs.com/package/under-pressure)
-[![Known Vulnerabilities](https://snyk.io/test/github/fastify/under-pressure/badge.svg)](https://snyk.io/test/github/fastify/under-pressure)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
 
 Measure process load with automatic handling of *"Service Unavailable"* plugin for Fastify.
