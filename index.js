@@ -253,7 +253,7 @@ function now () {
 
 module.exports = fp(underPressure, {
   fastify: '4.x',
-  name: 'under-pressure'
+  name: '@fastify/under-pressure'
 })
 
 module.exports.TYPE_EVENT_LOOP_DELAY = TYPE_EVENT_LOOP_DELAY
