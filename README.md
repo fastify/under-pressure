@@ -1,7 +1,7 @@
-# under-pressure
+# @fastify/under-pressure
 
 ![CI](https://github.com/fastify/under-pressure/workflows/CI/badge.svg)
-[![NPM version](https://img.shields.io/npm/v/under-pressure.svg?style=flat)](https://www.npmjs.com/package/under-pressure)
+[![NPM version](https://img.shields.io/npm/v/@fastify/under-pressure.svg?style=flat)](https://www.npmjs.com/package/@fastify/under-pressure)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
 
 Measure process load with automatic handling of *"Service Unavailable"* plugin for Fastify.
@@ -17,7 +17,7 @@ Fastify ^2.0.0. Please refer to [this branch](https://github.com/fastify/under-p
 <a name="install"></a>
 ## Install
 ```
-npm i under-pressure --save
+npm i @fastify/under-pressure
 ```
 
 <a name="usage"></a>
@@ -27,7 +27,7 @@ Require the plugin and register it into the Fastify instance.
 ```js
 const fastify = require('fastify')()
 
-fastify.register(require('under-pressure'), {
+fastify.register(require('@fastify/under-pressure'), {
   maxEventLoopDelay: 1000,
   maxHeapUsedBytes: 100000000,
   maxRssBytes: 100000000,
@@ -43,17 +43,17 @@ fastify.listen(3000, err => {
   console.log(`server listening on ${fastify.server.address().port}`)
 })
 ```
-`under-pressure` will automatically handle for you the `Service Unavailable` error once one of the thresholds has been reached.
+`@fastify/under-pressure` will automatically handle for you the `Service Unavailable` error once one of the thresholds has been reached.
 You can configure the error message and the `Retry-After` header.
 ```js
-fastify.register(require('under-pressure'), {
+fastify.register(require('@fastify/under-pressure'), {
   maxEventLoopDelay: 1000,
   message: 'Under pressure!',
   retryAfter: 50
 })
 ```
 
-You can also configure custom Error instance `under-pressure` will throw.
+You can also configure custom Error instance `@fastify/under-pressure` will throw.
 ```js
   class CustomError extends Error {
     constructor () {
@@ -62,7 +62,7 @@ You can also configure custom Error instance `under-pressure` will throw.
     }
   }
 
-  fastify.register(require('under-pressure'), {
+  fastify.register(require('@fastify/under-pressure'), {
   maxEventLoopDelay: 1000,
   customError: CustomError
 })
@@ -87,7 +87,7 @@ You can provide a pressure handler in the options to handle the pressure errors.
 
 ```js
 const fastify = require('fastify')()
-const underPressure = require('under-pressure')()
+const underPressure = require('@fastify/under-pressure')()
 
 fastify.register(underPressure, {
   maxHeapUsedBytes: 100000000,
@@ -118,7 +118,7 @@ fastify.register(underPressure, {
 Any other return value than a promise or nullish will be sent to client with `reply.send`.
 
 #### Status route
-If needed you can pass `{ exposeStatusRoute: true }` and `under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example.
+If needed you can pass `{ exposeStatusRoute: true }` and `@fastify/under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example.
 
 If you need the change the exposed route path, you can pass `{ exposeStatusRoute: '/alive' }` options.
 
@@ -130,7 +130,7 @@ To configure the endpoint more specifically you can pass an object. This consist
 - *url* - The URL to expose the status route on
 
 ```js
-fastify.register(require('under-pressure'), {
+fastify.register(require('@fastify/under-pressure'), {
   maxEventLoopDelay: 1000,
   exposeStatusRoute: {
     routeOpts: {
@@ -179,7 +179,7 @@ fastify.register(underPressure, {
 ```
 
 #### Custom health checks
-If needed you can pass a custom `healthCheck` property, which is an async function, and `under-pressure` will allow you to check the status of other components of your service.
+If needed you can pass a custom `healthCheck` property, which is an async function, and `@fastify/under-pressure` will allow you to check the status of other components of your service.
 
 This function should return a promise that resolves to a boolean value or to an object. The `healthCheck` function can be called either:
 
@@ -193,7 +193,7 @@ By default when this function is supplied your service health is considered unhe
 ```js
 const fastify = require('fastify')()
 
-fastify.register(require('under-pressure'), {
+fastify.register(require('@fastify/under-pressure'), {
   healthCheck: async function (fastifyInstance) {
     // do some magic to check if your db connection is healthy, etc...
     return true
@@ -211,7 +211,7 @@ The default value is different depending on which Node version is used. In versi
 ```js
 const fastify = require('fastify')()
 
-fastify.register(require('under-pressure'), {
+fastify.register(require('@fastify/under-pressure'), {
   sampleInterval: <your custom sample interval in ms>
 })
 
