@@ -61,7 +61,7 @@ async function underPressure (fastify, opts) {
 
   fastify.decorate('memoryUsage', memoryUsage)
 
-  const timer = setInterval(updateMemoryUsage, sampleInterval)
+  const timer = setTimeout(doMemoryUsageUpdate, sampleInterval)
   timer.unref()
 
   let externalsHealthy = false
@@ -153,6 +153,11 @@ async function underPressure (fastify, opts) {
     } else {
       eventLoopUtilized = 0
     }
+  }
+
+  function doMemoryUsageUpdate () {
+    updateMemoryUsage()
+    timer.refresh()
   }
 
   function updateMemoryUsage () {
