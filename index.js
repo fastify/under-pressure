@@ -61,7 +61,7 @@ async function underPressure (fastify, opts) {
 
   fastify.decorate('memoryUsage', memoryUsage)
 
-  const timer = setTimeout(doMemoryUsageUpdate, sampleInterval)
+  const timer = setTimeout(beginMemoryUsageUpdate, sampleInterval)
   timer.unref()
 
   let externalsHealthy = false
@@ -82,7 +82,12 @@ async function underPressure (fastify, opts) {
     await doCheck()
 
     if (healthCheckInterval > 0) {
-      externalHealthCheckTimer = setInterval(doCheck, healthCheckInterval)
+      const beginCheck = async () => {
+        await doCheck()
+        externalHealthCheckTimer.refresh()
+      }
+
+      externalHealthCheckTimer = setTimeout(beginCheck, healthCheckInterval)
       externalHealthCheckTimer.unref()
     }
   } else {
@@ -155,7 +160,7 @@ async function underPressure (fastify, opts) {
     }
   }
 
-  function doMemoryUsageUpdate () {
+  function beginMemoryUsageUpdate () {
     updateMemoryUsage()
     timer.refresh()
   }
