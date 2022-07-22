@@ -30,7 +30,7 @@
     "fastify-plugin": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^17.0.7",
+    "@types/node": "^18.0.6",
     "fastify": "^4.0.0-rc.2",
     "pre-commit": "^1.2.2",
     "semver": "^7.3.2",
