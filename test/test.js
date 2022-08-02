@@ -2,7 +2,7 @@
 
 const { test } = require('tap')
 const { promisify } = require('util')
-const sget = require('simple-get').concat
+const forkRequest = require('./forkRequest')
 const Fastify = require('fastify')
 const { monitorEventLoopDelay } = require('perf_hooks')
 const underPressure = require('../index')
@@ -32,13 +32,7 @@ test('Should return 503 on maxEventLoopDelay', t => {
       await wait(500)
     }
 
-    // Increased to prevent Travis to fail
-    process.nextTick(() => block(1000))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, 500, (err, response, body) => {
       t.error(err)
       t.equal(response.statusCode, 503)
       t.equal(response.headers['retry-after'], '10')
@@ -50,6 +44,8 @@ test('Should return 503 on maxEventLoopDelay', t => {
       })
       fastify.close()
     })
+
+    process.nextTick(() => block(1000))
   })
 })
 
@@ -69,13 +65,7 @@ test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion
     t.error(err)
     fastify.server.unref()
 
-    // Increased to prevent Travis to fail
-    process.nextTick(() => block(1000))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, 500, (err, response, body) => {
       t.error(err)
       t.equal(response.statusCode, 503)
       t.equal(response.headers['retry-after'], '10')
@@ -87,6 +77,8 @@ test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion
       })
       fastify.close()
     })
+
+    process.nextTick(() => block(1000))
   })
 })
 
@@ -106,12 +98,7 @@ test('Should return 503 on maxHeapUsedBytes', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
       t.error(err)
       t.equal(response.statusCode, 503)
       t.equal(response.headers['retry-after'], '10')
@@ -123,6 +110,8 @@ test('Should return 503 on maxHeapUsedBytes', t => {
       })
       fastify.close()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
@@ -142,12 +131,7 @@ test('Should return 503 on maxRssBytes', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
       t.error(err)
       t.equal(response.statusCode, 503)
       t.equal(response.headers['retry-after'], '10')
@@ -159,6 +143,8 @@ test('Should return 503 on maxRssBytes', t => {
       })
       fastify.close()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
@@ -180,12 +166,7 @@ test('Custom message and retry after header', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
       t.error(err)
       t.equal(response.statusCode, 503)
       t.equal(response.headers['retry-after'], '50')
@@ -197,6 +178,8 @@ test('Custom message and retry after header', t => {
       })
       fastify.close()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
@@ -231,12 +214,7 @@ test('Custom error instance', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
       t.error(err)
       t.equal(response.statusCode, 418)
       t.same(JSON.parse(body), {
@@ -247,6 +225,8 @@ test('Custom error instance', t => {
       })
       fastify.close()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
@@ -280,17 +260,14 @@ test('memoryUsage name space', t => {
       await wait(500)
     }
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
       t.error(err)
       t.equal(response.statusCode, 200)
       t.same(JSON.parse(body), { hello: 'world' })
       fastify.close()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
@@ -319,17 +296,14 @@ test('memoryUsage name space (without check)', t => {
       await wait(500)
     }
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
       t.error(err)
       t.equal(response.statusCode, 200)
       t.same(JSON.parse(body), { hello: 'world' })
       fastify.close()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
@@ -355,10 +329,7 @@ test('Custom health check', t => {
       t.error(err)
       fastify.server.unref()
 
-      sget({
-        method: 'GET',
-        url: address
-      }, (err, response, body) => {
+      forkRequest(address, 0, (err, response, body) => {
         t.error(err)
         t.equal(response.statusCode, 503)
         t.equal(response.headers['retry-after'], '10')
@@ -390,10 +361,7 @@ test('Custom health check', t => {
       t.error(err)
       fastify.server.unref()
 
-      sget({
-        method: 'GET',
-        url: address
-      }, (err, response, body) => {
+      forkRequest(address, 0, (err, response, body) => {
         t.error(err)
         t.equal(response.statusCode, 200)
         t.same(JSON.parse(body), {
@@ -422,10 +390,8 @@ test('Custom health check', t => {
     fastify.listen({ port: 0 }, (err, address) => {
       t.error(err)
       fastify.server.unref()
-      sget({
-        method: 'GET',
-        url: address
-      }, (err, response, body) => {
+
+      forkRequest(address, 0, (err, response, body) => {
         check = false
         t.error(err)
         t.equal(response.statusCode, 200)
@@ -434,23 +400,18 @@ test('Custom health check', t => {
         })
       })
 
-      setTimeout(function () {
-        sget({
-          method: 'GET',
-          url: address
-        }, (err, response, body) => {
-          t.error(err)
-          t.equal(response.statusCode, 503)
-          t.equal(response.headers['retry-after'], '10')
-          t.same(JSON.parse(body), {
-            code: 'FST_UNDER_PRESSURE',
-            error: 'Service Unavailable',
-            message: 'Service Unavailable',
-            statusCode: 503
-          })
-          fastify.close()
+      forkRequest(address, 100, (err, response, body) => {
+        t.error(err)
+        t.equal(response.statusCode, 503)
+        t.equal(response.headers['retry-after'], '10')
+        t.same(JSON.parse(body), {
+          code: 'FST_UNDER_PRESSURE',
+          error: 'Service Unavailable',
+          message: 'Service Unavailable',
+          statusCode: 503
         })
-      }, 100)
+        fastify.close()
+      })
     })
   })
 
@@ -493,10 +454,7 @@ test('Custom health check', t => {
       fastify.server.unref()
       check = false
 
-      sget({
-        method: 'GET',
-        url: address + '/status'
-      }, (err, response, body) => {
+      forkRequest(address + '/status', 0, (err, response, body) => {
         t.error(err)
         t.equal(response.statusCode, 503)
         t.equal(response.headers['retry-after'], '10')
@@ -532,10 +490,7 @@ test('Custom health check', t => {
       fastify.server.unref()
       check = false
 
-      sget({
-        method: 'GET',
-        url: address + '/status'
-      }, (err, response, body) => {
+      forkRequest(address + '/status', 0, (err, response, body) => {
         t.error(err)
         t.equal(response.statusCode, 503)
         t.equal(response.headers['retry-after'], '10')
@@ -575,10 +530,7 @@ test('Custom health check', t => {
       t.error(err)
       fastify.server.unref()
 
-      sget({
-        method: 'GET',
-        url: address + '/status'
-      }, (err, response, body) => {
+      forkRequest(address + '/status', 0, (err, response, body) => {
         t.error(err)
         t.equal(response.statusCode, 200)
         t.same(JSON.parse(body), {
@@ -614,10 +566,7 @@ test('Custom health check', t => {
       t.error(err)
       fastify.server.unref()
 
-      sget({
-        method: 'GET',
-        url: address + '/status'
-      }, (err, response, body) => {
+      forkRequest(address + '/status', 0, (err, response, body) => {
         t.error(err)
         t.equal(response.statusCode, 200)
         t.same(JSON.parse(body), {

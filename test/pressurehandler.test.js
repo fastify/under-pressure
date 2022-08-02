@@ -2,7 +2,7 @@
 
 const { test } = require('tap')
 const { promisify } = require('util')
-const sget = require('simple-get').concat
+const forkRequest = require('./forkRequest')
 const Fastify = require('fastify')
 const { monitorEventLoopDelay } = require('perf_hooks')
 const underPressure = require('../index')
@@ -120,22 +120,16 @@ test('event loop delay', { skip: !monitorEventLoopDelay }, t => {
   })
 
   fastify.get('/', (req, rep) => rep.send('A'))
-
-  fastify.listen({ port: 0 }, async (err, address) => {
+  fastify.listen({ port: 3000 }, async (err, address) => {
     t.error(err)
     fastify.server.unref()
 
-    await wait(500)
-    process.nextTick(() => block(1500))
-
-    sget({
-      method: 'GET',
-      url: address + '/'
-    }, (err, response, body) => {
+    forkRequest(address, 500, (err, response, body) => {
       t.error(err)
-      t.equal(body.toString(), 'B')
+      t.equal(body, 'B')
       fastify.close()
     })
+    process.nextTick(() => block(1500))
   })
 })
 
@@ -158,16 +152,13 @@ test('heap bytes', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
       t.error(err)
       t.equal(body.toString(), 'B')
       fastify.close()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
@@ -190,16 +181,13 @@ test('rss bytes', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
       t.error(err)
       t.equal(body.toString(), 'B')
       fastify.close()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
@@ -222,16 +210,13 @@ test('event loop utilization', { skip: !isSupportedVersion }, t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => block(1000))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, 500, (err, response, body) => {
       t.error(err)
       t.equal(body.toString(), 'B')
       fastify.close()
     })
+
+    process.nextTick(() => block(1000))
   })
 })
 
@@ -267,15 +252,11 @@ test('event loop delay (NaN)', { skip: !isSupportedVersion }, t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => block(1000))
-
-    sget({
-      method: 'GET',
-      url: address
-    }, (err, response, body) => {
+    forkRequest(address, 500, (err, response, body) => {
       t.error(err)
       t.equal(body.toString(), 'B')
       fastify.close()
     })
+    process.nextTick(() => block(1000))
   })
 })

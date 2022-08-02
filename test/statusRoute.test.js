@@ -1,7 +1,7 @@
 'use strict'
 
 const { test } = require('tap')
-const sget = require('simple-get').concat
+const forkRequest = require('./forkRequest')
 const Fastify = require('fastify')
 const { monitorEventLoopDelay } = require('perf_hooks')
 const underPressure = require('../index')
@@ -24,17 +24,14 @@ test('Expose status route', t => {
     t.error(err)
     fastify.server.unref()
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-
-    sget({
-      method: 'GET',
-      url: `${address}/status`
-    }, (err, response, body) => {
+    forkRequest(`${address}/status`, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
       t.error(err)
       t.equal(response.statusCode, 200)
       t.same(JSON.parse(body), { status: 'ok' })
       fastify.close()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
