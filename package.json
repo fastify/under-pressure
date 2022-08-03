@@ -3,11 +3,12 @@
   "version": "7.0.0",
   "description": "Measure process load with automatic handling of 'Service Unavailable' plugin for Fastify.",
   "main": "index.js",
+  "types": "types/index.d.ts",
   "scripts": {
     "lint": "standard | snazzy",
-    "unit": "tap -j 1 test/*test.js",
-    "test": "npm run lint && npm run unit && npm run typescript",
-    "typescript": "tsd"
+    "test": "npm run test:unit && npm run test:typescript",
+    "test:unit": "tap",
+    "test:typescript": "tsd"
   },
   "repository": {
     "type": "git",
