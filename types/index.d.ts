@@ -1,6 +1,6 @@
 import {
   FastifyInstance,
-  FastifyPlugin,
+  FastifyPluginCallback,
   FastifyReply,
   FastifyRequest
 } from "fastify";
@@ -34,7 +34,7 @@ declare module "fastify" {
   }
 }
 
-declare let underPressure: FastifyPlugin<
+declare let underPressure: FastifyPluginCallback<
   underPressure.UnderPressureOptions
 >;
 

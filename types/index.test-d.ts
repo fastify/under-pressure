@@ -1,4 +1,4 @@
-import underPressure from ".";
+import underPressure from "..";
 import fastify from "fastify";
 
 const server = fastify();
@@ -16,7 +16,7 @@ const server = fastify();
     reply.send({ hello: "world" });
   });
 
-  server.listen(3000, err => {
+  server.listen({port: 3000}, err => {
     if (err) throw err;
   });
 };
