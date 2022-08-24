@@ -218,6 +218,19 @@ fastify.register(require('@fastify/under-pressure'), {
 
 ```
 
+<a name="additional-information"></a>
+## Additional information
+
+<a name="set-timeout-vs-set-interval"></a>
+#### `setTimeout` vs `setInterval`
+
+Under the hood the `@fastify/under-pressure` uses the `setTimeout` method to perform its polling checks. The choice is based on the fact that we do not want to add additional pressure to the system. 
+
+In fact, it is known that `setInterval` will call repeatedly at the scheduled time regardless of whether the previous call ended or not, and if the server is already under load, this will likely increase the problem, because those `setInterval` calls will start piling up. `setTimeout`, on the other hand, is called only once and does not cause the mentioned problem.
+
+One note to consider is that because the two methods are not identical, the timer function is not guaranteed to run at exactly the same rate when the system is under pressure or running a long-running process.
+
+
 <a name="acknowledgements"></a>
 ## Acknowledgements
 
