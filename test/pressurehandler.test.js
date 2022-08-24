@@ -7,6 +7,7 @@ const Fastify = require('fastify')
 const { monitorEventLoopDelay } = require('perf_hooks')
 const underPressure = require('../index')
 const { valid, satisfies, coerce } = require('semver')
+const sinon = require('sinon')
 
 const wait = promisify(setTimeout)
 const isSupportedVersion = satisfies(valid(coerce(process.version)), '12.19.0 || >=14.0.0')
@@ -18,92 +19,136 @@ function block (msec) {
 }
 
 test('health check', async t => {
-  t.plan(3)
-  const fastify = Fastify()
+  test('simple', async t => {
+    t.plan(3)
+    const fastify = Fastify()
 
-  fastify.register(underPressure, {
-    healthCheck: async () => false,
-    healthCheckInterval: 1,
-    pressureHandler: (req, rep, type, value) => {
-      t.equal(type, underPressure.TYPE_HEALTH_CHECK)
-      t.equal(value, undefined)
-      rep.send('B')
-    }
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: (req, rep, type, value) => {
+        t.equal(type, underPressure.TYPE_HEALTH_CHECK)
+        t.equal(value, undefined)
+        rep.send('B')
+      }
+    })
+
+    fastify.get('/', (req, rep) => rep.send('A'))
+
+    t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
 
-  fastify.get('/', (req, rep) => rep.send('A'))
+  test('delayed handling with promise success', async t => {
+    const fastify = Fastify()
 
-  t.equal((await fastify.inject().get('/').end()).body, 'B')
-})
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: async (req, rep, type, value) => {
+        await wait(250)
+        rep.send('B')
+      }
+    })
 
-test('health check - delayed handling with promise success', async t => {
-  t.plan(1)
-  const fastify = Fastify()
+    fastify.get('/', (req, rep) => rep.send('A'))
 
-  fastify.register(underPressure, {
-    healthCheck: async () => false,
-    healthCheckInterval: 1,
-    pressureHandler: async (req, rep, type, value) => {
-      await wait(250)
-      rep.send('B')
-    }
+    t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
 
-  fastify.get('/', (req, rep) => rep.send('A'))
+  test('delayed handling with promise error', async t => {
+    const fastify = Fastify()
 
-  t.equal((await fastify.inject().get('/').end()).body, 'B')
-})
+    const errorMessage = 'promiseError'
 
-test('health check - delayed handling with promise error', async t => {
-  t.plan(2)
-  const fastify = Fastify()
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: async (req, rep, type, value) => {
+        await wait(250)
+        throw new Error(errorMessage)
+      }
+    })
 
-  const errorMessage = 'promiseError'
+    fastify.get('/', (req, rep) => rep.send('A'))
 
-  fastify.register(underPressure, {
-    healthCheck: async () => false,
-    healthCheckInterval: 1,
-    pressureHandler: async (req, rep, type, value) => {
-      await wait(250)
-      throw new Error(errorMessage)
-    }
+    const response = await fastify.inject().get('/').end()
+    t.equal(response.statusCode, 500)
+    t.equal(JSON.parse(response.body).message, errorMessage)
   })
 
-  fastify.get('/', (req, rep) => rep.send('A'))
+  test('no handling', async t => {
+    const fastify = Fastify()
 
-  const response = await fastify.inject().get('/').end()
-  t.equal(response.statusCode, 500)
-  t.equal(JSON.parse(response.body).message, errorMessage)
-})
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: (req, rep, type, value) => { }
+    })
 
-test('health check - no handling', async t => {
-  t.plan(1)
-  const fastify = Fastify()
+    fastify.get('/', (req, rep) => rep.send('A'))
 
-  fastify.register(underPressure, {
-    healthCheck: async () => false,
-    healthCheckInterval: 1,
-    pressureHandler: (req, rep, type, value) => { }
+    t.equal((await fastify.inject().get('/').end()).body, 'A')
   })
 
-  fastify.get('/', (req, rep) => rep.send('A'))
+  test('return response', async t => {
+    const fastify = Fastify()
 
-  t.equal((await fastify.inject().get('/').end()).body, 'A')
-})
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: (req, rep, type, value) => 'B'
+    })
 
-test('health check - return response', async t => {
-  t.plan(1)
-  const fastify = Fastify()
+    fastify.get('/', (req, rep) => rep.send('A'))
 
-  fastify.register(underPressure, {
-    healthCheck: async () => false,
-    healthCheckInterval: 1,
-    pressureHandler: (req, rep, type, value) => 'B'
+    t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
 
-  fastify.get('/', (req, rep) => rep.send('A'))
+  test('interval reentrance', async t => {
+    const clock = sinon.useFakeTimers()
+    t.teardown(() => sinon.restore())
 
-  t.equal((await fastify.inject().get('/').end()).body, 'B')
+    const healthCheckInterval = 500
+
+    const fastify = Fastify()
+
+    const healthCheck = sinon.fake(async () => {
+      await wait(healthCheckInterval * 2)
+      return true
+    })
+
+    fastify.register(underPressure, {
+      healthCheck,
+      healthCheckInterval
+    })
+
+    // not called until fastify has finished initializing
+    sinon.assert.callCount(healthCheck, 0)
+
+    await fastify.ready()
+
+    // called immediately when registering the plugin
+    sinon.assert.callCount(healthCheck, 1)
+
+    // wait until next execution
+    await clock.tickAsync(healthCheckInterval)
+
+    // scheduled by the timer
+    sinon.assert.callCount(healthCheck, 2)
+
+    await clock.tickAsync(healthCheckInterval)
+
+    // still running the previous invocation
+    sinon.assert.callCount(healthCheck, 2)
+
+    // wait until the last call resolves and schedules another invocation
+    await healthCheck.lastCall.returnValue
+
+    await clock.tickAsync(healthCheckInterval)
+
+    // next timer invocation
+    sinon.assert.callCount(healthCheck, 3)
+  })
 })
 
 test('event loop delay', { skip: !monitorEventLoopDelay }, t => {
