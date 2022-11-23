@@ -265,6 +265,8 @@ module.exports = fp(underPressure, {
   fastify: '4.x',
   name: '@fastify/under-pressure'
 })
+module.exports.default = underPressure
+module.exports.underPressure = underPressure
 
 module.exports.TYPE_EVENT_LOOP_DELAY = TYPE_EVENT_LOOP_DELAY
 module.exports.TYPE_EVENT_LOOP_UTILIZATION = TYPE_EVENT_LOOP_UTILIZATION
