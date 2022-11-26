@@ -21,7 +21,7 @@ function getSampleInterval (value, eventLoopResolution) {
   return monitorEventLoopDelay ? Math.max(eventLoopResolution, sampleInterval) : sampleInterval
 }
 
-async function underPressure (fastify, opts) {
+async function fastifyUnderPressure (fastify, opts) {
   opts = opts || {}
 
   const resolution = 10
@@ -261,12 +261,12 @@ function now () {
   return (ts[0] * 1e3) + (ts[1] / 1e6)
 }
 
-module.exports = fp(underPressure, {
+module.exports = fp(fastifyUnderPressure, {
   fastify: '4.x',
   name: '@fastify/under-pressure'
 })
-module.exports.default = underPressure
-module.exports.underPressure = underPressure
+module.exports.default = fastifyUnderPressure
+module.exports.fastifyUnderPressure = fastifyUnderPressure
 
 module.exports.TYPE_EVENT_LOOP_DELAY = TYPE_EVENT_LOOP_DELAY
 module.exports.TYPE_EVENT_LOOP_UTILIZATION = TYPE_EVENT_LOOP_UTILIZATION

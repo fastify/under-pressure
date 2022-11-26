@@ -11,15 +11,17 @@ declare module "fastify" {
   }
 }
 
-type UnderPressure = FastifyPluginAsync<underPressure.UnderPressureOptions>;
+interface FastifyUnderPressureExports {
+  TYPE_EVENT_LOOP_DELAY: 'eventLoopDelay'
+  TYPE_HEAP_USED_BYTES: 'heapUsedBytes'
+  TYPE_RSS_BYTES: 'rssBytes'
+  TYPE_HEALTH_CHECK: 'healthCheck'
+  TYPE_EVENT_LOOP_UTILIZATION: 'eventLoopUtilization'
+}
 
-declare namespace underPressure {
-  export const TYPE_EVENT_LOOP_DELAY = 'eventLoopDelay'
-  export const TYPE_HEAP_USED_BYTES = 'heapUsedBytes'
-  export const TYPE_RSS_BYTES = 'rssBytes'
-  export const TYPE_HEALTH_CHECK = 'healthCheck'
-  export const TYPE_EVENT_LOOP_UTILIZATION = 'eventLoopUtilization'
-  
+type FastifyUnderPressure = FastifyPluginAsync<fastifyUnderPressure.UnderPressureOptions> & FastifyUnderPressureExports
+
+declare namespace fastifyUnderPressure {
   export interface UnderPressureOptions {
     maxEventLoopDelay?: number;
     maxEventLoopUtilization?: number;
@@ -35,9 +37,15 @@ declare namespace underPressure {
     customError?: Error;
   }
 
-  export const underPressure: UnderPressure
-  export { underPressure as default }
+  export const TYPE_EVENT_LOOP_DELAY = 'eventLoopDelay'
+  export const TYPE_HEAP_USED_BYTES = 'heapUsedBytes'
+  export const TYPE_RSS_BYTES = 'rssBytes'
+  export const TYPE_HEALTH_CHECK = 'healthCheck'
+  export const TYPE_EVENT_LOOP_UTILIZATION = 'eventLoopUtilization'
+
+  export const fastifyUnderPressure: FastifyUnderPressure
+  export { fastifyUnderPressure as default }
 }
 
-declare function underPressure(...params: Parameters<UnderPressure>): ReturnType<UnderPressure>
-export = underPressure
+declare function fastifyUnderPressure(...params: Parameters<FastifyUnderPressure>): ReturnType<FastifyUnderPressure>
+export = fastifyUnderPressure
