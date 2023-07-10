@@ -129,8 +129,27 @@ test('Expose status route with additional route options, route schema options', 
       response: {
         200: {
           type: 'object',
+          description: 'Health Check Succeeded',
           properties: {
             status: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          description: 'Error Performing Health Check',
+          properties: {
+            message: { type: 'string', description: 'Error message for failure during health check', example: 'Internal Server Error' },
+            statusCode: { type: 'number', description: 'Code representing the error. Currently matches the HTTP response code.', example: 500 }
+          }
+        },
+        503: {
+          type: 'object',
+          description: 'Health Check Failed',
+          properties: {
+            code: { type: 'string', description: 'Error code associated with the failing check', example: 'FST_UNDER_PRESSURE' },
+            error: { type: 'string', description: 'Error thrown during health check', example: 'Service Unavailable' },
+            message: { type: 'string', description: 'Error message to explain health check failure', example: 'Service Unavailable' },
+            statusCode: { type: 'number', description: 'Code representing the error. Currently matches the HTTP response code.', example: 503 }
           }
         }
       }
@@ -166,8 +185,27 @@ test('Expose status route with additional route options, route schema options an
       response: {
         200: {
           type: 'object',
+          description: 'Health Check Succeeded',
           properties: {
             status: { type: 'string' }
+          }
+        },
+        500: {
+          type: 'object',
+          description: 'Error Performing Health Check',
+          properties: {
+            message: { type: 'string', description: 'Error message for failure during health check', example: 'Internal Server Error' },
+            statusCode: { type: 'number', description: 'Code representing the error. Currently matches the HTTP response code.', example: 500 }
+          }
+        },
+        503: {
+          type: 'object',
+          description: 'Health Check Failed',
+          properties: {
+            code: { type: 'string', description: 'Error code associated with the failing check', example: 'FST_UNDER_PRESSURE' },
+            error: { type: 'string', description: 'Error thrown during health check', example: 'Service Unavailable' },
+            message: { type: 'string', description: 'Error message to explain health check failure', example: 'Service Unavailable' },
+            statusCode: { type: 'number', description: 'Code representing the error. Currently matches the HTTP response code.', example: 503 }
           }
         }
       }
