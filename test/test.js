@@ -11,7 +11,7 @@ const { valid, satisfies, coerce } = require('semver')
 const wait = promisify(setTimeout)
 
 test('Should return 503 on maxEventLoopDelay', t => {
-  t.plan(5)
+  t.plan(6)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
@@ -42,6 +42,7 @@ test('Should return 503 on maxEventLoopDelay', t => {
         message: 'Service Unavailable',
         statusCode: 503
       })
+      t.equal(fastify.isUnderPressure(), true)
       fastify.close()
     })
 
@@ -51,7 +52,7 @@ test('Should return 503 on maxEventLoopDelay', t => {
 
 const isSupportedVersion = satisfies(valid(coerce(process.version)), '12.19.0 || >=14.0.0')
 test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion }, t => {
-  t.plan(5)
+  t.plan(6)
   const fastify = Fastify()
   fastify.register(underPressure, {
     maxEventLoopUtilization: 0.60
@@ -75,6 +76,7 @@ test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion
         message: 'Service Unavailable',
         statusCode: 503
       })
+      t.equal(fastify.isUnderPressure(), true)
       fastify.close()
     })
 
@@ -83,7 +85,7 @@ test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion
 })
 
 test('Should return 503 on maxHeapUsedBytes', t => {
-  t.plan(5)
+  t.plan(6)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
@@ -108,6 +110,7 @@ test('Should return 503 on maxHeapUsedBytes', t => {
         message: 'Service Unavailable',
         statusCode: 503
       })
+      t.equal(fastify.isUnderPressure(), true)
       fastify.close()
     })
 
@@ -116,7 +119,7 @@ test('Should return 503 on maxHeapUsedBytes', t => {
 })
 
 test('Should return 503 on maxRssBytes', t => {
-  t.plan(5)
+  t.plan(6)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
@@ -141,6 +144,7 @@ test('Should return 503 on maxRssBytes', t => {
         message: 'Service Unavailable',
         statusCode: 503
       })
+      t.equal(fastify.isUnderPressure(), true)
       fastify.close()
     })
 
@@ -231,7 +235,7 @@ test('Custom error instance', t => {
 })
 
 test('memoryUsage name space', t => {
-  t.plan(9)
+  t.plan(10)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
@@ -264,6 +268,7 @@ test('memoryUsage name space', t => {
       t.error(err)
       t.equal(response.statusCode, 200)
       t.same(JSON.parse(body), { hello: 'world' })
+      t.equal(fastify.isUnderPressure(), true)
       fastify.close()
     })
 
@@ -311,7 +316,7 @@ test('Custom health check', t => {
   t.plan(8)
 
   t.test('should return 503 when custom health check returns false for healthCheck', t => {
-    t.plan(5)
+    t.plan(6)
 
     const fastify = Fastify()
     fastify.register(underPressure, {
@@ -339,6 +344,7 @@ test('Custom health check', t => {
           message: 'Service Unavailable',
           statusCode: 503
         })
+        t.equal(fastify.isUnderPressure(), true)
         fastify.close()
       })
     })
