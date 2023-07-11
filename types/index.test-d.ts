@@ -14,7 +14,8 @@ const server = fastify();
   server.register(fastifyUnderPressure);
 
   server.get("/", (req, reply) => {
-    reply.send({ hello: "world" });
+
+    reply.send({ hello: "world", underPressure: server.isUnderPressure() });
   });
 
   server.listen({port: 3000}, err => {

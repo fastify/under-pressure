@@ -12,7 +12,7 @@ external resources.
 <a name="requirements"></a>
 ## Requirements
 
-Fastify ^2.0.0. Please refer to [this branch](https://github.com/fastify/under-pressure/tree/1.x) and related versions for Fastify ^1.1.0 compatibility.
+Fastify ^4.0.0. Please refer to [this branch](https://github.com/fastify/under-pressure/tree/1.x) and related versions for Fastify ^1.1.0 compatibility.
 
 <a name="install"></a>
 ## Install
@@ -35,6 +35,9 @@ fastify.register(require('@fastify/under-pressure'), {
 })
 
 fastify.get('/', (req, reply) => {
+  if (fastify.isUnderPressure()) {
+    // skip complex computation
+  }
   reply.send({ hello: 'world'})
 })
 

@@ -60,6 +60,7 @@ async function fastifyUnderPressure (fastify, opts) {
   }
 
   fastify.decorate('memoryUsage', memoryUsage)
+  fastify.decorate('isUnderPressure', isUnderPressure)
 
   const timer = setTimeout(beginMemoryUsageUpdate, sampleInterval)
   timer.unref()
@@ -171,6 +172,30 @@ async function fastifyUnderPressure (fastify, opts) {
     rssBytes = mem.rss
     updateEventLoopDelay()
     updateEventLoopUtilization()
+  }
+
+  function isUnderPressure () {
+    if (checkMaxEventLoopDelay && eventLoopDelay > maxEventLoopDelay) {
+      return true
+    }
+
+    if (checkMaxHeapUsedBytes && heapUsed > maxHeapUsedBytes) {
+      return true
+    }
+
+    if (checkMaxRssBytes && rssBytes > maxRssBytes) {
+      return true
+    }
+
+    if (!externalsHealthy) {
+      return true
+    }
+
+    if (checkMaxEventLoopUtilization && eventLoopUtilized > maxEventLoopUtilization) {
+      return true
+    }
+
+    return false
   }
 
   function onRequest (req, reply, next) {

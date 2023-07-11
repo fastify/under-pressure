@@ -8,6 +8,7 @@ import {
 declare module "fastify" {
   interface FastifyInstance {
     memoryUsage(): { heapUsed: number; rssBytes: number; eventLoopDelay: number; eventLoopUtilized: number };
+    isUnderPressure(): boolean;
   }
 }
 
