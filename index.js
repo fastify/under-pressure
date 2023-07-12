@@ -118,7 +118,7 @@ async function fastifyUnderPressure (fastify, opts) {
             description: 'Error Performing Health Check',
             properties: {
               message: { type: 'string', description: 'Error message for failure during health check', example: 'Internal Server Error' },
-              statusCode: { type: 'number', description: 'Code representing the error. Currently matches the HTTP response code.', example: 500 }
+              statusCode: { type: 'number', description: 'Code representing the error. Always matches the HTTP response code.', example: 500 }
             }
           },
           503: {
@@ -128,7 +128,7 @@ async function fastifyUnderPressure (fastify, opts) {
               code: { type: 'string', description: 'Error code associated with the failing check', example: 'FST_UNDER_PRESSURE' },
               error: { type: 'string', description: 'Error thrown during health check', example: 'Service Unavailable' },
               message: { type: 'string', description: 'Error message to explain health check failure', example: 'Service Unavailable' },
-              statusCode: { type: 'number', description: 'Code representing the error. Currently matches the HTTP response code.', example: 503 }
+              statusCode: { type: 'number', description: 'Code representing the error. Always matches the HTTP response code.', example: 503 }
             }
           }
         }
