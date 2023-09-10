@@ -1,5 +1,5 @@
-const fork = require('child_process').fork
-const resolve = require('path').resolve
+const fork = require('node:child_process').fork
+const resolve = require('node:path').resolve
 
 module.exports = function forkRequest (address, delay = 100, cb) {
   const childProcess = fork(

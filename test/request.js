@@ -1,7 +1,7 @@
 'use strict'
 
 const sget = require('simple-get').concat
-const promisify = require('util').promisify
+const promisify = require('node:util').promisify
 const wait = promisify(setTimeout)
 
 const address = process.argv[2]

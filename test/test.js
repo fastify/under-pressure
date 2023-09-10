@@ -1,10 +1,10 @@
 'use strict'
 
 const { test } = require('tap')
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const forkRequest = require('./forkRequest')
 const Fastify = require('fastify')
-const { monitorEventLoopDelay } = require('perf_hooks')
+const { monitorEventLoopDelay } = require('node:perf_hooks')
 const underPressure = require('../index')
 const { valid, satisfies, coerce } = require('semver')
 
