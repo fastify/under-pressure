@@ -2,9 +2,9 @@
 
 const fe = require('@fastify/error')
 const fp = require('fastify-plugin')
-const assert = require('assert')
-const { monitorEventLoopDelay } = require('perf_hooks')
-const { eventLoopUtilization } = require('perf_hooks').performance
+const assert = require('node:assert')
+const { monitorEventLoopDelay } = require('node:perf_hooks')
+const { eventLoopUtilization } = require('node:perf_hooks').performance
 
 const SERVICE_UNAVAILABLE = 503
 const createError = (msg = 'Service Unavailable') => fe('FST_UNDER_PRESSURE', msg, SERVICE_UNAVAILABLE)
