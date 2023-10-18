@@ -1,3 +1,5 @@
+'use strict'
+
 const fork = require('node:child_process').fork
 const resolve = require('node:path').resolve
 
