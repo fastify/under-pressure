@@ -127,7 +127,7 @@ If you need the change the exposed route path, you can pass `{ exposeStatusRoute
 
 To configure the endpoint more specifically you can pass an object. This consists of
 
-- *routeOpts* - Any Fastify [route options](https://www.fastify.io/docs/latest/Reference/Routes/#routes-options) except `schema`
+- *routeOpts* - Any Fastify [route options](https://www.fastify.dev/docs/latest/Reference/Routes/#routes-options) except `schema`
 - *routeSchemaOpts* - As per the Fastify route options, an object containing the schema for request
 - *routeResponseSchemaOpts* - An object containing the schema for additional response items to be merged with the default response schema, see below
 - *url* - The URL to expose the status route on
