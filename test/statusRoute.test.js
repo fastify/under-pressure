@@ -132,6 +132,9 @@ test('Expose status route with additional route options, route schema options', 
           description: 'Health Check Succeeded',
           properties: {
             status: { type: 'string' }
+          },
+          example: {
+            status: 'ok'
           }
         },
         500: {
@@ -188,6 +191,9 @@ test('Expose status route with additional route options, route schema options an
           description: 'Health Check Succeeded',
           properties: {
             status: { type: 'string' }
+          },
+          example: {
+            status: 'ok'
           }
         },
         500: {

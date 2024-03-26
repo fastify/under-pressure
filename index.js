@@ -112,7 +112,10 @@ async function fastifyUnderPressure (fastify, opts) {
             properties: Object.assign(
               { status: { type: 'string' } },
               opts.exposeStatusRoute.routeResponseSchemaOpts
-            )
+            ),
+            example: {
+              status: 'ok'
+            }
           },
           500: {
             type: 'object',
