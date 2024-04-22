@@ -1,7 +1,4 @@
-jsx: false
-ts: false
-flow: false
-coverage: false
+disable-coverage: true
 jobs: 1
 files:
-  - 'test/**/*.test.js'
+  - "test/**/*.test.js"
