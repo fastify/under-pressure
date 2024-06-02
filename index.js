@@ -297,8 +297,8 @@ async function fastifyUnderPressure (fastify, opts) {
   }
 
   function onClose (fastify, done) {
-    clearInterval(timer)
-    clearInterval(externalHealthCheckTimer)
+    clearTimeout(timer)
+    clearTimeout(externalHealthCheckTimer)
     done()
   }
 }
