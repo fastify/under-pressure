@@ -305,3 +305,106 @@ test('event loop delay (NaN)', { skip: !isSupportedVersion }, t => {
     process.nextTick(() => block(1000))
   })
 })
+
+test('pressureHandler on route', async t => {
+  test('simple', async t => {
+    t.plan(3)
+    const fastify = Fastify()
+
+    await fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1
+    })
+
+    fastify.get('/', {
+      config: {
+        pressureHandler: (req, rep, type, value) => {
+          process._rawDebug('pressureHandler')
+          t.equal(type, underPressure.TYPE_HEALTH_CHECK)
+          t.equal(value, undefined)
+          rep.send('B')
+        }
+      }
+    }, (req, rep) => rep.send('A'))
+
+    t.equal((await fastify.inject().get('/').end()).body, 'B')
+  })
+
+  test('delayed handling with promise success', async t => {
+    const fastify = Fastify()
+
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1
+    })
+
+    fastify.get('/', {
+      config: {
+        pressureHandler: async (req, rep, type, value) => {
+          await wait(250)
+          rep.send('B')
+        }
+      }
+    }, (req, rep) => rep.send('A'))
+
+    t.equal((await fastify.inject().get('/').end()).body, 'B')
+  })
+
+  test('delayed handling with promise error', async t => {
+    const fastify = Fastify()
+
+    const errorMessage = 'promiseError'
+
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1
+    })
+
+    fastify.get('/', {
+      config: {
+        pressureHandler: async (req, rep, type, value) => {
+          await wait(250)
+          throw new Error(errorMessage)
+        }
+      }
+    }, (req, rep) => rep.send('A'))
+
+    const response = await fastify.inject().get('/').end()
+    t.equal(response.statusCode, 500)
+    t.equal(JSON.parse(response.body).message, errorMessage)
+  })
+
+  test('no handling', async t => {
+    const fastify = Fastify()
+
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1
+    })
+
+    fastify.get('/', {
+      config: {
+        pressureHandler: (req, rep, type, value) => { }
+      }
+    }, (req, rep) => rep.send('A'))
+
+    t.equal((await fastify.inject().get('/').end()).body, 'A')
+  })
+
+  test('return response', async t => {
+    const fastify = Fastify()
+
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1
+    })
+
+    fastify.get('/', {
+      config: {
+        pressureHandler: (req, rep, type, value) => 'B'
+      }
+    }, (req, rep) => rep.send('A'))
+
+    t.equal((await fastify.inject().get('/').end()).body, 'B')
+  })
+})

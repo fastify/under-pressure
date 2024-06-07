@@ -120,6 +120,34 @@ fastify.register(underPressure, {
 
 Any other return value than a promise or nullish will be sent to client with `reply.send`.
 
+It's also possible to specify the `pressureHandler` on the route:
+
+```js
+const fastify = require('fastify')()
+const underPressure = require('@fastify/under-pressure')()
+
+fastify.register(underPressure, {
+  maxHeapUsedBytes: 100000000,
+  maxRssBytes: 100000000,
+})
+
+fastify.register(async function (fastify) {
+  fastify.get('/, {
+    config: {
+      pressureHandler: (req, rep, type, value) => {
+        if (type === underPressure.TYPE_HEAP_USED_BYTES) {
+          fastify.log.warn(`too many heap bytes used: ${value}`)
+        } else if (type === underPressure.TYPE_RSS_BYTES) {
+          fastify.log.warn(`too many rss bytes used: ${value}`)
+        }
+
+        rep.send('out of memory') // if you omit this line, the request will be handled normally
+      }
+    }
+  }, () => 'A')
+})
+```
+
 #### Status route
 If needed you can pass `{ exposeStatusRoute: true }` and `@fastify/under-pressure` will expose a `/status` route for you that sends back a `{ status: 'ok' }` object. This can be useful if you need to attach the server to an ELB on AWS for example.
 
