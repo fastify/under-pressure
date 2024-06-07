@@ -199,35 +199,36 @@ async function fastifyUnderPressure (fastify, opts) {
   }
 
   function onRequest (req, reply, next) {
+    const _pressureHandler = req.context.config.pressureHandler || pressureHandler
     if (checkMaxEventLoopDelay && eventLoopDelay > maxEventLoopDelay) {
-      handlePressure(req, reply, next, TYPE_EVENT_LOOP_DELAY, eventLoopDelay)
+      handlePressure(_pressureHandler, req, reply, next, TYPE_EVENT_LOOP_DELAY, eventLoopDelay)
       return
     }
 
     if (checkMaxHeapUsedBytes && heapUsed > maxHeapUsedBytes) {
-      handlePressure(req, reply, next, TYPE_HEAP_USED_BYTES, heapUsed)
+      handlePressure(_pressureHandler, req, reply, next, TYPE_HEAP_USED_BYTES, heapUsed)
       return
     }
 
     if (checkMaxRssBytes && rssBytes > maxRssBytes) {
-      handlePressure(req, reply, next, TYPE_RSS_BYTES, rssBytes)
+      handlePressure(_pressureHandler, req, reply, next, TYPE_RSS_BYTES, rssBytes)
       return
     }
 
     if (!externalsHealthy) {
-      handlePressure(req, reply, next, TYPE_HEALTH_CHECK)
+      handlePressure(_pressureHandler, req, reply, next, TYPE_HEALTH_CHECK, undefined)
       return
     }
 
     if (checkMaxEventLoopUtilization && eventLoopUtilized > maxEventLoopUtilization) {
-      handlePressure(req, reply, next, TYPE_EVENT_LOOP_UTILIZATION, eventLoopUtilized)
+      handlePressure(_pressureHandler, req, reply, next, TYPE_EVENT_LOOP_UTILIZATION, eventLoopUtilized)
       return
     }
 
     next()
   }
 
-  function handlePressure (req, reply, next, type, value) {
+  function handlePressure (pressureHandler, req, reply, next, type, value) {
     if (typeof pressureHandler === 'function') {
       const result = pressureHandler(req, reply, type, value)
       if (result instanceof Promise) {
