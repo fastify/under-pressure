@@ -1,6 +1,6 @@
 {
   "name": "@fastify/under-pressure",
-  "version": "8.5.0",
+  "version": "9.0.0-pre.fv5.1",
   "description": "Measure process load with automatic handling of 'Service Unavailable' plugin for Fastify.",
   "main": "index.js",
   "type": "commonjs",
