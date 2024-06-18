@@ -310,7 +310,8 @@ function now () {
 }
 
 module.exports = fp(fastifyUnderPressure, {
-  fastify: '4.x',
+  // DISABLED UNTIL FINAL fastify@5 RELEASE:
+  // fastify: '5.x',
   name: '@fastify/under-pressure'
 })
 module.exports.default = fastifyUnderPressure
