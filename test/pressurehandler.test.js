@@ -268,7 +268,7 @@ test('event loop utilization', { skip: !isSupportedVersion }, t => {
 test('event loop delay (NaN)', { skip: !isSupportedVersion }, t => {
   t.plan(5)
 
-  const mockedUnderPressure = t.mock('../index', {
+  const mockedUnderPressure = t.mockRequire('../index', {
     perf_hooks: {
       monitorEventLoopDelay: () => ({
         enable: () => { },
