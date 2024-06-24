@@ -28,7 +28,7 @@
   "author": "Tomas Della Vedova - @delvedor (http://delved.org)",
   "license": "MIT",
   "dependencies": {
-    "@fastify/error": "^3.4.1",
+    "@fastify/error": "^4.0.0",
     "fastify-plugin": "^4.5.1"
   },
   "devDependencies": {
