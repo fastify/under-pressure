@@ -35,7 +35,7 @@ declare namespace fastifyUnderPressure {
     pressureHandler?: (request: FastifyRequest, reply: FastifyReply, type: string, value: number | undefined) => Promise<void> | void;
     sampleInterval?: number;
     exposeStatusRoute?: boolean | string | { routeOpts: object; routeSchemaOpts?: object; routeResponseSchemaOpts?: object; url?: string };
-    customError?: Error | ErrorConstructor;
+    customError?: Error | (new () => Error);
   }
 
   export const TYPE_EVENT_LOOP_DELAY = 'eventLoopDelay'

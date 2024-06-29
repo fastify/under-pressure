@@ -92,12 +92,15 @@ const server = fastify();
     }
   })
 
-  server.register(fastifyUnderPressure, {
-    customError: new Error('custom error message')
-  });
+  class CustomError extends Error {
+    constructor () {
+      super('Custom error message')
+      Error.captureStackTrace(this, CustomError)
+    }
+  }
 
   server.register(fastifyUnderPressure, {
-    customError: Error
+    customError: CustomError
   });
 };
 
