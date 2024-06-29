@@ -244,15 +244,14 @@ test('memoryUsage name space', t => {
     maxRssBytes: 100000000,
     maxEventLoopUtilization: 0.85,
     pressureHandler: (req, rep, type, value) => {
-      // ignore and continue to '/'
+      t.ok(fastify.memoryUsage().eventLoopDelay > 0)
+      t.ok(fastify.memoryUsage().heapUsed > 0)
+      t.ok(fastify.memoryUsage().rssBytes > 0)
+      t.ok(fastify.memoryUsage().eventLoopUtilized >= 0)
     }
   })
 
   fastify.get('/', (req, reply) => {
-    t.ok(fastify.memoryUsage().eventLoopDelay > 0)
-    t.ok(fastify.memoryUsage().heapUsed > 0)
-    t.ok(fastify.memoryUsage().rssBytes > 0)
-    t.ok(fastify.memoryUsage().eventLoopUtilized >= 0)
     reply.send({ hello: 'world' })
   })
 
