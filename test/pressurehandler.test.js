@@ -152,7 +152,7 @@ test('health check', async t => {
 })
 
 test('event loop delay', { skip: !monitorEventLoopDelay }, t => {
-  t.plan(5)
+  t.plan(6)
   const fastify = Fastify()
 
   fastify.register(underPressure, {
@@ -160,6 +160,7 @@ test('event loop delay', { skip: !monitorEventLoopDelay }, t => {
     pressureHandler: (req, rep, type, value) => {
       t.equal(type, underPressure.TYPE_EVENT_LOOP_DELAY)
       t.ok(value > 1)
+      t.ok(fastify.isUnderPressure())
       rep.send('B')
     }
   })
@@ -179,7 +180,7 @@ test('event loop delay', { skip: !monitorEventLoopDelay }, t => {
 })
 
 test('heap bytes', t => {
-  t.plan(5)
+  t.plan(6)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
@@ -187,6 +188,7 @@ test('heap bytes', t => {
     pressureHandler: (req, rep, type, value) => {
       t.equal(type, underPressure.TYPE_HEAP_USED_BYTES)
       t.ok(value > 1)
+      t.ok(fastify.isUnderPressure())
       rep.send('B')
     }
   })
@@ -208,7 +210,7 @@ test('heap bytes', t => {
 })
 
 test('rss bytes', t => {
-  t.plan(5)
+  t.plan(6)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
@@ -216,6 +218,7 @@ test('rss bytes', t => {
     pressureHandler: (req, rep, type, value) => {
       t.equal(type, underPressure.TYPE_RSS_BYTES)
       t.ok(value > 1)
+      t.ok(fastify.isUnderPressure())
       rep.send('B')
     }
   })
@@ -237,7 +240,7 @@ test('rss bytes', t => {
 })
 
 test('event loop utilization', { skip: !isSupportedVersion }, t => {
-  t.plan(5)
+  t.plan(6)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
@@ -245,6 +248,8 @@ test('event loop utilization', { skip: !isSupportedVersion }, t => {
     pressureHandler: (req, rep, type, value) => {
       t.equal(type, underPressure.TYPE_EVENT_LOOP_UTILIZATION)
       t.ok(value > 0.01 && value <= 1)
+
+      t.ok(fastify.isUnderPressure())
       rep.send('B')
     }
   })
