@@ -16,7 +16,9 @@ const TYPE_HEALTH_CHECK = 'healthCheck'
 const TYPE_EVENT_LOOP_UTILIZATION = 'eventLoopUtilization'
 
 function getSampleInterval (value, eventLoopResolution) {
+/* c8 ignore start - @see: https://github.com/fastify/under-pressure/issues/18 */
   const defaultValue = monitorEventLoopDelay ? 1000 : 5
+  /* c8 ignore end */
   const sampleInterval = value || defaultValue
   return monitorEventLoopDelay ? Math.max(eventLoopResolution, sampleInterval) : sampleInterval
 }

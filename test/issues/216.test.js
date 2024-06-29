@@ -29,4 +29,3 @@ test('should be unhealthy if healthCheck throws an error', async t => {
 
   await app.close()
 })
-
