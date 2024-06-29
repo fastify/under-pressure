@@ -92,6 +92,10 @@ const server = fastify();
     }
   })
 
+  server.register(fastifyUnderPressure, {
+    customError: new Error('custom error message')
+  });
+
   class CustomError extends Error {
     constructor () {
       super('Custom error message')
