@@ -302,10 +302,12 @@ async function fastifyUnderPressure (fastify, opts = {}) {
   }
 }
 
+/* c8 ignore start */
 function now () {
   const ts = process.hrtime()
   return (ts[0] * 1e3) + (ts[1] / 1e6)
 }
+/* c8 ignore end */
 
 module.exports = fp(fastifyUnderPressure, {
   // DISABLED UNTIL FINAL fastify@5 RELEASE:
