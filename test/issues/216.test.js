@@ -2,6 +2,27 @@ const { test } = require('tap')
 const Fastify = require('fastify')
 const underPressure = require('../../index')
 
+test('onRequest call next if no pression to handle', async t => {
+  t.plan(1)
+
+  const app = Fastify()
+  app.register(underPressure, {
+    maxEventLoopDelay: 1000,
+    exposeStatusRoute: true
+  })
+
+  await app.ready()
+
+  const response = await app.inject({
+    method: 'GET',
+    url: '/status'
+  })
+
+  t.equal(response.statusCode, 200)
+
+  await app.close()
+})
+
 test('should be unhealthy if healthCheck throws an error', async t => {
   t.plan(4)
 
