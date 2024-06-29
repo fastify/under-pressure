@@ -95,6 +95,10 @@ const server = fastify();
   server.register(fastifyUnderPressure, {
     customError: new Error('custom error message')
   });
+
+  server.register(fastifyUnderPressure, {
+    customError: Error
+  });
 };
 
 expectType<'eventLoopDelay'>(fastifyUnderPressure.TYPE_EVENT_LOOP_DELAY)
