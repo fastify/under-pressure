@@ -16,10 +16,7 @@ const TYPE_HEALTH_CHECK = 'healthCheck'
 const TYPE_EVENT_LOOP_UTILIZATION = 'eventLoopUtilization'
 
 function getSampleInterval (value, eventLoopResolution) {
-/* c8 ignore start - @see: https://github.com/fastify/under-pressure/issues/18 */
-  const defaultValue = monitorEventLoopDelay ? 1000 : 5
-  /* c8 ignore end */
-  const sampleInterval = value || defaultValue
+  const sampleInterval = value || 1000
   return monitorEventLoopDelay ? Math.max(eventLoopResolution, sampleInterval) : sampleInterval
 }
 
@@ -43,7 +40,6 @@ async function fastifyUnderPressure (fastify, opts = {}) {
   let heapUsed = 0
   let rssBytes = 0
   let eventLoopDelay = 0
-  let lastCheck
   let histogram
   let elu
   let eventLoopUtilized = 0
@@ -51,11 +47,7 @@ async function fastifyUnderPressure (fastify, opts = {}) {
   if (monitorEventLoopDelay) {
     histogram = monitorEventLoopDelay({ resolution })
     histogram.enable()
-  /* c8 ignore start - @see: https://github.com/fastify/under-pressure/issues/18 */
-  } else {
-    lastCheck = now()
   }
-  /* c8 ignore stop */
 
   if (eventLoopUtilization) {
     elu = eventLoopUtilization()
@@ -170,13 +162,7 @@ async function fastifyUnderPressure (fastify, opts = {}) {
       eventLoopDelay = Math.max(0, histogram.mean / 1e6 - resolution)
       if (Number.isNaN(eventLoopDelay)) eventLoopDelay = Infinity
       histogram.reset()
-      /* c8 ignore start - @see: https://github.com/fastify/under-pressure/issues/18 */
-    } else {
-      const toCheck = now()
-      eventLoopDelay = Math.max(0, toCheck - lastCheck - sampleInterval)
-      lastCheck = toCheck
     }
-    /* c8 ignore stop */
   }
 
   function updateEventLoopUtilization () {
@@ -303,13 +289,6 @@ async function fastifyUnderPressure (fastify, opts = {}) {
     done()
   }
 }
-
-/* c8 ignore start */
-function now () {
-  const ts = process.hrtime()
-  return (ts[0] * 1e3) + (ts[1] / 1e6)
-}
-/* c8 ignore end */
 
 module.exports = fp(fastifyUnderPressure, {
   // DISABLED UNTIL FINAL fastify@5 RELEASE:
