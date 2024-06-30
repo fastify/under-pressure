@@ -17,7 +17,8 @@ const TYPE_EVENT_LOOP_UTILIZATION = 'eventLoopUtilization'
 
 function getSampleInterval (value, eventLoopResolution) {
   const sampleInterval = value || 1000
-  return monitorEventLoopDelay ? Math.max(eventLoopResolution, sampleInterval) : sampleInterval
+
+  return Math.max(eventLoopResolution, sampleInterval)
 }
 
 async function fastifyUnderPressure (fastify, opts = {}) {
@@ -35,19 +36,16 @@ async function fastifyUnderPressure (fastify, opts = {}) {
   const checkMaxEventLoopDelay = maxEventLoopDelay > 0
   const checkMaxHeapUsedBytes = maxHeapUsedBytes > 0
   const checkMaxRssBytes = maxRssBytes > 0
-  const checkMaxEventLoopUtilization = eventLoopUtilization ? maxEventLoopUtilization > 0 : false
+  const checkMaxEventLoopUtilization = maxEventLoopUtilization > 0
 
   let heapUsed = 0
   let rssBytes = 0
   let eventLoopDelay = 0
-  let histogram
   let elu
   let eventLoopUtilized = 0
 
-  if (monitorEventLoopDelay) {
-    histogram = monitorEventLoopDelay({ resolution })
-    histogram.enable()
-  }
+  const histogram = monitorEventLoopDelay({ resolution })
+  histogram.enable()
 
   if (eventLoopUtilization) {
     elu = eventLoopUtilization()
@@ -158,11 +156,9 @@ async function fastifyUnderPressure (fastify, opts = {}) {
   }
 
   function updateEventLoopDelay () {
-    if (histogram) {
-      eventLoopDelay = Math.max(0, histogram.mean / 1e6 - resolution)
-      if (Number.isNaN(eventLoopDelay)) eventLoopDelay = Infinity
-      histogram.reset()
-    }
+    eventLoopDelay = Math.max(0, histogram.mean / 1e6 - resolution)
+    if (Number.isNaN(eventLoopDelay)) eventLoopDelay = Infinity
+    histogram.reset()
   }
 
   function updateEventLoopUtilization () {
