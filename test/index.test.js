@@ -235,21 +235,23 @@ test('Custom error instance', t => {
 })
 
 test('memoryUsage name space', t => {
-  t.plan(10)
+  t.plan(9)
 
   const fastify = Fastify()
   fastify.register(underPressure, {
     maxEventLoopDelay: 1000,
     maxHeapUsedBytes: 100000000,
     maxRssBytes: 100000000,
-    maxEventLoopUtilization: 0.85
+    maxEventLoopUtilization: 0.85,
+    pressureHandler: (req, rep, type, value) => {
+      t.ok(fastify.memoryUsage().eventLoopDelay > 0)
+      t.ok(fastify.memoryUsage().heapUsed > 0)
+      t.ok(fastify.memoryUsage().rssBytes > 0)
+      t.ok(fastify.memoryUsage().eventLoopUtilized >= 0)
+    }
   })
 
   fastify.get('/', (req, reply) => {
-    t.ok(fastify.memoryUsage().eventLoopDelay > 0)
-    t.ok(fastify.memoryUsage().heapUsed > 0)
-    t.ok(fastify.memoryUsage().rssBytes > 0)
-    t.ok(fastify.memoryUsage().eventLoopUtilized >= 0)
     reply.send({ hello: 'world' })
   })
 
@@ -268,7 +270,6 @@ test('memoryUsage name space', t => {
       t.error(err)
       t.equal(response.statusCode, 200)
       t.same(JSON.parse(body), { hello: 'world' })
-      t.equal(fastify.isUnderPressure(), true)
       fastify.close()
     })
 

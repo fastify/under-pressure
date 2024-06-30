@@ -16,14 +16,12 @@ const TYPE_HEALTH_CHECK = 'healthCheck'
 const TYPE_EVENT_LOOP_UTILIZATION = 'eventLoopUtilization'
 
 function getSampleInterval (value, eventLoopResolution) {
-  const defaultValue = monitorEventLoopDelay ? 1000 : 5
-  const sampleInterval = value || defaultValue
-  return monitorEventLoopDelay ? Math.max(eventLoopResolution, sampleInterval) : sampleInterval
+  const sampleInterval = value || 1000
+
+  return Math.max(eventLoopResolution, sampleInterval)
 }
 
-async function fastifyUnderPressure (fastify, opts) {
-  opts = opts || {}
-
+async function fastifyUnderPressure (fastify, opts = {}) {
   const resolution = 10
   const sampleInterval = getSampleInterval(opts.sampleInterval, resolution)
   const maxEventLoopDelay = opts.maxEventLoopDelay || 0
@@ -38,22 +36,16 @@ async function fastifyUnderPressure (fastify, opts) {
   const checkMaxEventLoopDelay = maxEventLoopDelay > 0
   const checkMaxHeapUsedBytes = maxHeapUsedBytes > 0
   const checkMaxRssBytes = maxRssBytes > 0
-  const checkMaxEventLoopUtilization = eventLoopUtilization ? maxEventLoopUtilization > 0 : false
+  const checkMaxEventLoopUtilization = maxEventLoopUtilization > 0
 
   let heapUsed = 0
   let rssBytes = 0
   let eventLoopDelay = 0
-  let lastCheck
-  let histogram
   let elu
   let eventLoopUtilized = 0
 
-  if (monitorEventLoopDelay) {
-    histogram = monitorEventLoopDelay({ resolution })
-    histogram.enable()
-  } else {
-    lastCheck = now()
-  }
+  const histogram = monitorEventLoopDelay({ resolution })
+  histogram.enable()
 
   if (eventLoopUtilization) {
     elu = eventLoopUtilization()
@@ -164,15 +156,9 @@ async function fastifyUnderPressure (fastify, opts) {
   }
 
   function updateEventLoopDelay () {
-    if (histogram) {
-      eventLoopDelay = Math.max(0, histogram.mean / 1e6 - resolution)
-      if (Number.isNaN(eventLoopDelay)) eventLoopDelay = Infinity
-      histogram.reset()
-    } else {
-      const toCheck = now()
-      eventLoopDelay = Math.max(0, toCheck - lastCheck - sampleInterval)
-      lastCheck = toCheck
-    }
+    eventLoopDelay = Math.max(0, histogram.mean / 1e6 - resolution)
+    if (Number.isNaN(eventLoopDelay)) eventLoopDelay = Infinity
+    histogram.reset()
   }
 
   function updateEventLoopUtilization () {
@@ -213,11 +199,7 @@ async function fastifyUnderPressure (fastify, opts) {
       return true
     }
 
-    if (checkMaxEventLoopUtilization && eventLoopUtilized > maxEventLoopUtilization) {
-      return true
-    }
-
-    return false
+    return checkMaxEventLoopUtilization && eventLoopUtilized > maxEventLoopUtilization
   }
 
   function onRequest (req, reply, next) {
@@ -302,11 +284,6 @@ async function fastifyUnderPressure (fastify, opts) {
     clearTimeout(externalHealthCheckTimer)
     done()
   }
-}
-
-function now () {
-  const ts = process.hrtime()
-  return (ts[0] * 1e3) + (ts[1] / 1e6)
 }
 
 module.exports = fp(fastifyUnderPressure, {

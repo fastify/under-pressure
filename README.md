@@ -132,7 +132,7 @@ fastify.register(underPressure, {
 })
 
 fastify.register(async function (fastify) {
-  fastify.get('/, {
+  fastify.get('/', {
     config: {
       pressureHandler: (req, rep, type, value) => {
         if (type === underPressure.TYPE_HEAP_USED_BYTES) {

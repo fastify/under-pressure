@@ -7,6 +7,7 @@
   "types": "types/index.d.ts",
   "scripts": {
     "lint": "standard | snazzy",
+    "lint:fix": "standard --fix",
     "test": "npm run test:unit && npm run test:typescript",
     "test:unit": "tap",
     "test:typescript": "tsd"
