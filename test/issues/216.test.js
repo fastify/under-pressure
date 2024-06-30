@@ -17,7 +17,7 @@ test('should be unhealthy if healthCheck throws an error', async t => {
   })
 
   await app.ready()
-  t.ok(app.isUnderPressure(), 'App should be under pressure due to failed health check')
+  t.ok(app.isUnderPressure())
 
   const response = await app.inject({
     method: 'GET',
