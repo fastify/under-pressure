@@ -37,10 +37,6 @@ declare namespace fastifyUnderPressure {
     exposeStatusRoute?: boolean | string | { routeOpts: object; routeSchemaOpts?: object; routeResponseSchemaOpts?: object; url?: string };
     customError?: Error;
   }
-  /**
-   * @deprecated Use FastifyUnderPressureOptions instead
-   */
-  export interface UnderPressureOptions extends FastifyUnderPressureOptions {}
 
   export const TYPE_EVENT_LOOP_DELAY = 'eventLoopDelay'
   export const TYPE_HEAP_USED_BYTES = 'heapUsedBytes'
