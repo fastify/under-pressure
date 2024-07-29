@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
-    "@types/node": "^20.12.7",
+    "@types/node": "^22.0.0",
     "fastify": "^5.0.0-alpha.1",
     "semver": "^7.6.0",
     "simple-get": "^4.0.1",
