@@ -20,10 +20,10 @@ interface FastifyUnderPressureExports {
   TYPE_EVENT_LOOP_UTILIZATION: 'eventLoopUtilization'
 }
 
-type FastifyUnderPressure = FastifyPluginAsync<fastifyUnderPressure.UnderPressureOptions> & FastifyUnderPressureExports
+type FastifyUnderPressure = FastifyPluginAsync<fastifyUnderPressure.FastifyUnderPressureOptions> & FastifyUnderPressureExports
 
 declare namespace fastifyUnderPressure {
-  export interface UnderPressureOptions {
+  export interface FastifyUnderPressureOptions {
     maxEventLoopDelay?: number;
     maxEventLoopUtilization?: number;
     maxHeapUsedBytes?: number;
