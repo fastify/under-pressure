@@ -1,6 +1,6 @@
 {
   "name": "@fastify/under-pressure",
-  "version": "9.0.0-pre.fv5.1",
+  "version": "9.0.0",
   "description": "Measure process load with automatic handling of 'Service Unavailable' plugin for Fastify.",
   "main": "index.js",
   "type": "commonjs",
@@ -30,12 +30,12 @@
   "license": "MIT",
   "dependencies": {
     "@fastify/error": "^4.0.0",
-    "fastify-plugin": "^4.5.1"
+    "fastify-plugin": "^5.0.0"
   },
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
     "@types/node": "^22.0.0",
-    "fastify": "^5.0.0-alpha.1",
+    "fastify": "^5.0.0-alpha.4",
     "semver": "^7.6.0",
     "simple-get": "^4.0.1",
     "sinon": "^18.0.0",
