@@ -74,8 +74,6 @@ fastify.register(require('@fastify/under-pressure'), {
 The default value for `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` is `0`.
 If the value is `0` the check will not be performed.
 
-Since [`eventLoopUtilization`](https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_eventlooputilization_utilization1_utilization2) is introduced starting with Node version 12.19.0, the check will be disabled in older versions.
-
 Thanks to the encapsulation model of Fastify, you can selectively use this plugin in some subset of routes or even with different thresholds in different plugins.
 
 #### `memoryUsage`
