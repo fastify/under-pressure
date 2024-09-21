@@ -34,7 +34,7 @@ fastify.register(require('@fastify/under-pressure'), {
   maxEventLoopUtilization:0.98
 })
 
-fastify.get('/', (req, reply) => {
+fastify.get('/', (request, reply) => {
   if (fastify.isUnderPressure()) {
     // skip complex computation
   }
@@ -58,14 +58,14 @@ fastify.register(require('@fastify/under-pressure'), {
 
 You can also configure custom Error instance `@fastify/under-pressure` will throw.
 ```js
-  class CustomError extends Error {
-    constructor () {
-      super('Custom error message')
-      Error.captureStackTrace(this, CustomError)
-    }
+class CustomError extends Error {
+  constructor () {
+    super('Custom error message')
+    Error.captureStackTrace(this, CustomError)
   }
+}
 
-  fastify.register(require('@fastify/under-pressure'), {
+fastify.register(require('@fastify/under-pressure'), {
   maxEventLoopDelay: 1000,
   customError: CustomError
 })
@@ -73,8 +73,6 @@ You can also configure custom Error instance `@fastify/under-pressure` will thro
 
 The default value for `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` is `0`.
 If the value is `0` the check will not be performed.
-
-Since [`eventLoopUtilization`](https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_eventlooputilization_utilization1_utilization2) is only available in Node version 14.0.0 and 12.19.0 the check will be disabled in other versions.
 
 Thanks to the encapsulation model of Fastify, you can selectively use this plugin in some subset of routes or even with different thresholds in different plugins.
 
@@ -95,14 +93,14 @@ const underPressure = require('@fastify/under-pressure')()
 fastify.register(underPressure, {
   maxHeapUsedBytes: 100000000,
   maxRssBytes: 100000000,
-  pressureHandler: (req, rep, type, value) => {
+  pressureHandler: (request, reply, type, value) => {
     if (type === underPressure.TYPE_HEAP_USED_BYTES) {
       fastify.log.warn(`too many heap bytes used: ${value}`)
     } else if (type === underPressure.TYPE_RSS_BYTES) {
       fastify.log.warn(`too many rss bytes used: ${value}`)
     }
 
-    rep.send('out of memory') // if you omit this line, the request will be handled normally
+    reply.send('out of memory') // if you omit this line, the request will be handled normally
   }
 })
 ```
@@ -112,8 +110,8 @@ It is possible as well to return a Promise that will call `reply.send` (or somet
 ```js
 fastify.register(underPressure, {
   maxHeapUsedBytes: 100000000,
-  pressureHandler: (req, rep, type, value) => {
-    return getPromise().then(() => reply.send({hello: 'world'}))
+  pressureHandler: (request, reply, type, value) => {
+    return getPromise().then(() => reply.send({ hello: 'world' }))
   }
 })
 ```
@@ -134,14 +132,14 @@ fastify.register(underPressure, {
 fastify.register(async function (fastify) {
   fastify.get('/', {
     config: {
-      pressureHandler: (req, rep, type, value) => {
+      pressureHandler: (request, reply, type, value) => {
         if (type === underPressure.TYPE_HEAP_USED_BYTES) {
           fastify.log.warn(`too many heap bytes used: ${value}`)
         } else if (type === underPressure.TYPE_RSS_BYTES) {
           fastify.log.warn(`too many rss bytes used: ${value}`)
         }
 
-        rep.send('out of memory') // if you omit this line, the request will be handled normally
+        reply.send('out of memory') // if you omit this line, the request will be handled normally
       }
     }
   }, () => 'A')
@@ -245,8 +243,6 @@ const fastify = require('fastify')()
 fastify.register(require('@fastify/under-pressure'), {
   sampleInterval: <your custom sample interval in ms>
 })
-
-
 ```
 
 <a name="additional-information"></a>
