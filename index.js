@@ -220,16 +220,8 @@ async function fastifyUnderPressure (fastify, opts) {
     return false
   }
 
-  function getReqConfig(req) {
-    if (req.routeOptions && req.routeOptions.config) {
-      return req.routeOptions.config
-    }
-
-    return req.context.config
-  }
-
   function onRequest (req, reply, next) {
-    const config = getReqConfig(req)
+    const config = req.routeOptions && req.routeOptions.config ? req.routeOptions.config : req.context.config
     const _pressureHandler = config.pressureHandler || pressureHandler
     if (checkMaxEventLoopDelay && eventLoopDelay > maxEventLoopDelay) {
       handlePressure(_pressureHandler, req, reply, next, TYPE_EVENT_LOOP_DELAY, eventLoopDelay)
