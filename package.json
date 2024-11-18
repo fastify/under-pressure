@@ -19,6 +19,7 @@
   "bugs": {
     "url": "https://github.com/fastify/under-pressure/issues"
   },
+  "homepage": "https://github.com/fastify/under-pressure#readme",
   "keywords": [
     "fastify",
     "service unavailable",
