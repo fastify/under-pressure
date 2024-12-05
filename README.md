@@ -1,6 +1,6 @@
 # @fastify/under-pressure
 
-![CI](https://github.com/fastify/under-pressure/workflows/CI/badge.svg)
+![CI](https://github.com/fastify/under-pressure/workflows/CI/badge.svg?branch=master)
 [![NPM version](https://img.shields.io/npm/v/@fastify/under-pressure.svg?style=flat)](https://www.npmjs.com/package/@fastify/under-pressure)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
 
