@@ -2,9 +2,8 @@ import fastifyUnderPressure, { fastifyUnderPressure as namedFastifyUnderPressure
 import fastify from 'fastify'
 import { expectType } from 'tsd'
 
-const server = fastify();
-
-() => {
+{
+  const server = fastify()
   server.register(fastifyUnderPressure, {
     maxEventLoopDelay: 1000,
     maxHeapUsedBytes: 100000000,
@@ -22,7 +21,8 @@ const server = fastify();
   })
 };
 
-() => {
+{
+  const server = fastify()
   server.register(fastifyUnderPressure, {
     maxEventLoopDelay: 1000,
     message: 'Under pressure!',
@@ -30,14 +30,16 @@ const server = fastify();
   })
 };
 
-() => {
+{
+  const server = fastify()
   const memoryUsage = server.memoryUsage()
   console.log(memoryUsage.heapUsed)
   console.log(memoryUsage.rssBytes)
   console.log(memoryUsage.eventLoopDelay)
 };
 
-() => {
+{
+  const server = fastify()
   server.register(fastifyUnderPressure, {
     healthCheck: async function (fastifyInstance) {
       // do some magic to check if your db connection is healthy, etc...
@@ -47,13 +49,15 @@ const server = fastify();
   })
 };
 
-() => {
+{
+  const server = fastify()
   server.register(fastifyUnderPressure, {
     sampleInterval: 10
   })
 }
 
-() => {
+{
+  const server = fastify()
   server.register(fastifyUnderPressure, {
     exposeStatusRoute: '/v2/status',
   })
