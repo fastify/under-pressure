@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/fastify/under-pressure/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/fastify/under-pressure/actions/workflows/ci.yml)
 [![NPM version](https://img.shields.io/npm/v/@fastify/under-pressure.svg?style=flat)](https://www.npmjs.com/package/@fastify/under-pressure)
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
+[![neostandard javascript style](https://img.shields.io/badge/code_style-neostandard-brightgreen?style=flat)](https://github.com/neostandard/neostandard)
 
 Measure process load with automatic handling of *"Service Unavailable"* plugin for Fastify.
 It can check `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEventLoopUtilization` values.

@@ -3,9 +3,9 @@ import {
   FastifyPluginAsync,
   FastifyReply,
   FastifyRequest
-} from "fastify";
+} from 'fastify'
 
-declare module "fastify" {
+declare module 'fastify' {
   interface FastifyInstance {
     memoryUsage(): { heapUsed: number; rssBytes: number; eventLoopDelay: number; eventLoopUtilized: number };
     isUnderPressure(): boolean;
@@ -48,5 +48,5 @@ declare namespace fastifyUnderPressure {
   export { fastifyUnderPressure as default }
 }
 
-declare function fastifyUnderPressure(...params: Parameters<FastifyUnderPressure>): ReturnType<FastifyUnderPressure>
+declare function fastifyUnderPressure (...params: Parameters<FastifyUnderPressure>): ReturnType<FastifyUnderPressure>
 export = fastifyUnderPressure
