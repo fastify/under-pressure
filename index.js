@@ -287,8 +287,7 @@ async function fastifyUnderPressure (fastify, opts = {}) {
 }
 
 module.exports = fp(fastifyUnderPressure, {
-  // DISABLED UNTIL FINAL fastify@5 RELEASE:
-  // fastify: '5.x',
+  fastify: '5.x',
   name: '@fastify/under-pressure'
 })
 module.exports.default = fastifyUnderPressure
