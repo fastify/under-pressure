@@ -9,16 +9,25 @@ It can check `maxEventLoopDelay`, `maxHeapUsedBytes`, `maxRssBytes` and `maxEven
 You can also specify a custom health check, to verify the status of
 external resources.
 
-<a name="requirements"></a>
-## Requirements
-
-Fastify ^4.0.0. Please refer to [this branch](https://github.com/fastify/under-pressure/tree/1.x) and related versions for Fastify ^1.1.0 compatibility.
-
 <a name="install"></a>
 ## Install
 ```
 npm i @fastify/under-pressure
 ```
+
+### Compatibility
+| Plugin version | Fastify version |
+| ---------------|-----------------|
+| `^9.x`         | `^5.x`          |
+| `^6.x`         | `^4.x`          |
+| `^5.x`         | `^3.x`          |
+| `^2.x`         | `^2.x`          |
+| `^1.x`         | `^1.x`          |
+
+
+Please note that if a Fastify version is out of support, then so are the corresponding versions of this plugin
+in the table above.
+See [Fastify's LTS policy](https://github.com/fastify/fastify/blob/main/docs/Reference/LTS.md) for more details.
 
 <a name="usage"></a>
 ## Usage
