@@ -279,7 +279,7 @@ async function fastifyUnderPressure (fastify, opts = {}) {
     return okResponse
   }
 
-  function onClose (fastify, done) {
+  function onClose (_fastify, done) {
     clearTimeout(timer)
     clearTimeout(externalHealthCheckTimer)
     done()

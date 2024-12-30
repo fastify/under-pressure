@@ -10,7 +10,7 @@ test('should be unhealthy if healthCheck throws an error', async t => {
     healthCheck: async () => { throw new Error('Kaboom!') },
     healthCheckInterval: 1000,
     exposeStatusRoute: true,
-    pressureHandler: (req, rep, type) => {
+    pressureHandler: (_req, rep, type) => {
       t.equal(type, underPressure.TYPE_HEALTH_CHECK)
       rep.status(503).send('unhealthy')
     }
