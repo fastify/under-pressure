@@ -12,7 +12,7 @@ import { expectType } from 'tsd'
 
   server.register(fastifyUnderPressure)
 
-  server.get('/', (req, reply) => {
+  server.get('/', (_req, reply) => {
     reply.send({ hello: 'world', underPressure: server.isUnderPressure() })
   })
 

@@ -18,7 +18,7 @@ test('Should return 503 on maxEventLoopDelay', t => {
     maxEventLoopDelay: 15
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send({ hello: 'world' })
   })
 
@@ -58,7 +58,7 @@ test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion
     maxEventLoopUtilization: 0.60
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send({ hello: 'world' })
   })
 
@@ -92,7 +92,7 @@ test('Should return 503 on maxHeapUsedBytes', t => {
     maxHeapUsedBytes: 1
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send({ hello: 'world' })
   })
 
@@ -126,7 +126,7 @@ test('Should return 503 on maxRssBytes', t => {
     maxRssBytes: 1
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send({ hello: 'world' })
   })
 
@@ -162,7 +162,7 @@ test('Custom message and retry after header', t => {
     retryAfter: 50
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send({ hello: 'world' })
   })
 
@@ -205,11 +205,11 @@ test('Custom error instance', t => {
     customError: CustomError
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.setErrorHandler((err, req, reply) => {
+  fastify.setErrorHandler((err, _req, reply) => {
     t.ok(err instanceof Error)
     return reply.code(err.statusCode).send(err)
   })
@@ -243,7 +243,7 @@ test('memoryUsage name space', t => {
     maxHeapUsedBytes: 100000000,
     maxRssBytes: 100000000,
     maxEventLoopUtilization: 0.85,
-    pressureHandler: (req, rep, type, value) => {
+    pressureHandler: (_req, _rep, _type, _value) => {
       t.ok(fastify.memoryUsage().eventLoopDelay > 0)
       t.ok(fastify.memoryUsage().heapUsed > 0)
       t.ok(fastify.memoryUsage().rssBytes > 0)
@@ -251,7 +251,7 @@ test('memoryUsage name space', t => {
     }
   })
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     reply.send({ hello: 'world' })
   })
 
@@ -283,7 +283,7 @@ test('memoryUsage name space (without check)', t => {
   const fastify = Fastify()
   fastify.register(underPressure)
 
-  fastify.get('/', (req, reply) => {
+  fastify.get('/', (_req, reply) => {
     t.ok(fastify.memoryUsage().eventLoopDelay > 0)
     t.ok(fastify.memoryUsage().heapUsed > 0)
     t.ok(fastify.memoryUsage().rssBytes > 0)
@@ -327,7 +327,7 @@ test('Custom health check', t => {
       healthCheckInterval: 1000
     })
 
-    fastify.get('/', (req, reply) => {
+    fastify.get('/', (_req, reply) => {
       reply.send({ hello: 'world' })
     })
 
@@ -360,7 +360,7 @@ test('Custom health check', t => {
       healthCheckInterval: 1000
     })
 
-    fastify.get('/', (req, reply) => {
+    fastify.get('/', (_req, reply) => {
       reply.send({ hello: 'world' })
     })
 
@@ -390,7 +390,7 @@ test('Custom health check', t => {
       healthCheckInterval: 100
     })
 
-    fastify.get('/', (req, reply) => {
+    fastify.get('/', (_req, reply) => {
       reply.send({ hello: 'world' })
     })
 

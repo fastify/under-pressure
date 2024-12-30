@@ -18,7 +18,7 @@ function block (msec) {
   while (Date.now() - start < msec) { }
 }
 
-test('health check', async t => {
+test('health check', async () => {
   test('simple', async t => {
     t.plan(3)
     const fastify = Fastify()
@@ -26,14 +26,14 @@ test('health check', async t => {
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
-      pressureHandler: (req, rep, type, value) => {
+      pressureHandler: (_req, rep, type, value) => {
         t.equal(type, underPressure.TYPE_HEALTH_CHECK)
         t.equal(value, undefined)
         rep.send('B')
       }
     })
 
-    fastify.get('/', (req, rep) => rep.send('A'))
+    fastify.get('/', (_req, rep) => rep.send('A'))
 
     t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
@@ -44,13 +44,13 @@ test('health check', async t => {
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
-      pressureHandler: async (req, rep, type, value) => {
+      pressureHandler: async (_req, rep, _type, _value) => {
         await wait(250)
         rep.send('B')
       }
     })
 
-    fastify.get('/', (req, rep) => rep.send('A'))
+    fastify.get('/', (_req, rep) => rep.send('A'))
 
     t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
@@ -63,13 +63,13 @@ test('health check', async t => {
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
-      pressureHandler: async (req, rep, type, value) => {
+      pressureHandler: async (_req, _rep, _type, _value) => {
         await wait(250)
         throw new Error(errorMessage)
       }
     })
 
-    fastify.get('/', (req, rep) => rep.send('A'))
+    fastify.get('/', (_req, rep) => rep.send('A'))
 
     const response = await fastify.inject().get('/').end()
     t.equal(response.statusCode, 500)
@@ -82,10 +82,10 @@ test('health check', async t => {
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
-      pressureHandler: (req, rep, type, value) => { }
+      pressureHandler: (_req, _rep, _type, _value) => { }
     })
 
-    fastify.get('/', (req, rep) => rep.send('A'))
+    fastify.get('/', (_req, rep) => rep.send('A'))
 
     t.equal((await fastify.inject().get('/').end()).body, 'A')
   })
@@ -96,10 +96,10 @@ test('health check', async t => {
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
-      pressureHandler: (req, rep, type, value) => 'B'
+      pressureHandler: (_req, _rep, _type, _value) => 'B'
     })
 
-    fastify.get('/', (req, rep) => rep.send('A'))
+    fastify.get('/', (_req, rep) => rep.send('A'))
 
     t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
@@ -157,19 +157,19 @@ test('event loop delay', { skip: !monitorEventLoopDelay }, t => {
 
   fastify.register(underPressure, {
     maxEventLoopDelay: 1,
-    pressureHandler: (req, rep, type, value) => {
+    pressureHandler: (_req, rep, type, value) => {
       t.equal(type, underPressure.TYPE_EVENT_LOOP_DELAY)
       t.ok(value > 1)
       rep.send('B')
     }
   })
 
-  fastify.get('/', (req, rep) => rep.send('A'))
+  fastify.get('/', (_req, rep) => rep.send('A'))
   fastify.listen({ port: 3000 }, async (err, address) => {
     t.error(err)
     fastify.server.unref()
 
-    forkRequest(address, 500, (err, response, body) => {
+    forkRequest(address, 500, (err, _response, body) => {
       t.error(err)
       t.equal(body, 'B')
       fastify.close()
@@ -184,20 +184,20 @@ test('heap bytes', t => {
   const fastify = Fastify()
   fastify.register(underPressure, {
     maxHeapUsedBytes: 1,
-    pressureHandler: (req, rep, type, value) => {
+    pressureHandler: (_req, rep, type, value) => {
       t.equal(type, underPressure.TYPE_HEAP_USED_BYTES)
       t.ok(value > 1)
       rep.send('B')
     }
   })
 
-  fastify.get('/', (req, rep) => rep.send('A'))
+  fastify.get('/', (_req, rep) => rep.send('A'))
 
   fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
-    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, _response, body) => {
       t.error(err)
       t.equal(body.toString(), 'B')
       fastify.close()
@@ -213,20 +213,20 @@ test('rss bytes', t => {
   const fastify = Fastify()
   fastify.register(underPressure, {
     maxRssBytes: 1,
-    pressureHandler: (req, rep, type, value) => {
+    pressureHandler: (_req, rep, type, value) => {
       t.equal(type, underPressure.TYPE_RSS_BYTES)
       t.ok(value > 1)
       rep.send('B')
     }
   })
 
-  fastify.get('/', (req, rep) => rep.send('A'))
+  fastify.get('/', (_req, rep) => rep.send('A'))
 
   fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
-    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, _response, body) => {
       t.error(err)
       t.equal(body.toString(), 'B')
       fastify.close()
@@ -242,20 +242,20 @@ test('event loop utilization', { skip: !isSupportedVersion }, t => {
   const fastify = Fastify()
   fastify.register(underPressure, {
     maxEventLoopUtilization: 0.01,
-    pressureHandler: (req, rep, type, value) => {
+    pressureHandler: (_req, rep, type, value) => {
       t.equal(type, underPressure.TYPE_EVENT_LOOP_UTILIZATION)
       t.ok(value > 0.01 && value <= 1)
       rep.send('B')
     }
   })
 
-  fastify.get('/', async (req, rep) => rep.send('A'))
+  fastify.get('/', async (_req, rep) => rep.send('A'))
 
   fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
-    forkRequest(address, 500, (err, response, body) => {
+    forkRequest(address, 500, (err, _response, body) => {
       t.error(err)
       t.equal(body.toString(), 'B')
       fastify.close()
@@ -284,20 +284,20 @@ test('event loop delay (NaN)', { skip: !isSupportedVersion }, t => {
   const fastify = Fastify()
   fastify.register(mockedUnderPressure, {
     maxEventLoopDelay: 1000,
-    pressureHandler: (req, rep, type, value) => {
+    pressureHandler: (_req, rep, type, value) => {
       t.equal(type, underPressure.TYPE_EVENT_LOOP_DELAY)
       t.equal(value, Infinity)
       rep.send('B')
     }
   })
 
-  fastify.get('/', async (req, rep) => rep.send('A'))
+  fastify.get('/', async (_req, rep) => rep.send('A'))
 
   fastify.listen({ port: 0 }, (err, address) => {
     t.error(err)
     fastify.server.unref()
 
-    forkRequest(address, 500, (err, response, body) => {
+    forkRequest(address, 500, (err, _response, body) => {
       t.error(err)
       t.equal(body.toString(), 'B')
       fastify.close()
@@ -306,7 +306,7 @@ test('event loop delay (NaN)', { skip: !isSupportedVersion }, t => {
   })
 })
 
-test('pressureHandler on route', async t => {
+test('pressureHandler on route', async () => {
   test('simple', async t => {
     t.plan(3)
     const fastify = Fastify()
@@ -318,14 +318,14 @@ test('pressureHandler on route', async t => {
 
     fastify.get('/', {
       config: {
-        pressureHandler: (req, rep, type, value) => {
+        pressureHandler: (_req, rep, type, value) => {
           process._rawDebug('pressureHandler')
           t.equal(type, underPressure.TYPE_HEALTH_CHECK)
           t.equal(value, undefined)
           rep.send('B')
         }
       }
-    }, (req, rep) => rep.send('A'))
+    }, (_req, rep) => rep.send('A'))
 
     t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
@@ -340,12 +340,12 @@ test('pressureHandler on route', async t => {
 
     fastify.get('/', {
       config: {
-        pressureHandler: async (req, rep, type, value) => {
+        pressureHandler: async (_req, rep, _type, _value) => {
           await wait(250)
           rep.send('B')
         }
       }
-    }, (req, rep) => rep.send('A'))
+    }, (_req, rep) => rep.send('A'))
 
     t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
@@ -362,12 +362,12 @@ test('pressureHandler on route', async t => {
 
     fastify.get('/', {
       config: {
-        pressureHandler: async (req, rep, type, value) => {
+        pressureHandler: async (_req, _rep, _type, _value) => {
           await wait(250)
           throw new Error(errorMessage)
         }
       }
-    }, (req, rep) => rep.send('A'))
+    }, (_req, rep) => rep.send('A'))
 
     const response = await fastify.inject().get('/').end()
     t.equal(response.statusCode, 500)
@@ -384,9 +384,9 @@ test('pressureHandler on route', async t => {
 
     fastify.get('/', {
       config: {
-        pressureHandler: (req, rep, type, value) => { }
+        pressureHandler: (_req, _rep, _type, _value) => { }
       }
-    }, (req, rep) => rep.send('A'))
+    }, (_req, rep) => rep.send('A'))
 
     t.equal((await fastify.inject().get('/').end()).body, 'A')
   })
@@ -401,9 +401,9 @@ test('pressureHandler on route', async t => {
 
     fastify.get('/', {
       config: {
-        pressureHandler: (req, rep, type, value) => 'B'
+        pressureHandler: (_req, _rep, _type, _value) => 'B'
       }
-    }, (req, rep) => rep.send('A'))
+    }, (_req, rep) => rep.send('A'))
 
     t.equal((await fastify.inject().get('/').end()).body, 'B')
   })
