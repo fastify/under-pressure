@@ -1,31 +1,41 @@
-const { test } = require('tap')
+'use strict'
+
+const { test, afterEach } = require('node:test')
+const assert = require('node:assert')
 const Fastify = require('fastify')
 const underPressure = require('../../index')
 
-test('should be unhealthy if healthCheck throws an error', async t => {
-  t.plan(4)
+let app
 
-  const app = Fastify()
+afterEach(async () => {
+  if (app) {
+    await app.close()
+    app = undefined
+  }
+})
+
+test('should be unhealthy if healthCheck throws an error', async (t) => {
+  app = Fastify()
   app.register(underPressure, {
-    healthCheck: async () => { throw new Error('Kaboom!') },
+    healthCheck: async () => {
+      throw new Error('Kaboom!')
+    },
     healthCheckInterval: 1000,
     exposeStatusRoute: true,
     pressureHandler: (_req, rep, type) => {
-      t.equal(type, underPressure.TYPE_HEALTH_CHECK)
+      assert.strictEqual(type, underPressure.TYPE_HEALTH_CHECK)
       rep.status(503).send('unhealthy')
-    }
+    },
   })
 
   await app.ready()
-  t.ok(app.isUnderPressure())
+  assert.ok(app.isUnderPressure())
 
   const response = await app.inject({
     method: 'GET',
-    url: '/status'
+    url: '/status',
   })
 
-  t.equal(response.statusCode, 503)
-  t.equal(response.body, 'unhealthy')
-
-  await app.close()
+  assert.strictEqual(response.statusCode, 503)
+  assert.strictEqual(response.body, 'unhealthy')
 })
