@@ -9,7 +9,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "npm run test:unit && npm run test:typescript",
-    "test:unit": "node --test test/issues/*.test.js test/*.test.js",
+    "test:unit": "node scripts/unit.js",
     "test:typescript": "tsd"
   },
   "repository": {
@@ -66,6 +66,7 @@
     "@fastify/pre-commit": "^2.1.0",
     "@types/node": "^22.0.0",
     "eslint": "^9.17.0",
+    "fast-glob": "^3.3.3",
     "fastify": "^5.0.0",
     "neostandard": "^0.12.0",
     "semver": "^7.6.0",
