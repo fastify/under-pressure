@@ -20,7 +20,7 @@ async function run () {
   sget({
     method: 'GET',
     url: address
-  }, function (error, response, body) {
+  }, (error, response, body) => {
     if (error instanceof Error) {
       process.send({
         error: error.message,
