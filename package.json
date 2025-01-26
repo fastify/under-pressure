@@ -9,7 +9,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "npm run test:unit && npm run test:typescript",
-    "test:unit": "tap",
+    "test:unit": "node --test test/issues/*.test.js test/*.test.js",
     "test:typescript": "tsd"
   },
   "repository": {
@@ -71,7 +71,6 @@
     "semver": "^7.6.0",
     "simple-get": "^4.0.1",
     "sinon": "^18.0.0",
-    "tap": "^18.7.2",
     "tsd": "^0.31.0"
   },
   "publishConfig": {
