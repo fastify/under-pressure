@@ -1,6 +1,6 @@
 'use strict'
 
-const { test, afterEach, describe, after } = require('node:test')
+const { test, afterEach, describe, after, beforeEach } = require('node:test')
 const assert = require('node:assert')
 const { promisify } = require('node:util')
 const forkRequest = require('./forkRequest')
@@ -20,7 +20,9 @@ function block (msec) {
 }
 
 let fastify
-
+beforeEach(() => {
+  fastify = Fastify()
+})
 afterEach(async () => {
   if (fastify) {
     await fastify.close()
@@ -30,8 +32,6 @@ afterEach(async () => {
 
 describe('health check', async () => {
   test('simple', async () => {
-    fastify = Fastify()
-
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
@@ -48,8 +48,6 @@ describe('health check', async () => {
   })
 
   test('delayed handling with promise success', async () => {
-    fastify = Fastify()
-
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
@@ -65,8 +63,6 @@ describe('health check', async () => {
   })
 
   test('delayed handling with promise error', async () => {
-    fastify = Fastify()
-
     const errorMessage = 'promiseError'
 
     fastify.register(underPressure, {
@@ -86,8 +82,6 @@ describe('health check', async () => {
   })
 
   test('no handling', async () => {
-    fastify = Fastify()
-
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
@@ -100,8 +94,6 @@ describe('health check', async () => {
   })
 
   test('return response', async () => {
-    fastify = Fastify()
-
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1,
@@ -118,8 +110,6 @@ describe('health check', async () => {
     after(() => sinon.restore())
 
     const healthCheckInterval = 500
-
-    fastify = Fastify()
 
     const healthCheck = sinon.fake(async () => {
       await wait(healthCheckInterval * 2)
@@ -161,8 +151,6 @@ describe('health check', async () => {
 })
 
 test('event loop delay', { skip: !monitorEventLoopDelay }, async () => {
-  fastify = Fastify()
-
   fastify.register(underPressure, {
     maxEventLoopDelay: 1,
     pressureHandler: (_req, rep, type, value) => {
@@ -191,7 +179,6 @@ test('event loop delay', { skip: !monitorEventLoopDelay }, async () => {
 })
 
 test('heap bytes', async () => {
-  fastify = Fastify()
   fastify.register(underPressure, {
     maxHeapUsedBytes: 1,
     pressureHandler: (_req, rep, type, value) => {
@@ -220,7 +207,6 @@ test('heap bytes', async () => {
 })
 
 test('rss bytes', async () => {
-  fastify = Fastify()
   fastify.register(underPressure, {
     maxRssBytes: 1,
     pressureHandler: (_req, rep, type, value) => {
@@ -248,7 +234,6 @@ test('rss bytes', async () => {
 })
 
 test('event loop utilization', { skip: !isSupportedVersion }, async () => {
-  fastify = Fastify()
   fastify.register(underPressure, {
     maxEventLoopUtilization: 0.01,
     pressureHandler: (_req, rep, type, value) => {
@@ -282,7 +267,6 @@ test('event loop delay (NaN)', { skip: !isSupportedVersion }, async () => {
     mean: NaN,
   })
 
-  const fastify = Fastify()
   fastify.register(underPressure, {
     maxEventLoopDelay: 1000,
     pressureHandler: (_req, rep, type, value) => {
@@ -319,8 +303,6 @@ test('event loop delay (NaN)', { skip: !isSupportedVersion }, async () => {
 
 describe('pressureHandler on route', async () => {
   test('simple', async () => {
-    fastify = Fastify()
-
     await fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1
@@ -341,8 +323,6 @@ describe('pressureHandler on route', async () => {
   })
 
   test('delayed handling with promise success', async () => {
-    fastify = Fastify()
-
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1
@@ -361,8 +341,6 @@ describe('pressureHandler on route', async () => {
   })
 
   test('delayed handling with promise error', async () => {
-    fastify = Fastify()
-
     const errorMessage = 'promiseError'
 
     fastify.register(underPressure, {
@@ -385,8 +363,6 @@ describe('pressureHandler on route', async () => {
   })
 
   test('no handling', async () => {
-    fastify = Fastify()
-
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1
@@ -402,8 +378,6 @@ describe('pressureHandler on route', async () => {
   })
 
   test('return response', async () => {
-    fastify = Fastify()
-
     fastify.register(underPressure, {
       healthCheck: async () => false,
       healthCheckInterval: 1

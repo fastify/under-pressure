@@ -1,6 +1,6 @@
 'use strict'
 
-const { test, afterEach, describe } = require('node:test')
+const { test, afterEach, describe, beforeEach } = require('node:test')
 const assert = require('node:assert')
 const { promisify } = require('node:util')
 const forkRequest = require('./forkRequest')
@@ -18,6 +18,10 @@ function block (msec) {
 
 let fastify
 
+beforeEach(() => {
+  fastify = Fastify()
+})
+
 afterEach(async () => {
   if (fastify) {
     await fastify.close()
@@ -26,9 +30,8 @@ afterEach(async () => {
 })
 
 test('Should return 503 on maxEventLoopDelay', async () => {
-  fastify = Fastify()
   fastify.register(underPressure, {
-    maxEventLoopDelay: 15
+    maxEventLoopDelay: 15,
   })
 
   fastify.get('/', (_req, reply) => {
@@ -58,7 +61,7 @@ test('Should return 503 on maxEventLoopDelay', async () => {
           code: 'FST_UNDER_PRESSURE',
           error: 'Service Unavailable',
           message: 'Service Unavailable',
-          statusCode: 503
+          statusCode: 503,
         })
         assert.equal(fastify.isUnderPressure(), true)
         resolve()
@@ -69,48 +72,53 @@ test('Should return 503 on maxEventLoopDelay', async () => {
   })
 })
 
-const isSupportedVersion = satisfies(valid(coerce(process.version)), '12.19.0 || >=14.0.0')
-test('Should return 503 on maxEventloopUtilization', { skip: !isSupportedVersion }, async () => {
-  fastify = Fastify()
-  fastify.register(underPressure, {
-    maxEventLoopUtilization: 0.60
-  })
+const isSupportedVersion = satisfies(
+  valid(coerce(process.version)),
+  '12.19.0 || >=14.0.0'
+)
+test(
+  'Should return 503 on maxEventloopUtilization',
+  { skip: !isSupportedVersion },
+  async () => {
+    fastify.register(underPressure, {
+      maxEventLoopUtilization: 0.6,
+    })
 
-  fastify.get('/', (_req, reply) => {
-    reply.send({ hello: 'world' })
-  })
-  await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, async (err, address) => {
-      if (err) {
-        reject(err)
-      }
-      fastify.server.unref()
-
-      forkRequest(address, 500, (err, response, body) => {
+    fastify.get('/', (_req, reply) => {
+      reply.send({ hello: 'world' })
+    })
+    await new Promise((resolve, reject) => {
+      fastify.listen({ port: 0 }, async (err, address) => {
         if (err) {
-          reject.err(err)
+          reject(err)
         }
-        assert.equal(response.statusCode, 503)
-        assert.equal(response.headers['retry-after'], '10')
-        assert.deepStrictEqual(JSON.parse(body), {
-          code: 'FST_UNDER_PRESSURE',
-          error: 'Service Unavailable',
-          message: 'Service Unavailable',
-          statusCode: 503
-        })
-        assert.equal(fastify.isUnderPressure(), true)
-        resolve()
-      })
+        fastify.server.unref()
 
-      process.nextTick(() => block(1000))
+        forkRequest(address, 500, (err, response, body) => {
+          if (err) {
+            reject.err(err)
+          }
+          assert.equal(response.statusCode, 503)
+          assert.equal(response.headers['retry-after'], '10')
+          assert.deepStrictEqual(JSON.parse(body), {
+            code: 'FST_UNDER_PRESSURE',
+            error: 'Service Unavailable',
+            message: 'Service Unavailable',
+            statusCode: 503,
+          })
+          assert.equal(fastify.isUnderPressure(), true)
+          resolve()
+        })
+
+        process.nextTick(() => block(1000))
+      })
     })
-  })
-})
+  }
+)
 
 test('Should return 503 on maxHeapUsedBytes', async () => {
-  fastify = Fastify()
   fastify.register(underPressure, {
-    maxHeapUsedBytes: 1
+    maxHeapUsedBytes: 1,
   })
 
   fastify.get('/', (_req, reply) => {
@@ -119,22 +127,30 @@ test('Should return 503 on maxHeapUsedBytes', async () => {
 
   await new Promise((resolve, reject) => {
     fastify.listen({ port: 0 }, (err, address) => {
-      if (err) { reject(err) }
+      if (err) {
+        reject(err)
+      }
       fastify.server.unref()
 
-      forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
-        if (err) { reject(err) }
-        assert.equal(response.statusCode, 503)
-        assert.equal(response.headers['retry-after'], '10')
-        assert.deepStrictEqual(JSON.parse(body), {
-          code: 'FST_UNDER_PRESSURE',
-          error: 'Service Unavailable',
-          message: 'Service Unavailable',
-          statusCode: 503
-        })
-        assert.equal(fastify.isUnderPressure(), true)
-        resolve()
-      })
+      forkRequest(
+        address,
+        monitorEventLoopDelay ? 750 : 250,
+        (err, response, body) => {
+          if (err) {
+            reject(err)
+          }
+          assert.equal(response.statusCode, 503)
+          assert.equal(response.headers['retry-after'], '10')
+          assert.deepStrictEqual(JSON.parse(body), {
+            code: 'FST_UNDER_PRESSURE',
+            error: 'Service Unavailable',
+            message: 'Service Unavailable',
+            statusCode: 503,
+          })
+          assert.equal(fastify.isUnderPressure(), true)
+          resolve()
+        }
+      )
 
       process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
     })
@@ -142,9 +158,8 @@ test('Should return 503 on maxHeapUsedBytes', async () => {
 })
 
 test('Should return 503 on maxRssBytes', async () => {
-  fastify = Fastify()
   fastify.register(underPressure, {
-    maxRssBytes: 1
+    maxRssBytes: 1,
   })
 
   fastify.get('/', (_req, reply) => {
@@ -152,22 +167,30 @@ test('Should return 503 on maxRssBytes', async () => {
   })
   await new Promise((resolve, reject) => {
     fastify.listen({ port: 0 }, (err, address) => {
-      if (err) { reject(err) }
+      if (err) {
+        reject(err)
+      }
       fastify.server.unref()
 
-      forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
-        if (err) { reject(err) }
-        assert.equal(response.statusCode, 503)
-        assert.equal(response.headers['retry-after'], '10')
-        assert.deepStrictEqual(JSON.parse(body), {
-          code: 'FST_UNDER_PRESSURE',
-          error: 'Service Unavailable',
-          message: 'Service Unavailable',
-          statusCode: 503
-        })
-        assert.equal(fastify.isUnderPressure(), true)
-        resolve()
-      })
+      forkRequest(
+        address,
+        monitorEventLoopDelay ? 750 : 250,
+        (err, response, body) => {
+          if (err) {
+            reject(err)
+          }
+          assert.equal(response.statusCode, 503)
+          assert.equal(response.headers['retry-after'], '10')
+          assert.deepStrictEqual(JSON.parse(body), {
+            code: 'FST_UNDER_PRESSURE',
+            error: 'Service Unavailable',
+            message: 'Service Unavailable',
+            statusCode: 503,
+          })
+          assert.equal(fastify.isUnderPressure(), true)
+          resolve()
+        }
+      )
 
       process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
     })
@@ -175,11 +198,10 @@ test('Should return 503 on maxRssBytes', async () => {
 })
 
 test('Custom message and retry after header', async () => {
-  fastify = Fastify()
   fastify.register(underPressure, {
     maxRssBytes: 1,
     message: 'Under pressure!',
-    retryAfter: 50
+    retryAfter: 50,
   })
 
   fastify.get('/', (_req, reply) => {
@@ -187,21 +209,29 @@ test('Custom message and retry after header', async () => {
   })
   await new Promise((resolve, reject) => {
     fastify.listen({ port: 0 }, (err, address) => {
-      if (err) { reject(err) }
+      if (err) {
+        reject(err)
+      }
       fastify.server.unref()
 
-      forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
-        if (err) { reject(err) }
-        assert.equal(response.statusCode, 503)
-        assert.equal(response.headers['retry-after'], '50')
-        assert.deepStrictEqual(JSON.parse(body), {
-          code: 'FST_UNDER_PRESSURE',
-          error: 'Service Unavailable',
-          message: 'Under pressure!',
-          statusCode: 503
-        })
-        resolve()
-      })
+      forkRequest(
+        address,
+        monitorEventLoopDelay ? 750 : 250,
+        (err, response, body) => {
+          if (err) {
+            reject(err)
+          }
+          assert.equal(response.statusCode, 503)
+          assert.equal(response.headers['retry-after'], '50')
+          assert.deepStrictEqual(JSON.parse(body), {
+            code: 'FST_UNDER_PRESSURE',
+            error: 'Service Unavailable',
+            message: 'Under pressure!',
+            statusCode: 503,
+          })
+          resolve()
+        }
+      )
 
       process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
     })
@@ -218,10 +248,9 @@ test('Custom error instance', async () => {
     }
   }
 
-  fastify = Fastify()
   fastify.register(underPressure, {
     maxRssBytes: 1,
-    customError: CustomError
+    customError: CustomError,
   })
 
   fastify.get('/', (_req, reply) => {
@@ -234,20 +263,28 @@ test('Custom error instance', async () => {
   })
   await new Promise((resolve, reject) => {
     fastify.listen({ port: 0 }, (err, address) => {
-      if (err) { reject(err) }
+      if (err) {
+        reject(err)
+      }
       fastify.server.unref()
 
-      forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
-        if (err) { reject(err) }
-        assert.equal(response.statusCode, 418)
-        assert.deepStrictEqual(JSON.parse(body), {
-          code: 'FST_CUSTOM_ERROR',
-          error: 'I\'m a Teapot',
-          message: 'Custom error message',
-          statusCode: 418
-        })
-        resolve()
-      })
+      forkRequest(
+        address,
+        monitorEventLoopDelay ? 750 : 250,
+        (err, response, body) => {
+          if (err) {
+            reject(err)
+          }
+          assert.equal(response.statusCode, 418)
+          assert.deepStrictEqual(JSON.parse(body), {
+            code: 'FST_CUSTOM_ERROR',
+            error: "I'm a Teapot",
+            message: 'Custom error message',
+            statusCode: 418,
+          })
+          resolve()
+        }
+      )
 
       process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
     })
@@ -255,7 +292,6 @@ test('Custom error instance', async () => {
 })
 
 test('memoryUsage name space', async () => {
-  fastify = Fastify()
   fastify.register(underPressure, {
     maxEventLoopDelay: 1000,
     maxHeapUsedBytes: 100000000,
@@ -266,7 +302,7 @@ test('memoryUsage name space', async () => {
       assert.ok(fastify.memoryUsage().heapUsed > 0)
       assert.ok(fastify.memoryUsage().rssBytes > 0)
       assert.ok(fastify.memoryUsage().eventLoopUtilized >= 0)
-    }
+    },
   })
 
   fastify.get('/', (_req, reply) => {
@@ -275,7 +311,9 @@ test('memoryUsage name space', async () => {
 
   await new Promise((resolve, reject) => {
     fastify.listen({ port: 0 }, async (err, address) => {
-      if (err) { reject(err) }
+      if (err) {
+        reject(err)
+      }
       assert.equal(typeof fastify.memoryUsage, 'function')
       fastify.server.unref()
 
@@ -285,12 +323,18 @@ test('memoryUsage name space', async () => {
         await wait(500)
       }
 
-      forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
-        if (err) { reject(err) }
-        assert.equal(response.statusCode, 200)
-        assert.deepStrictEqual(JSON.parse(body), { hello: 'world' })
-        resolve()
-      })
+      forkRequest(
+        address,
+        monitorEventLoopDelay ? 750 : 250,
+        (err, response, body) => {
+          if (err) {
+            reject(err)
+          }
+          assert.equal(response.statusCode, 200)
+          assert.deepStrictEqual(JSON.parse(body), { hello: 'world' })
+          resolve()
+        }
+      )
 
       process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
     })
@@ -298,7 +342,6 @@ test('memoryUsage name space', async () => {
 })
 
 test('memoryUsage name space (without check)', async () => {
-  fastify = Fastify()
   fastify.register(underPressure)
 
   fastify.get('/', (_req, reply) => {
@@ -311,7 +354,9 @@ test('memoryUsage name space (without check)', async () => {
 
   await new Promise((resolve, reject) => {
     fastify.listen({ port: 0 }, async (err, address) => {
-      if (err) { reject(err) }
+      if (err) {
+        reject(err)
+      }
       assert.equal(typeof fastify.memoryUsage, 'function')
       fastify.server.unref()
 
@@ -321,12 +366,18 @@ test('memoryUsage name space (without check)', async () => {
         await wait(500)
       }
 
-      forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
-        if (err) { reject(err) }
-        assert.equal(response.statusCode, 200)
-        assert.deepStrictEqual(JSON.parse(body), { hello: 'world' })
-        resolve()
-      })
+      forkRequest(
+        address,
+        monitorEventLoopDelay ? 750 : 250,
+        (err, response, body) => {
+          if (err) {
+            reject(err)
+          }
+          assert.equal(response.statusCode, 200)
+          assert.deepStrictEqual(JSON.parse(body), { hello: 'world' })
+          resolve()
+        }
+      )
 
       process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
     })
@@ -335,7 +386,6 @@ test('memoryUsage name space (without check)', async () => {
 
 describe('Custom health check', () => {
   test('should return 503 when custom health check returns false for healthCheck', async () => {
-    fastify = Fastify()
     fastify.register(underPressure, {
       healthCheck: async () => {
         return false
@@ -374,7 +424,6 @@ describe('Custom health check', () => {
   })
 
   test('should return 200 when custom health check returns true for healthCheck', async () => {
-    fastify = Fastify()
     fastify.register(underPressure, {
       healthCheck: async () => true,
       healthCheckInterval: 1000,
@@ -405,7 +454,6 @@ describe('Custom health check', () => {
   })
 
   test('healthCheckInterval option', async () => {
-    fastify = Fastify()
     let check = true
 
     fastify.register(underPressure, {
@@ -461,14 +509,14 @@ describe('Custom health check', () => {
 
   test('should wait for the initial healthCheck call before initialising the server', async () => {
     let called = false
-    fastify = Fastify()
+
     fastify.register(underPressure, {
       healthCheck: async () => {
         await wait(100)
         assert.strictEqual(called, false)
         called = true
       },
-      healthCheckInterval: 1000
+      healthCheckInterval: 1000,
     })
 
     await new Promise((resolve, reject) => {
@@ -484,29 +532,32 @@ describe('Custom health check', () => {
   })
 
   test('should call the external health at every status route', async () => {
-    fastify = Fastify()
     let check = true
     fastify.register(underPressure, {
       healthCheck: async () => {
         return check
       },
-      exposeStatusRoute: true
+      exposeStatusRoute: true,
     })
     await new Promise((resolve, reject) => {
       fastify.listen({ port: 0 }, (err, address) => {
-        if (err) { reject(err) }
+        if (err) {
+          reject(err)
+        }
         fastify.server.unref()
         check = false
 
         forkRequest(address + '/status', 0, (err, response, body) => {
-          if (err) { reject(err) }
+          if (err) {
+            reject(err)
+          }
           assert.equal(response.statusCode, 503)
           assert.equal(response.headers['retry-after'], '10')
           assert.deepStrictEqual(JSON.parse(body), {
             code: 'FST_UNDER_PRESSURE',
             error: 'Service Unavailable',
             message: 'Service Unavailable',
-            statusCode: 503
+            statusCode: 503,
           })
           resolve()
         })
@@ -515,7 +566,6 @@ describe('Custom health check', () => {
   })
 
   test('should call the external health at every status route, healthCheck throws', async () => {
-    fastify = Fastify()
     let check = true
     fastify.register(underPressure, {
       healthCheck: async () => {
@@ -524,23 +574,27 @@ describe('Custom health check', () => {
         }
         return true
       },
-      exposeStatusRoute: true
+      exposeStatusRoute: true,
     })
     await new Promise((resolve, reject) => {
       fastify.listen({ port: 0 }, (err, address) => {
-        if (err) { reject(err) }
+        if (err) {
+          reject(err)
+        }
         fastify.server.unref()
         check = false
 
         forkRequest(address + '/status', 0, (err, response, body) => {
-          if (err) { reject(err) }
+          if (err) {
+            reject(err)
+          }
           assert.equal(response.statusCode, 503)
           assert.equal(response.headers['retry-after'], '10')
           assert.deepStrictEqual(JSON.parse(body), {
             code: 'FST_UNDER_PRESSURE',
             error: 'Service Unavailable',
             message: 'Service Unavailable',
-            statusCode: 503
+            statusCode: 503,
           })
           resolve()
         })
@@ -549,34 +603,37 @@ describe('Custom health check', () => {
   })
 
   test('should return custom response if returned from the healthCheck function', async () => {
-    fastify = Fastify()
     fastify.register(underPressure, {
       healthCheck: async () => {
         return {
           some: 'value',
           anotherValue: 'another',
-          status: 'overrride status'
+          status: 'overrride status',
         }
       },
       exposeStatusRoute: {
         routeResponseSchemaOpts: {
           some: { type: 'string' },
-          anotherValue: { type: 'string' }
-        }
-      }
+          anotherValue: { type: 'string' },
+        },
+      },
     })
     await new Promise((resolve, reject) => {
       fastify.listen({ port: 0 }, (err, address) => {
-        if (err) { reject(err) }
+        if (err) {
+          reject(err)
+        }
         fastify.server.unref()
 
         forkRequest(address + '/status', 0, (err, response, body) => {
-          if (err) { reject(err) }
+          if (err) {
+            reject(err)
+          }
           assert.equal(response.statusCode, 200)
           assert.deepStrictEqual(JSON.parse(body), {
             some: 'value',
             anotherValue: 'another',
-            status: 'overrride status'
+            status: 'overrride status',
           })
           resolve()
         })
@@ -585,31 +642,34 @@ describe('Custom health check', () => {
   })
 
   test('should be fastify instance as argument in the healthCheck function', async () => {
-    fastify = Fastify()
     fastify.register(underPressure, {
       healthCheck: async (fastifyInstance) => {
         return {
           fastifyInstanceOk: fastifyInstance === fastify,
-          status: 'overrride status'
+          status: 'overrride status',
         }
       },
       exposeStatusRoute: {
         routeResponseSchemaOpts: {
-          fastifyInstanceOk: { type: 'boolean' }
-        }
-      }
+          fastifyInstanceOk: { type: 'boolean' },
+        },
+      },
     })
     await new Promise((resolve, reject) => {
       fastify.listen({ port: 0 }, (err, address) => {
-        if (err) { reject(err) }
+        if (err) {
+          reject(err)
+        }
         fastify.server.unref()
 
         forkRequest(address + '/status', 0, (err, response, body) => {
-          if (err) { reject(err) }
+          if (err) {
+            reject(err)
+          }
           assert.equal(response.statusCode, 200)
           assert.deepStrictEqual(JSON.parse(body), {
             fastifyInstanceOk: true,
-            status: 'overrride status'
+            status: 'overrride status',
           })
           resolve()
         })

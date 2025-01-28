@@ -1,6 +1,6 @@
 'use strict'
 
-const { test, afterEach } = require('node:test')
+const { test } = require('node:test')
 const assert = require('node:assert')
 const forkRequest = require('./forkRequest')
 const Fastify = require('fastify')
@@ -12,15 +12,6 @@ function block (msec) {
   /* eslint-disable no-empty */
   while (Date.now() - start < msec) {}
 }
-
-let fastify
-
-afterEach(async () => {
-  if (fastify) {
-    await fastify.close()
-    fastify = undefined
-  }
-})
 
 test('Expose status route', async (t) => {
   const fastify = Fastify()
