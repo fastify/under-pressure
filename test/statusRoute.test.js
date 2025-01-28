@@ -20,7 +20,7 @@ test('Expose status route', async (t) => {
   })
 
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) {
         return reject(err)
       }

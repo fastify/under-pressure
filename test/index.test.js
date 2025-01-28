@@ -39,7 +39,7 @@ test('Should return 503 on maxEventLoopDelay', async () => {
   })
 
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, async (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, async (err, address) => {
       if (err) {
         reject(err)
       }
@@ -88,7 +88,7 @@ test(
       reply.send({ hello: 'world' })
     })
     await new Promise((resolve, reject) => {
-      fastify.listen({ port: 0 }, async (err, address) => {
+      fastify.listen({ port: 0, host: '127.0.0.1' }, async (err, address) => {
         if (err) {
           reject(err)
         }
@@ -126,7 +126,7 @@ test('Should return 503 on maxHeapUsedBytes', async () => {
   })
 
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) {
         reject(err)
       }
@@ -166,7 +166,7 @@ test('Should return 503 on maxRssBytes', async () => {
     reply.send({ hello: 'world' })
   })
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) {
         reject(err)
       }
@@ -208,7 +208,7 @@ test('Custom message and retry after header', async () => {
     reply.send({ hello: 'world' })
   })
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) {
         reject(err)
       }
@@ -262,7 +262,7 @@ test('Custom error instance', async () => {
     return reply.code(err.statusCode).send(err)
   })
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) {
         reject(err)
       }
@@ -310,7 +310,7 @@ test('memoryUsage name space', async () => {
   })
 
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, async (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, async (err, address) => {
       if (err) {
         reject(err)
       }
@@ -353,7 +353,7 @@ test('memoryUsage name space (without check)', async () => {
   })
 
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, async (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, async (err, address) => {
       if (err) {
         reject(err)
       }
@@ -398,7 +398,7 @@ describe('Custom health check', () => {
     })
 
     await new Promise((resolve, reject) => {
-      fastify.listen({ port: 0 }, (err, address) => {
+      fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
         if (err) {
           reject(err)
         }
@@ -433,7 +433,7 @@ describe('Custom health check', () => {
       reply.send({ hello: 'world' })
     })
     await new Promise((resolve, reject) => {
-      fastify.listen({ port: 0 }, (err, address) => {
+      fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
         if (err) {
           reject(err)
         }
@@ -465,7 +465,7 @@ describe('Custom health check', () => {
       reply.send({ hello: 'world' })
     })
     await new Promise((resolve, reject) => {
-      fastify.listen({ port: 0 }, (err, address) => {
+      fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
         if (err) {
           reject(err)
         }
@@ -520,7 +520,7 @@ describe('Custom health check', () => {
     })
 
     await new Promise((resolve, reject) => {
-      fastify.listen({ port: 0 }, (err) => {
+      fastify.listen({ port: 0, host: '127.0.0.1' }, (err) => {
         if (err) {
           return reject(err)
         }
@@ -540,7 +540,7 @@ describe('Custom health check', () => {
       exposeStatusRoute: true,
     })
     await new Promise((resolve, reject) => {
-      fastify.listen({ port: 0 }, (err, address) => {
+      fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
         if (err) {
           reject(err)
         }
@@ -577,7 +577,7 @@ describe('Custom health check', () => {
       exposeStatusRoute: true,
     })
     await new Promise((resolve, reject) => {
-      fastify.listen({ port: 0 }, (err, address) => {
+      fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
         if (err) {
           reject(err)
         }
@@ -619,7 +619,7 @@ describe('Custom health check', () => {
       },
     })
     await new Promise((resolve, reject) => {
-      fastify.listen({ port: 0 }, (err, address) => {
+      fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
         if (err) {
           reject(err)
         }
@@ -656,7 +656,7 @@ describe('Custom health check', () => {
       },
     })
     await new Promise((resolve, reject) => {
-      fastify.listen({ port: 0 }, (err, address) => {
+      fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
         if (err) {
           reject(err)
         }

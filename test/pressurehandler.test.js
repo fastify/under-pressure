@@ -162,7 +162,7 @@ test('event loop delay', { skip: !monitorEventLoopDelay }, async () => {
 
   fastify.get('/', (_req, rep) => rep.send('A'))
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 3000 }, async (err, address) => {
+    fastify.listen({ port: 3000, host: '127.0.0.1' }, async (err, address) => {
       if (err) {
         return reject(err)
       }
@@ -191,7 +191,7 @@ test('heap bytes', async () => {
   fastify.get('/', (_req, rep) => rep.send('A'))
 
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) { return reject(err) }
       fastify.server.unref()
 
@@ -218,7 +218,7 @@ test('rss bytes', async () => {
 
   fastify.get('/', (_req, rep) => rep.send('A'))
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) { return reject(err) }
       fastify.server.unref()
 
@@ -245,7 +245,7 @@ test('event loop utilization', { skip: !isSupportedVersion }, async () => {
 
   fastify.get('/', async (_req, rep) => rep.send('A'))
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) { return reject(err) }
       fastify.server.unref()
 
@@ -279,7 +279,7 @@ test('event loop delay (NaN)', { skip: !isSupportedVersion }, async () => {
   fastify.get('/', async (_req, rep) => rep.send('A'))
 
   await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0 }, (err, address) => {
+    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) {
         return reject(err)
       }
