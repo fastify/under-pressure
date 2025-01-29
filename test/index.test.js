@@ -165,6 +165,18 @@ test('Should return 503 on maxRssBytes', async () => {
   fastify.get('/', (_req, reply) => {
     reply.send({ hello: 'world' })
   })
+  const isWindows = process.platform === 'win32'
+
+  // Adjust timings based on platform
+  const timings = {
+    blockTime: isWindows
+      ? (monitorEventLoopDelay ? 3000 : 1000)
+      : (monitorEventLoopDelay ? 1500 : 500),
+    forkRequestTime: isWindows
+      ? (monitorEventLoopDelay ? 1500 : 500)
+      : (monitorEventLoopDelay ? 750 : 250)
+  }
+
   await new Promise((resolve, reject) => {
     fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
       if (err) {
@@ -174,7 +186,7 @@ test('Should return 503 on maxRssBytes', async () => {
 
       forkRequest(
         address,
-        monitorEventLoopDelay ? 750 : 250,
+        timings.forkRequestTime,
         (err, response, body) => {
           if (err) {
             reject(err)
@@ -192,7 +204,7 @@ test('Should return 503 on maxRssBytes', async () => {
         }
       )
 
-      process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+      process.nextTick(() => block(timings.blockTime))
     })
   })
 })
