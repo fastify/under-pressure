@@ -13,34 +13,28 @@ function block (msec) {
   while (Date.now() - start < msec) {}
 }
 
-test('Expose status route', async (t) => {
+test('Expose status route', (t, done) => {
   const fastify = Fastify()
   fastify.register(underPressure, {
     exposeStatusRoute: true,
   })
 
-  await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
-      if (err) {
-        return reject(err)
-      }
-      fastify.server.unref()
+  fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
+    t.assert.ifError(err)
+    fastify.server.unref()
 
-      forkRequest(
+    forkRequest(
         `${address}/status`,
         monitorEventLoopDelay ? 750 : 250,
         (err, response, body) => {
-          if (err) {
-            return reject(err)
-          }
-          assert.equal(response.statusCode, 200)
-          assert.deepStrictEqual(JSON.parse(body), { status: 'ok' })
-          resolve()
+          t.assert.ifError(err)
+          t.assert.equal(response.statusCode, 200)
+          t.assert.deepStrictEqual(JSON.parse(body), { status: 'ok' })
+          done()
         }
-      )
+    )
 
-      process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
-    })
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
