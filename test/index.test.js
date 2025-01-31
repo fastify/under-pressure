@@ -22,10 +22,7 @@ beforeEach(() => {
 })
 
 afterEach(async () => {
-  if (fastify) {
-    await fastify.close()
-    fastify = undefined
-  }
+  await fastify.close()
 })
 
 test('Should return 503 on maxEventLoopDelay', (t, done) => {

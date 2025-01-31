@@ -23,11 +23,9 @@ let fastify
 beforeEach(() => {
   fastify = Fastify()
 })
+
 afterEach(async () => {
-  if (fastify) {
-    await fastify.close()
-    fastify = undefined
-  }
+  await fastify.close()
 })
 
 describe('health check', async () => {

@@ -1,23 +1,18 @@
 'use strict'
 
-const { test, afterEach, beforeEach } = require('node:test')
+const { test, after } = require('node:test')
 const assert = require('node:assert')
 const Fastify = require('fastify')
 const underPressure = require('../../index')
 
 let app
-beforeEach(() => {
+
+after(async () => {
+  await app.close()
+})
+
+test('should be unhealthy if healthCheck throws an error', async () => {
   app = Fastify()
-})
-
-afterEach(async () => {
-  if (app) {
-    await app.close()
-    app = undefined
-  }
-})
-
-test('should be unhealthy if healthCheck throws an error', async (t) => {
   app.register(underPressure, {
     healthCheck: async () => {
       throw new Error('Kaboom!')
