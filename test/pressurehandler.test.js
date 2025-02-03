@@ -148,155 +148,147 @@ describe('health check', async () => {
   })
 })
 
-test('event loop delay', { skip: !monitorEventLoopDelay }, async () => {
+test('event loop delay', { skip: !monitorEventLoopDelay }, (t, done) => {
+  t.plan(5)
   fastify.register(underPressure, {
     maxEventLoopDelay: 1,
     pressureHandler: (_req, rep, type, value) => {
-      assert.equal(type, underPressure.TYPE_EVENT_LOOP_DELAY)
-      assert.ok(value > 1)
+      t.assert.equal(type, underPressure.TYPE_EVENT_LOOP_DELAY)
+      t.assert.ok(value > 1)
       rep.send('B')
     }
   })
 
   fastify.get('/', (_req, rep) => rep.send('A'))
-  await new Promise((resolve, reject) => {
-    fastify.listen({ port: 3000, host: '127.0.0.1' }, async (err, address) => {
-      if (err) {
-        return reject(err)
-      }
-      fastify.server.unref()
+  fastify.listen({ port: 3000, host: '127.0.0.1' }, async (err, address) => {
+    t.assert.ifError(err)
+    fastify.server.unref()
 
-      forkRequest(address, 500, (err, _response, body) => {
-        if (err) { return reject(err) }
-        assert.equal(body, 'B')
-        resolve()
-      })
-      process.nextTick(() => block(1500))
+    forkRequest(address, 500, (err, _response, body) => {
+      t.assert.ifError(err)
+      t.assert.equal(body, 'B')
+      done()
     })
+    process.nextTick(() => block(1500))
   })
 })
 
-test('heap bytes', async () => {
+test('heap bytes', (t, done) => {
+  t.plan(5)
   fastify.register(underPressure, {
     maxHeapUsedBytes: 1,
     pressureHandler: (_req, rep, type, value) => {
-      assert.equal(type, underPressure.TYPE_HEAP_USED_BYTES)
-      assert.ok(value > 1)
+      t.assert.equal(type, underPressure.TYPE_HEAP_USED_BYTES)
+      t.assert.ok(value > 1)
       rep.send('B')
     }
   })
 
   fastify.get('/', (_req, rep) => rep.send('A'))
 
-  await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
-      if (err) { return reject(err) }
-      fastify.server.unref()
+  fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
+    t.assert.ifError(err)
+    fastify.server.unref()
 
-      forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, _response, body) => {
-        if (err) { return reject(err) }
-        assert.equal(body.toString(), 'B')
-        resolve()
-      })
-
-      process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, _response, body) => {
+      t.assert.ifError(err)
+      t.assert.equal(body.toString(), 'B')
+      done()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
-test('rss bytes', async () => {
+test('rss bytes', (t, done) => {
+  t.plan(5)
   fastify.register(underPressure, {
     maxRssBytes: 1,
     pressureHandler: (_req, rep, type, value) => {
-      assert.equal(type, underPressure.TYPE_RSS_BYTES)
-      assert.ok(value > 1)
+      t.assert.equal(type, underPressure.TYPE_RSS_BYTES)
+      t.assert.ok(value > 1)
       rep.send('B')
     }
   })
 
   fastify.get('/', (_req, rep) => rep.send('A'))
-  await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
-      if (err) { return reject(err) }
-      fastify.server.unref()
+  fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
+    t.assert.ifError(err)
+    fastify.server.unref()
 
-      forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, _response, body) => {
-        if (err) { return reject(err) }
-        assert.equal(body.toString(), 'B')
-        return resolve()
-      })
-
-      process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+    forkRequest(address, monitorEventLoopDelay ? 750 : 250, (err, _response, body) => {
+      t.assert.ifError(err)
+      t.assert.equal(body.toString(), 'B')
+      done()
     })
+
+    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
-test('event loop utilization', { skip: !isSupportedVersion }, async () => {
+test('event loop utilization', { skip: !isSupportedVersion }, (t, done) => {
+  t.plan(5)
   fastify.register(underPressure, {
     maxEventLoopUtilization: 0.01,
     pressureHandler: (_req, rep, type, value) => {
-      assert.equal(type, underPressure.TYPE_EVENT_LOOP_UTILIZATION)
-      assert.ok(value > 0.01 && value <= 1)
+      t.assert.equal(type, underPressure.TYPE_EVENT_LOOP_UTILIZATION)
+      t.assert.ok(value > 0.01 && value <= 1)
       rep.send('B')
     }
   })
 
   fastify.get('/', async (_req, rep) => rep.send('A'))
-  await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
-      if (err) { return reject(err) }
-      fastify.server.unref()
+  fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
+    t.assert.ifError(err)
+    fastify.server.unref()
 
-      forkRequest(address, 500, (err, _response, body) => {
-        if (err) { return reject(err) }
-        assert.equal(body.toString(), 'B')
-        return resolve()
-      })
-
-      process.nextTick(() => block(1000))
+    forkRequest(address, 500, (err, _response, body) => {
+      t.assert.ifError(err)
+      t.assert.equal(body.toString(), 'B')
+      done()
     })
+
+    process.nextTick(() => block(1000))
   })
 })
 
-test('event loop delay (NaN)', { skip: !isSupportedVersion }, async () => {
+test('event loop delay (NaN)', { skip: !isSupportedVersion }, (t, done) => {
+  t.plan(5)
   sinon.stub(require('node:perf_hooks'), 'monitorEventLoopDelay').returns({
     enable: () => {},
     reset: () => {},
     mean: NaN,
   })
+  sinon.stub(require('node:perf_hooks').performance, 'eventLoopUtilization').returns({
+  })
 
   fastify.register(underPressure, {
     maxEventLoopDelay: 1000,
     pressureHandler: (_req, rep, type, value) => {
-      assert.strictEqual(type, underPressure.TYPE_EVENT_LOOP_DELAY)
-      assert.strictEqual(value, Infinity)
+      t.assert.strictEqual(type, underPressure.TYPE_EVENT_LOOP_DELAY)
+      t.assert.strictEqual(value, Infinity)
       rep.send('B')
     },
   })
 
   fastify.get('/', async (_req, rep) => rep.send('A'))
 
-  await new Promise((resolve, reject) => {
-    fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
-      if (err) {
-        return reject(err)
-      }
-      fastify.server.unref()
+  fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
+    t.assert.ifError(err)
+    fastify.server.unref()
 
-      forkRequest(address, 500, (err, _response, body) => {
-        if (err) {
-          return reject(err)
-        }
-        assert.strictEqual(body.toString(), 'B')
-        resolve()
-      })
-
-      process.nextTick(() => block(1000))
+    forkRequest(address, 500, (err, _response, body) => {
+      t.assert.ifError(err)
+      t.assert.strictEqual(body.toString(), 'B')
+      done()
     })
+
+    process.nextTick(() => block(1000))
   })
 
-  // Restore the original monitorEventLoopDelay after the test
-  require('node:perf_hooks').monitorEventLoopDelay.restore()
+  t.after(() => {
+    require('node:perf_hooks').monitorEventLoopDelay.restore()
+  })
 })
 
 describe('pressureHandler on route', async () => {
