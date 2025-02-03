@@ -1,6 +1,6 @@
 'use strict'
 
-const { test, afterEach, describe, after, beforeEach } = require('node:test')
+const { test, afterEach, describe, after, beforeEach, mock } = require('node:test')
 const assert = require('node:assert')
 const { promisify } = require('node:util')
 const forkRequest = require('./forkRequest')
@@ -9,6 +9,7 @@ const { monitorEventLoopDelay } = require('node:perf_hooks')
 const underPressure = require('../index')
 const { valid, satisfies, coerce } = require('semver')
 const sinon = require('sinon')
+const proxyquire = require('proxyquire')
 
 const wait = promisify(setTimeout)
 const isSupportedVersion = satisfies(valid(coerce(process.version)), '12.19.0 || >=14.0.0')
@@ -254,15 +255,22 @@ test('event loop utilization', { skip: !isSupportedVersion }, (t, done) => {
 
 test('event loop delay (NaN)', { skip: !isSupportedVersion }, (t, done) => {
   t.plan(5)
-  sinon.stub(require('node:perf_hooks'), 'monitorEventLoopDelay').returns({
-    enable: () => {},
-    reset: () => {},
-    mean: NaN,
-  })
-  sinon.stub(require('node:perf_hooks').performance, 'eventLoopUtilization').returns({
+  const mockedPerfHooks = {
+    monitorEventLoopDelay: () => ({
+      enable: () => { },
+      reset: () => { },
+      mean: NaN,
+    }),
+    performance: {
+      eventLoopUtilization: () => { },
+    },
+  }
+
+  const mockedUnderPressure = proxyquire('../index', {
+    'node:perf_hooks': mockedPerfHooks,
   })
 
-  fastify.register(underPressure, {
+  fastify.register(mockedUnderPressure, {
     maxEventLoopDelay: 1000,
     pressureHandler: (_req, rep, type, value) => {
       t.assert.strictEqual(type, underPressure.TYPE_EVENT_LOOP_DELAY)
@@ -284,10 +292,6 @@ test('event loop delay (NaN)', { skip: !isSupportedVersion }, (t, done) => {
     })
 
     process.nextTick(() => block(1000))
-  })
-
-  t.after(() => {
-    require('node:perf_hooks').monitorEventLoopDelay.restore()
   })
 })
 
