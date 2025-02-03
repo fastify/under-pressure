@@ -1,6 +1,6 @@
 'use strict'
 
-const { test, afterEach, describe, after, beforeEach, mock } = require('node:test')
+const { test, afterEach, describe, after, beforeEach } = require('node:test')
 const assert = require('node:assert')
 const { promisify } = require('node:util')
 const forkRequest = require('./forkRequest')
