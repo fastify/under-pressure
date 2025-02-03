@@ -9,7 +9,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "npm run test:unit && npm run test:typescript",
-    "test:unit": "borp -C --check-coverage --lines 95 --statements 95 --branches 95 --reporter=@jsumners/line-reporter",
+    "test:unit": "borp -C --check-coverage --reporter=@jsumners/line-reporter",
     "test:typescript": "tsd"
   },
   "repository": {
