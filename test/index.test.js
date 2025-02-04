@@ -310,12 +310,12 @@ test('memoryUsage name space (without check)', (t, done) => {
     // If using monitorEventLoopDelay give it time to collect
     // some samples
     if (monitorEventLoopDelay) {
-      await wait(500)
+      await wait(1000)
     }
 
     forkRequest(
       address,
-      monitorEventLoopDelay ? 750 : 250,
+      monitorEventLoopDelay ? 1250 : 250,
       (err, response, body) => {
         t.assert.ifError(err)
         t.assert.equal(response.statusCode, 200)
@@ -324,7 +324,7 @@ test('memoryUsage name space (without check)', (t, done) => {
       }
     )
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
+    process.nextTick(() => block(monitorEventLoopDelay ? 2000 : 500))
   })
 })
 
