@@ -291,6 +291,7 @@ test('memoryUsage name space', (t, done) => {
 })
 
 test('memoryUsage name space (without check)', (t, done) => {
+  const IS_WINDOWS = process.platform === 'win32'
   t.plan(9)
   fastify.register(underPressure)
 
@@ -307,15 +308,14 @@ test('memoryUsage name space (without check)', (t, done) => {
     t.assert.equal(typeof fastify.memoryUsage, 'function')
     fastify.server.unref()
 
-    // If using monitorEventLoopDelay give it time to collect
-    // some samples
+    // If using monitorEventLoopDelay, give it time to collect some samples
     if (monitorEventLoopDelay) {
-      await wait(1000)
+      await wait(IS_WINDOWS ? 1000 : 500)
     }
 
     forkRequest(
       address,
-      monitorEventLoopDelay ? 1250 : 250,
+      monitorEventLoopDelay ? (IS_WINDOWS ? 1500 : 750) : (IS_WINDOWS ? 500 : 250),
       (err, response, body) => {
         t.assert.ifError(err)
         t.assert.equal(response.statusCode, 200)
@@ -324,7 +324,7 @@ test('memoryUsage name space (without check)', (t, done) => {
       }
     )
 
-    process.nextTick(() => block(monitorEventLoopDelay ? 2000 : 500))
+    process.nextTick(() => block(monitorEventLoopDelay ? (IS_WINDOWS ? 3000 : 1500) : (IS_WINDOWS ? 1000 : 500)))
   })
 })
 
