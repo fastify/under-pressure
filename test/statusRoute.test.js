@@ -1,6 +1,7 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
+const assert = require('node:assert')
 const forkRequest = require('./forkRequest')
 const Fastify = require('fastify')
 const { monitorEventLoopDelay } = require('node:perf_hooks')
@@ -9,113 +10,112 @@ const underPressure = require('../index')
 function block (msec) {
   const start = Date.now()
   /* eslint-disable no-empty */
-  while (Date.now() - start < msec) { }
+  while (Date.now() - start < msec) {}
 }
 
-test('Expose status route', t => {
-  t.plan(4)
-
+test('Expose status route', (t, done) => {
   const fastify = Fastify()
   fastify.register(underPressure, {
-    exposeStatusRoute: true
+    exposeStatusRoute: true,
   })
 
-  fastify.listen({ port: 0 }, (err, address) => {
-    t.error(err)
+  fastify.listen({ port: 0, host: '127.0.0.1' }, (err, address) => {
+    t.assert.ifError(err)
     fastify.server.unref()
 
-    forkRequest(`${address}/status`, monitorEventLoopDelay ? 750 : 250, (err, response, body) => {
-      t.error(err)
-      t.equal(response.statusCode, 200)
-      t.same(JSON.parse(body), { status: 'ok' })
-      fastify.close()
-    })
+    forkRequest(
+        `${address}/status`,
+        monitorEventLoopDelay ? 750 : 250,
+        (err, response, body) => {
+          t.assert.ifError(err)
+          t.assert.equal(response.statusCode, 200)
+          t.assert.deepStrictEqual(JSON.parse(body), { status: 'ok' })
+          done()
+        }
+    )
 
     process.nextTick(() => block(monitorEventLoopDelay ? 1500 : 500))
   })
 })
 
-test('Expose custom status route', t => {
-  t.plan(5)
-
+test('Expose custom status route', (t) => {
   const fastify = Fastify()
-  t.teardown(() => fastify.close())
 
   fastify.register(underPressure, {
-    exposeStatusRoute: '/alive'
+    exposeStatusRoute: '/alive',
   })
 
-  fastify.inject({
-    url: '/status'
-  }, (err, response) => {
-    t.error(err)
-    t.equal(response.statusCode, 404)
-  })
+  fastify.inject(
+    {
+      url: '/status',
+    },
+    (err, response) => {
+      assert.ifError(err)
+      assert.equal(response.statusCode, 404)
+    }
+  )
 
-  fastify.inject({
-    url: '/alive'
-  }, (err, response) => {
-    t.error(err)
-    t.equal(response.statusCode, 200)
-    t.same(JSON.parse(response.payload), { status: 'ok' })
-  })
+  fastify.inject(
+    {
+      url: '/alive',
+    },
+    (err, response) => {
+      assert.ifError(err)
+      assert.equal(response.statusCode, 200)
+      assert.deepStrictEqual(JSON.parse(response.payload), { status: 'ok' })
+    }
+  )
 })
 
-test('Expose status route with additional route options', t => {
-  t.plan(3)
-
+test('Expose status route with additional route options', async () => {
   const customConfig = {
-    customVal: 'someVal'
+    customVal: 'someVal',
   }
   const fastify = Fastify({ exposeHeadRoutes: false })
 
-  fastify.addHook('onRoute', (routeOptions) => {
+  fastify.addHook('onRoute', async (routeOptions) => {
     fastify.server.unref()
     process.nextTick(() => block(500))
-    t.equal(routeOptions.url, '/alive')
-    t.equal(routeOptions.logLevel, 'silent', 'log level not set')
-    t.same(routeOptions.config, customConfig, 'config not set')
-    fastify.close()
+    assert.equal(routeOptions.url, '/alive')
+    assert.equal(routeOptions.logLevel, 'silent', 'log level not set')
+    assert.strictEqual(routeOptions.config, customConfig, 'config not set')
   })
 
   fastify.register(underPressure, {
     exposeStatusRoute: {
       routeOpts: {
         logLevel: 'silent',
-        config: customConfig
+        config: customConfig,
       },
-      url: '/alive'
-    }
+      url: '/alive',
+    },
   })
 
-  fastify.ready()
+  await fastify.ready()
 })
 
-test('Expose status route with additional route options and default url', t => {
-  t.plan(2)
-
+test('Expose status route with additional route options and default url', async () => {
   const fastify = Fastify({ exposeHeadRoutes: false })
 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
     process.nextTick(() => block(500))
-    t.equal(routeOptions.url, '/status')
-    t.equal(routeOptions.logLevel, 'silent', 'log level not set')
-    fastify.close()
+    assert.equal(routeOptions.url, '/status')
+    assert.equal(routeOptions.logLevel, 'silent', 'log level not set')
   })
 
   fastify.register(underPressure, {
     exposeStatusRoute: {
       routeOpts: {
-        logLevel: 'silent'
-      }
-    }
+        logLevel: 'silent',
+      },
+    },
   })
 
-  fastify.ready()
+  await fastify.ready()
 })
 
-test('Expose status route with additional route options, route schema options', t => {
+test('Expose status route with additional route options, route schema options', async () => {
   const routeSchemaOpts = { hide: true }
 
   const fastify = Fastify({ exposeHeadRoutes: false })
@@ -123,58 +123,86 @@ test('Expose status route with additional route options, route schema options', 
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
     process.nextTick(() => block(500))
-    t.equal(routeOptions.url, '/alive')
-    t.equal(routeOptions.logLevel, 'silent', 'log level not set')
-    t.same(routeOptions.schema, Object.assign({}, routeSchemaOpts, {
-      response: {
-        200: {
-          type: 'object',
-          description: 'Health Check Succeeded',
-          properties: {
-            status: { type: 'string' }
+    assert.equal(routeOptions.url, '/alive')
+    assert.equal(routeOptions.logLevel, 'silent', 'log level not set')
+    assert.deepStrictEqual(
+      routeOptions.schema,
+      Object.assign({}, routeSchemaOpts, {
+        response: {
+          200: {
+            type: 'object',
+            description: 'Health Check Succeeded',
+            properties: {
+              status: { type: 'string' },
+            },
+            example: {
+              status: 'ok',
+            },
           },
-          example: {
-            status: 'ok'
-          }
+          500: {
+            type: 'object',
+            description: 'Error Performing Health Check',
+            properties: {
+              message: {
+                type: 'string',
+                description: 'Error message for failure during health check',
+                example: 'Internal Server Error',
+              },
+              statusCode: {
+                type: 'number',
+                description:
+                  'Code representing the error. Always matches the HTTP response code.',
+                example: 500,
+              },
+            },
+          },
+          503: {
+            type: 'object',
+            description: 'Health Check Failed',
+            properties: {
+              code: {
+                type: 'string',
+                description: 'Error code associated with the failing check',
+                example: 'FST_UNDER_PRESSURE',
+              },
+              error: {
+                type: 'string',
+                description: 'Error thrown during health check',
+                example: 'Service Unavailable',
+              },
+              message: {
+                type: 'string',
+                description: 'Error message to explain health check failure',
+                example: 'Service Unavailable',
+              },
+              statusCode: {
+                type: 'number',
+                description:
+                  'Code representing the error. Always matches the HTTP response code.',
+                example: 503,
+              },
+            },
+          },
         },
-        500: {
-          type: 'object',
-          description: 'Error Performing Health Check',
-          properties: {
-            message: { type: 'string', description: 'Error message for failure during health check', example: 'Internal Server Error' },
-            statusCode: { type: 'number', description: 'Code representing the error. Always matches the HTTP response code.', example: 500 }
-          }
-        },
-        503: {
-          type: 'object',
-          description: 'Health Check Failed',
-          properties: {
-            code: { type: 'string', description: 'Error code associated with the failing check', example: 'FST_UNDER_PRESSURE' },
-            error: { type: 'string', description: 'Error thrown during health check', example: 'Service Unavailable' },
-            message: { type: 'string', description: 'Error message to explain health check failure', example: 'Service Unavailable' },
-            statusCode: { type: 'number', description: 'Code representing the error. Always matches the HTTP response code.', example: 503 }
-          }
-        }
-      }
-    }), 'config not set')
-    fastify.close()
-    t.end()
+      }),
+      'config not set'
+    )
   })
 
   fastify.register(underPressure, {
     exposeStatusRoute: {
       routeOpts: {
-        logLevel: 'silent'
+        logLevel: 'silent',
       },
       routeSchemaOpts,
-      url: '/alive'
-    }
+      url: '/alive',
+    },
   })
 
-  fastify.ready()
+  await fastify.ready()
 })
 
-test('Expose status route with additional route options, route schema options and default url', t => {
+test('Expose status route with additional route options, route schema options and default url', async () => {
   const routeSchemaOpts = { hide: true }
 
   const fastify = Fastify({ exposeHeadRoutes: false })
@@ -182,52 +210,80 @@ test('Expose status route with additional route options, route schema options an
   fastify.addHook('onRoute', (routeOptions) => {
     fastify.server.unref()
     process.nextTick(() => block(500))
-    t.equal(routeOptions.url, '/status')
-    t.equal(routeOptions.logLevel, 'silent', 'log level not set')
-    t.same(routeOptions.schema, Object.assign({}, routeSchemaOpts, {
-      response: {
-        200: {
-          type: 'object',
-          description: 'Health Check Succeeded',
-          properties: {
-            status: { type: 'string' }
+    assert.equal(routeOptions.url, '/status')
+    assert.equal(routeOptions.logLevel, 'silent', 'log level not set')
+    assert.deepStrictEqual(
+      routeOptions.schema,
+      Object.assign({}, routeSchemaOpts, {
+        response: {
+          200: {
+            type: 'object',
+            description: 'Health Check Succeeded',
+            properties: {
+              status: { type: 'string' },
+            },
+            example: {
+              status: 'ok',
+            },
           },
-          example: {
-            status: 'ok'
-          }
+          500: {
+            type: 'object',
+            description: 'Error Performing Health Check',
+            properties: {
+              message: {
+                type: 'string',
+                description: 'Error message for failure during health check',
+                example: 'Internal Server Error',
+              },
+              statusCode: {
+                type: 'number',
+                description:
+                  'Code representing the error. Always matches the HTTP response code.',
+                example: 500,
+              },
+            },
+          },
+          503: {
+            type: 'object',
+            description: 'Health Check Failed',
+            properties: {
+              code: {
+                type: 'string',
+                description: 'Error code associated with the failing check',
+                example: 'FST_UNDER_PRESSURE',
+              },
+              error: {
+                type: 'string',
+                description: 'Error thrown during health check',
+                example: 'Service Unavailable',
+              },
+              message: {
+                type: 'string',
+                description: 'Error message to explain health check failure',
+                example: 'Service Unavailable',
+              },
+              statusCode: {
+                type: 'number',
+                description:
+                  'Code representing the error. Always matches the HTTP response code.',
+                example: 503,
+              },
+            },
+          },
         },
-        500: {
-          type: 'object',
-          description: 'Error Performing Health Check',
-          properties: {
-            message: { type: 'string', description: 'Error message for failure during health check', example: 'Internal Server Error' },
-            statusCode: { type: 'number', description: 'Code representing the error. Always matches the HTTP response code.', example: 500 }
-          }
-        },
-        503: {
-          type: 'object',
-          description: 'Health Check Failed',
-          properties: {
-            code: { type: 'string', description: 'Error code associated with the failing check', example: 'FST_UNDER_PRESSURE' },
-            error: { type: 'string', description: 'Error thrown during health check', example: 'Service Unavailable' },
-            message: { type: 'string', description: 'Error message to explain health check failure', example: 'Service Unavailable' },
-            statusCode: { type: 'number', description: 'Code representing the error. Always matches the HTTP response code.', example: 503 }
-          }
-        }
-      }
-    }), 'config not set')
-    fastify.close()
-    t.end()
+      }),
+      'config not set'
+    )
   })
 
   fastify.register(underPressure, {
     exposeStatusRoute: {
       routeOpts: {
-        logLevel: 'silent'
+        logLevel: 'silent',
       },
-      routeSchemaOpts
-    }
+      routeSchemaOpts,
+    },
   })
 
-  fastify.ready()
+  await fastify.ready()
 })
