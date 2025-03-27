@@ -18,10 +18,10 @@ npm i @fastify/under-pressure
 ### Compatibility
 | Plugin version | Fastify version |
 | ---------------|-----------------|
-| `^9.x`         | `^5.x`          |
-| `^6.x`         | `^4.x`          |
+| `>=9.x`        | `^5.x`          |
+| `>=6.x <9.x`   | `^4.x`          |
 | `^5.x`         | `^3.x`          |
-| `^2.x`         | `^2.x`          |
+| `>=2.x <5.x`   | `^2.x`          |
 | `^1.x`         | `^1.x`          |
 
 
