@@ -416,7 +416,7 @@ describe('Custom health check', () => {
         alreadyFinished = true
       })
 
-      forkRequest(address, 100, (err, response, body) => {
+      forkRequest(address, 250, (err, response, body) => {
         t.assert.ifError(err)
         t.assert.equal(response.statusCode, 503)
         t.assert.equal(response.headers['retry-after'], '10')
