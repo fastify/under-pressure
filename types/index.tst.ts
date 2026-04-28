@@ -1,6 +1,6 @@
-import fastifyUnderPressure, { fastifyUnderPressure as namedFastifyUnderPressure, TYPE_EVENT_LOOP_DELAY, TYPE_EVENT_LOOP_UTILIZATION, TYPE_HEALTH_CHECK, TYPE_HEAP_USED_BYTES, TYPE_RSS_BYTES } from '..'
+import fastifyUnderPressure, { fastifyUnderPressure as namedFastifyUnderPressure, TYPE_EVENT_LOOP_DELAY, TYPE_EVENT_LOOP_UTILIZATION, TYPE_HEALTH_CHECK, TYPE_HEAP_USED_BYTES, TYPE_RSS_BYTES } from '.'
 import fastify from 'fastify'
-import { expectType } from 'tsd'
+import { expect } from 'tstyche'
 
 {
   const server = fastify()
@@ -111,20 +111,20 @@ import { expectType } from 'tsd'
   })
 }
 
-expectType<'eventLoopDelay'>(fastifyUnderPressure.TYPE_EVENT_LOOP_DELAY)
-expectType<'heapUsedBytes'>(fastifyUnderPressure.TYPE_HEAP_USED_BYTES)
-expectType<'rssBytes'>(fastifyUnderPressure.TYPE_RSS_BYTES)
-expectType<'healthCheck'>(fastifyUnderPressure.TYPE_HEALTH_CHECK)
-expectType<'eventLoopUtilization'>(fastifyUnderPressure.TYPE_EVENT_LOOP_UTILIZATION)
+expect(fastifyUnderPressure.TYPE_EVENT_LOOP_DELAY).type.toBe<'eventLoopDelay'>()
+expect(fastifyUnderPressure.TYPE_HEAP_USED_BYTES).type.toBe<'heapUsedBytes'>()
+expect(fastifyUnderPressure.TYPE_RSS_BYTES).type.toBe<'rssBytes'>()
+expect(fastifyUnderPressure.TYPE_HEALTH_CHECK).type.toBe<'healthCheck'>()
+expect(fastifyUnderPressure.TYPE_EVENT_LOOP_UTILIZATION).type.toBe<'eventLoopUtilization'>()
 
-expectType<'eventLoopDelay'>(namedFastifyUnderPressure.TYPE_EVENT_LOOP_DELAY)
-expectType<'heapUsedBytes'>(namedFastifyUnderPressure.TYPE_HEAP_USED_BYTES)
-expectType<'rssBytes'>(namedFastifyUnderPressure.TYPE_RSS_BYTES)
-expectType<'healthCheck'>(namedFastifyUnderPressure.TYPE_HEALTH_CHECK)
-expectType<'eventLoopUtilization'>(namedFastifyUnderPressure.TYPE_EVENT_LOOP_UTILIZATION)
+expect(namedFastifyUnderPressure.TYPE_EVENT_LOOP_DELAY).type.toBe<'eventLoopDelay'>()
+expect(namedFastifyUnderPressure.TYPE_HEAP_USED_BYTES).type.toBe<'heapUsedBytes'>()
+expect(namedFastifyUnderPressure.TYPE_RSS_BYTES).type.toBe<'rssBytes'>()
+expect(namedFastifyUnderPressure.TYPE_HEALTH_CHECK).type.toBe<'healthCheck'>()
+expect(namedFastifyUnderPressure.TYPE_EVENT_LOOP_UTILIZATION).type.toBe<'eventLoopUtilization'>()
 
-expectType<'eventLoopDelay'>(TYPE_EVENT_LOOP_DELAY)
-expectType<'heapUsedBytes'>(TYPE_HEAP_USED_BYTES)
-expectType<'rssBytes'>(TYPE_RSS_BYTES)
-expectType<'healthCheck'>(TYPE_HEALTH_CHECK)
-expectType<'eventLoopUtilization'>(TYPE_EVENT_LOOP_UTILIZATION)
+expect(TYPE_EVENT_LOOP_DELAY).type.toBe<'eventLoopDelay'>()
+expect(TYPE_HEAP_USED_BYTES).type.toBe<'heapUsedBytes'>()
+expect(TYPE_RSS_BYTES).type.toBe<'rssBytes'>()
+expect(TYPE_HEALTH_CHECK).type.toBe<'healthCheck'>()
+expect(TYPE_EVENT_LOOP_UTILIZATION).type.toBe<'eventLoopUtilization'>()
