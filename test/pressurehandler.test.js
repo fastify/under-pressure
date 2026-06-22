@@ -105,7 +105,9 @@ describe('health check', async () => {
   })
 
   test('interval reentrance', async () => {
-    const clock = sinon.useFakeTimers()
+    const clock = sinon.useFakeTimers({
+      toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate', 'clearImmediate', 'Date']
+    })
     after(() => sinon.restore())
 
     const healthCheckInterval = 500
