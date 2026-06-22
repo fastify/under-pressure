@@ -60,7 +60,7 @@
   "license": "MIT",
   "dependencies": {
     "@fastify/error": "^4.0.0",
-    "fastify-plugin": "^5.0.0"
+    "fastify-plugin": "^6.0.0"
   },
   "devDependencies": {
     "@jsumners/line-reporter": "^1.0.1",
