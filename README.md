@@ -270,7 +270,8 @@ One note to consider is that because the two methods are not identical, the time
 <a name="acknowledgments"></a>
 ## Acknowledgments
 
-This project is kindly sponsored by [LetzDoIt](https://www.letzdoitapp.com/).
+Past sponsors:
+- LetzDoIt
 
 <a name="license"></a>
 ## License
