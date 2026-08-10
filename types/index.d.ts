@@ -26,6 +26,7 @@ declare namespace fastifyUnderPressure {
   export interface FastifyUnderPressureOptions {
     maxEventLoopDelay?: number;
     maxEventLoopUtilization?: number;
+    eventLoopUtilizationMode?: 'cumulative' | 'interval';
     maxHeapUsedBytes?: number;
     maxRssBytes?: number;
     message?: string;

@@ -31,6 +31,7 @@ async function fastifyUnderPressure (fastify, opts = {}) {
   const healthCheckInterval = opts.healthCheckInterval || -1
   const UnderPressureError = opts.customError || createError(opts.message)
   const maxEventLoopUtilization = opts.maxEventLoopUtilization || 0
+  const eventLoopUtilizationMode = opts.eventLoopUtilizationMode || 'cumulative'
   const pressureHandler = opts.pressureHandler
 
   const checkMaxEventLoopDelay = maxEventLoopDelay > 0
@@ -163,7 +164,13 @@ async function fastifyUnderPressure (fastify, opts = {}) {
 
   function updateEventLoopUtilization () {
     if (elu) {
-      eventLoopUtilized = eventLoopUtilization(elu).utilization
+      if (eventLoopUtilizationMode === 'interval') {
+        const current = eventLoopUtilization()
+        eventLoopUtilized = eventLoopUtilization(current, elu).utilization
+        elu = current
+      } else {
+        eventLoopUtilized = eventLoopUtilization(elu).utilization
+      }
     } else {
       eventLoopUtilized = 0
     }
