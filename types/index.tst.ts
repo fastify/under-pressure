@@ -52,7 +52,9 @@ import { expect } from 'tstyche'
 {
   const server = fastify()
   server.register(fastifyUnderPressure, {
-    sampleInterval: 10
+    sampleInterval: 10,
+    maxEventLoopUtilization: 0.9,
+    eventLoopUtilizationMode: 'interval'
   })
 }
 
