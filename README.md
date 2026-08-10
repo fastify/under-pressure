@@ -246,11 +246,14 @@ You can set a custom value for sampling the metrics returned by `memoryUsage` us
 
 The default value is different depending on which Node version is used. In version 8 and 10 it is `5`, while on version 11.10.0 and up it is `1000`. This difference is because from version 11.10.0 the event loop delay can be sampled with [`monitorEventLoopDelay`](https://nodejs.org/docs/latest-v12.x/api/perf_hooks.html#perf_hooks_perf_hooks_monitoreventloopdelay_options) and this allows an increase in the interval value.
 
+By default, `eventLoopUtilized` is the cumulative utilization since the plugin was registered. Set `eventLoopUtilizationMode` to `'interval'` to measure utilization only since the previous sample. In interval mode, `sampleInterval` determines the intended measurement window, although the actual window can be longer when the event loop is busy.
+
 ```js
 const fastify = require('fastify')()
 
 fastify.register(require('@fastify/under-pressure'), {
-  sampleInterval: <your custom sample interval in ms>
+  sampleInterval: <your custom sample interval in ms>,
+  eventLoopUtilizationMode: 'interval'
 })
 ```
 
