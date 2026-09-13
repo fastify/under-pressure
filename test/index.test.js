@@ -249,16 +249,23 @@ test('Custom error instance', (t, done) => {
 test('memoryUsage name space', (t, done) => {
   fastify.register(underPressure, {
     maxEventLoopDelay: 1000,
-    maxHeapUsedBytes: 100000000,
-    maxRssBytes: 100000000,
-    maxEventLoopUtilization: 0.85,
-    pressureHandler: (_req, _rep, _type, _value) => {
-      t.assert.ok(false)
+    // The limits below are intentionally high: this test only checks that the
+    // memoryUsage() namespace works, not that a threshold is hit. A modern
+    // Node.js process running with coverage enabled can easily exceed 100 MB
+    // of RSS, which would trigger the pressureHandler and make the test fail.
+    maxHeapUsedBytes: 1_000_000_000,
+    maxRssBytes: 1_000_000_000,
+    maxEventLoopUtilization: 0.99,
+    pressureHandler: (_req, _rep, type, value) => {
+      t.assert.ok(
+        false,
+        `pressureHandler unexpectedly called for ${type} with value ${value}`
+      )
       t.assert.ok(fastify.memoryUsage().eventLoopDelay > 0)
       t.assert.ok(fastify.memoryUsage().heapUsed > 0)
       t.assert.ok(fastify.memoryUsage().rssBytes > 0)
       t.assert.ok(fastify.memoryUsage().eventLoopUtilized >= 0)
-    },
+    }
   })
   fastify.get('/', (_req, reply) => {
     reply.send({ hello: 'world' })
@@ -280,7 +287,9 @@ test('memoryUsage name space', (t, done) => {
       monitorEventLoopDelay ? 750 : 250,
       (err, response, body) => {
         t.assert.ifError(err)
-        t.assert.equal(response.statusCode, 200)
+        // include the body in the message: if the pressureHandler was invoked
+        // the response is a 500 whose body explains which metric triggered it
+        t.assert.equal(response.statusCode, 200, body)
         t.assert.deepStrictEqual(JSON.parse(body), { hello: 'world' })
         done()
       }
