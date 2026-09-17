@@ -93,21 +93,28 @@ async function fastifyUnderPressure (fastify, opts = {}) {
   opts.exposeStatusRoute = mapExposeStatusRoute(opts.exposeStatusRoute)
 
   if (opts.exposeStatusRoute) {
+    const { response: customResponse = {}, ...routeSchemaOpts } = opts.exposeStatusRoute.routeSchemaOpts || {}
+    const { 200: custom200 = {}, ...customErrorResponses } = customResponse
+
     fastify.route({
       ...opts.exposeStatusRoute.routeOpts,
       url: opts.exposeStatusRoute.url,
       method: 'GET',
-      schema: Object.assign({}, opts.exposeStatusRoute.routeSchemaOpts, {
+      schema: {
+        ...routeSchemaOpts,
         response: {
           200: {
             type: 'object',
             description: 'Health Check Succeeded',
-            properties: Object.assign(
-              { status: { type: 'string' } },
-              opts.exposeStatusRoute.routeResponseSchemaOpts
-            ),
             example: {
               status: 'ok'
+            },
+            ...custom200,
+            // `status` is always part of the 200 response
+            properties: {
+              status: { type: 'string' },
+              ...opts.exposeStatusRoute.routeResponseSchemaOpts,
+              ...custom200.properties
             }
           },
           500: {
@@ -127,9 +134,11 @@ async function fastifyUnderPressure (fastify, opts = {}) {
               message: { type: 'string', description: 'Error message to explain health check failure', example: 'Service Unavailable' },
               statusCode: { type: 'number', description: 'Code representing the error. Always matches the HTTP response code.', example: 503 }
             }
-          }
+          },
+          // user-provided response schemas win over the defaults
+          ...customErrorResponses
         }
-      }),
+      },
       handler: onStatus
     })
   }

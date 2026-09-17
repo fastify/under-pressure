@@ -287,3 +287,62 @@ test('Expose status route with additional route options, route schema options an
 
   await fastify.ready()
 })
+
+test('Expose status route with custom error handler and custom response schema', async (t) => {
+  const fastify = Fastify()
+
+  fastify.setErrorHandler((err, _req, reply) => {
+    reply.status(err.statusCode).send({ ok: false, reason: err.message })
+  })
+
+  fastify.register(underPressure, {
+    healthCheck: async () => { throw new Error('Arbitrary Error') },
+    healthCheckInterval: 100000,
+    exposeStatusRoute: {
+      routeOpts: { logLevel: 'silent' },
+      routeSchemaOpts: {
+        response: {
+          503: {
+            type: 'object',
+            properties: {
+              ok: { type: 'boolean' },
+              reason: { type: 'string' }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  const res = await fastify.inject({ url: '/status' })
+  t.assert.equal(res.statusCode, 503)
+  t.assert.deepStrictEqual(res.json(), { ok: false, reason: 'Service Unavailable' })
+  await fastify.close()
+})
+
+test('Expose status route with custom 200 response schema keeps status', async (t) => {
+  const fastify = Fastify()
+
+  fastify.register(underPressure, {
+    healthCheck: async () => ({ foo: 'bar', extra: 'baz' }),
+    healthCheckInterval: 100000,
+    exposeStatusRoute: {
+      routeOpts: { logLevel: 'silent' },
+      routeResponseSchemaOpts: { extra: { type: 'string' } },
+      routeSchemaOpts: {
+        response: {
+          200: {
+            type: 'object',
+            description: 'Custom description',
+            properties: { foo: { type: 'string' } }
+          }
+        }
+      }
+    }
+  })
+
+  const res = await fastify.inject({ url: '/status' })
+  t.assert.equal(res.statusCode, 200)
+  t.assert.deepStrictEqual(res.json(), { status: 'ok', foo: 'bar', extra: 'baz' })
+  await fastify.close()
+})
