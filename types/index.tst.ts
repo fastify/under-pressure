@@ -111,6 +111,19 @@ import { expect } from 'tstyche'
   server.register(fastifyUnderPressure, {
     customError: CustomError
   })
+
+  server.register(fastifyUnderPressure, {
+    maxEventLoopDelay: 1000,
+    pressureHandler: async (_req, reply) => {
+      reply.code(503)
+      return { error: 'Service Unavailable' }
+    }
+  })
+
+  server.register(fastifyUnderPressure, {
+    maxEventLoopDelay: 1000,
+    pressureHandler: (_req, _reply) => 'Service Unavailable'
+  })
 }
 
 expect(fastifyUnderPressure.TYPE_EVENT_LOOP_DELAY).type.toBe<'eventLoopDelay'>()
