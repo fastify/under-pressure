@@ -125,7 +125,7 @@ fastify.register(underPressure, {
 })
 ```
 
-Any other return value than a promise or nullish will be sent to the client with `reply.send`.
+Any other returned or resolved value other than `reply` or nullish will be sent to the client with `reply.send`.
 
 It's also possible to specify the `pressureHandler` on the route:
 

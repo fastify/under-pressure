@@ -104,6 +104,64 @@ describe('health check', async () => {
     assert.equal((await fastify.inject().get('/').end()).body, 'B')
   })
 
+  test('delayed handling returning response value', async () => {
+    let routeCalled = false
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: async (_req, rep, _type, _value) => {
+        await wait(20)
+        rep.code(503)
+        return { error: 'B' }
+      }
+    })
+
+    fastify.get('/', (_req, rep) => {
+      routeCalled = true
+      return rep.send('A')
+    })
+
+    const res = await fastify.inject().get('/').end()
+    assert.equal(res.statusCode, 503)
+    assert.deepEqual(res.json(), { error: 'B' })
+    assert.equal(routeCalled, false)
+  })
+
+  test('delayed handling returning nullish continues to route', async () => {
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: async () => {
+        await wait(20)
+      }
+    })
+
+    fastify.get('/', (_req, rep) => rep.send('A'))
+
+    assert.equal((await fastify.inject().get('/').end()).body, 'A')
+  })
+
+  test('delayed handling returning reply.send result does not re-send', async () => {
+    let routeCalled = false
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1,
+      pressureHandler: (_req, rep) => {
+        return wait(20).then(() => rep.code(503).send('B'))
+      }
+    })
+
+    fastify.get('/', (_req, rep) => {
+      routeCalled = true
+      return rep.send('A')
+    })
+
+    const res = await fastify.inject().get('/').end()
+    assert.equal(res.statusCode, 503)
+    assert.equal(res.body, 'B')
+    assert.equal(routeCalled, false)
+  })
+
   test('interval reentrance', async () => {
     const clock = sinon.useFakeTimers({
       toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate', 'clearImmediate', 'Date']
@@ -386,5 +444,31 @@ describe('pressureHandler on route', async () => {
     }, (_req, rep) => rep.send('A'))
 
     assert.equal((await fastify.inject().get('/').end()).body, 'B')
+  })
+
+  test('delayed handling returning response value', async () => {
+    let routeCalled = false
+    fastify.register(underPressure, {
+      healthCheck: async () => false,
+      healthCheckInterval: 1
+    })
+
+    fastify.get('/', {
+      config: {
+        pressureHandler: async (_req, rep, _type, _value) => {
+          await wait(20)
+          rep.code(503)
+          return 'B'
+        }
+      }
+    }, (_req, rep) => {
+      routeCalled = true
+      return rep.send('A')
+    })
+
+    const res = await fastify.inject().get('/').end()
+    assert.equal(res.statusCode, 503)
+    assert.equal(res.body, 'B')
+    assert.equal(routeCalled, false)
   })
 })

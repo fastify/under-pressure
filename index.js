@@ -248,15 +248,27 @@ async function fastifyUnderPressure (fastify, opts = {}) {
     next()
   }
 
+  function sendPressureResponse (reply, next, result) {
+    if (reply.sent) {
+      return
+    }
+    if (result == null) {
+      next()
+    } else {
+      reply.send(result)
+    }
+  }
+
   function handlePressure (pressureHandler, req, reply, next, type, value) {
     if (typeof pressureHandler === 'function') {
       const result = pressureHandler(req, reply, type, value)
       if (result instanceof Promise) {
-        result.then(() => next(), next)
-      } else if (result == null) {
-        next()
+        result.then(
+          (resolved) => sendPressureResponse(reply, next, resolved),
+          next
+        )
       } else {
-        reply.send(result)
+        sendPressureResponse(reply, next, result)
       }
     } else {
       reply.status(SERVICE_UNAVAILABLE).header('Retry-After', retryAfter)
